@@ -23,7 +23,7 @@ System.out.println( "selected_xml = " + xml_path + xml_filename + ".xml");
 System.out.println( "-------------------------------------------------------" );
 System.out.println( "General parameters: " );
 
-parallel_timepoints = System.getProperty( "parallel_timepoints" );
+parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
 process_timepoint = System.getProperty( "process_timepoint" );
 process_channel = System.getProperty( "process_channel" );
 process_illumination = System.getProperty( "process_illumination" );
@@ -101,13 +101,23 @@ System.out.println( "detection_min_max = " + detection_min_max );
 
 //activate cluster processing
 System.out.println( "=======================================================" );
+try {
 IJ.run("Toggle Cluster Processing", "display_cluster");
+}
+catch ( e ) { 
+
+    print( "[registration::activate_cluster_processing] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 System.out.println( "Activated Cluster Processing" );
 
 
 //interest point detection
 System.out.println( "=======================================================" );
 System.out.println( "Starting Detection of Interest Points" );
+try {
 IJ.run("Detect Interest Points for Registration", 
 	"select_xml=" + xml_path + xml_filename + ".xml " +  
 	"unique_id=" + parallel_timepoints + " " +
@@ -127,7 +137,14 @@ IJ.run("Detect Interest Points for Registration",
 	"radius_2=" + radius_2 + " " + 
 	"threshold=" + threshold + " " +
 	"find_maxima");
+}
+catch ( e ) { 
 
+    print( "[registration::interest_points] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 //registration based on interest point detection
 System.out.println( "=======================================================" );
 System.out.println( "Starting Registration" );
@@ -156,7 +173,7 @@ try {
 }
 catch ( e ) { 
 
-    print( "[registration] caught exception: "+e );
+    print( "[registration::based_on_interestpoints] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     

@@ -17,7 +17,7 @@ for ds in datasets:
    bn = os.path.basename(ds)
    bn_res = fre.search(bn)
    xml_base,file_id = bn_res.group('xml_base'),bn_res.group('file_id')
-   xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=file_id))
+   xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=int(file_id)))
    
 #TODO: this should go into a python module in this path
 def produce_string(_fstring, *args, **kwargs):
@@ -33,9 +33,9 @@ rule done:
     input: [ ds+"_deconvolved" for ds in datasets ]
 
 rule registration:
-    input: "{xml_base}-{file_id,\d+}-00.h5"
-    output: "{xml_base}.job_{file_id,\d+}.xml"
-    log: "{xml_base}-{file_id,\d+}-registration.log"
+    input: "{xml_base}-{file_id}-00.h5"
+    output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
+    log: "{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
            """{fiji-prefix} {fiji-app} \
@@ -79,7 +79,7 @@ rule registration:
         #shell("touch {output}")
 
 rule xml_merge:
-    input: xml_merge_in
+    input: [ item+"_registered" for item in datasets ] #xml_merge_in 
     output: "{xml_base}_merge.xml"
     log: "{xml_base}_merge.log"
     run:
@@ -159,4 +159,4 @@ rule deconvolution:
         shell(cmd_string)
   
 rule distclean:
-    shell : "rm -rf *registered *tif "+str(" ".join(xml_merge_in))
+    shell : "rm -rf *registered *tif *log *_deconvolved *.xml~* interestpoints "+str(" ".join(xml_merge_in))
