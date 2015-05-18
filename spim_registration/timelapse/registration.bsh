@@ -131,26 +131,36 @@ IJ.run("Detect Interest Points for Registration",
 //registration based on interest point detection
 System.out.println( "=======================================================" );
 System.out.println( "Starting Registration" );
-IJ.run("Register Dataset based on Interest Points",
-	"select_xml=" + xml_path + xml_filename + ".job_" + parallel_timepoints + ".xml " +
-        "process_angle=[" + process_angle + "] " +
-        "process_channel=[" + process_channel + "] " +
-        "process_illumination=[" + process_illumination + "] " +
-        "process_timepoint=[" + process_timepoint + "] " +
-	"xml_output=[Do not process on cluster] " + 
-	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " +
-        "registration_algorithm=[" + registration_algorithm + "] " +
-        "type_of_registration=[" + type_of_registration + "] " +
-        "interest_points_channel_0=" + interest_points_channel_0 + " " +
-// check? "interest_points_channel_0=[[DO NOT register this channel]] " +
-//      "interest_points_channel_1=" + interest_points_channel_1 + " " + // Dual Channel
-        "fix_tiles=[" + fix_tiles + "] " +
-        "map_back_tiles=[" + map_back_tiles + "] " +
-        "transformation=" + transformation_model + " " +
-        "regularize_model " +
-        "model_to_regularize_with=" + model_to_regularize_with + " " +
-        "lamba=" + lambda + " " +
-        "allowed_error_for_ransac=" + allowed_error_for_ransac);
+
+try {
+    IJ.run("Register Dataset based on Interest Points",
+	   "select_xml=" + xml_path + xml_filename + ".job_" + parallel_timepoints + ".xml " +
+	   "process_angle=[" + process_angle + "] " +
+	   "process_channel=[" + process_channel + "] " +
+	   "process_illumination=[" + process_illumination + "] " +
+	   "process_timepoint=[" + process_timepoint + "] " +
+	   "xml_output=[Do not process on cluster] " + 
+	   "processing_timepoint=[Timepoint " + parallel_timepoints + "] " +
+	   "registration_algorithm=[" + registration_algorithm + "] " +
+	   "type_of_registration=[" + type_of_registration + "] " +
+	   "interest_points_channel_0=" + interest_points_channel_0 + " " +
+	   // check? "interest_points_channel_0=[[DO NOT register this channel]] " +
+	   //      "interest_points_channel_1=" + interest_points_channel_1 + " " + // Dual Channel
+	   "fix_tiles=[" + fix_tiles + "] " +
+	   "map_back_tiles=[" + map_back_tiles + "] " +
+	   "transformation=" + transformation_model + " " +
+	   "regularize_model " +
+	   "model_to_regularize_with=" + model_to_regularize_with + " " +
+	   "lamba=" + lambda + " " +
+	   "allowed_error_for_ransac=" + allowed_error_for_ransac);
+}
+catch ( e ) { 
+
+    print( "[registration] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 
 /* shutdown */
 runtime.exit(0);

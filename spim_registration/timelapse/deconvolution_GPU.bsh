@@ -13,10 +13,12 @@ System.out.println( "Start to load Parameters:" );
 // Select xml
 image_file_directory = System.getProperty( "image_file_directory" );
 merged_xml = System.getProperty( "merged_xml" );
-
+if ( ! merged_xml.endsWith(".xml") )
+    merged_xml = merged.xml + ".xml";
+    
 System.out.println( "-------------------------------------------------------" );
 System.out.println( "Load xml file: " );
-System.out.println( "selected_xml = " + image_file_directory + merged_xml + ".xml");
+System.out.println( "selected_xml = " + image_file_directory + merged_xml);
 
 // Load general Parameters
 parallel_timepoints = System.getProperty( "parallel_timepoints" );
@@ -98,8 +100,9 @@ System.out.println( "psf_size_z = " + psf_size_z );
 System.out.println( "=======================================================" );
 System.out.println( "Starting Deconvolution" );
 
+try {
 IJ.run("Fuse/Deconvolve Dataset", 
-	"select_xml=" + image_file_directory + merged_xml + ".xml " + 
+	"select_xml=" + image_file_directory + merged_xml + " " +
 	"process_angle=[All angles] " +
 	"process_channel=[All channels] " + 
 	"process_illumination=[All illuminations] " +
@@ -137,7 +140,14 @@ IJ.run("Fuse/Deconvolve Dataset",
 	"psf_size_x=" + psf_size_x + " " +
 	"psf_size_y=" + psf_size_y + " " +
 	"psf_size_z=" + psf_size_z + "");
+}
+catch ( e ) { 
 
+    print( "[deconvolution-GPU] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 
 /* shutdown */
 runtime.exit(0);
