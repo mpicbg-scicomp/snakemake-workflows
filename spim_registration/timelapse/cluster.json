@@ -1,23 +1,23 @@
 {
     "__default__" :
     {
-	"lsf_extra" : "-R span[hosts=1]",
+	"lsf_extra" : "-R \"span[hosts=1]\"",
 	"lsf_q" : "short"	
     },
  
     "registration" :
     {
-        "lsf_extra" : "-R span[hosts=1] -R rusage[mem=100000]"
+        "lsf_extra" : "-R \"span[hosts=1] rusage[mem=100000]\""
     },
 
     "external_trafo" :
     {
-        "lsf_extra" : "-R span[hosts=1] -R rusage[mem=10000]"
+        "lsf_extra" : "-R \"span[hosts=1] rusage[mem=10000]\""
     },
 
     "deconvolution" :
     {
-        "lsf_extra" : "-n 7 -R span[hosts=1] -R rusage[mem=50000]",
+        "lsf_extra" : "-n 7 -R \"span[hosts=1] rusage[mem=50000]\"",
 	"lsf_q" : "gpu"
     }
 }
