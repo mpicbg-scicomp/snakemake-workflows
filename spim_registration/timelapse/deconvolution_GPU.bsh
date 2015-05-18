@@ -21,7 +21,7 @@ System.out.println( "Load xml file: " );
 System.out.println( "selected_xml = " + image_file_directory + merged_xml);
 
 // Load general Parameters
-parallel_timepoints = System.getProperty( "parallel_timepoints" );
+parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
 process_timepoint = System.getProperty( "process_timepoint" );
 process_channel = System.getProperty( "process_channel" );
 process_illumination = System.getProperty( "process_illumination" );
