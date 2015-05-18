@@ -1,0 +1,22 @@
+{
+    "__default__" :
+    {
+        "fiji-app" : "/projects/pilot_spim/Christopher/Test_pipeline_3.0/test_unicore/unicore_jobs/Fiji.app.cuda_new/ImageJ-linux64",
+	"fiji-good-4-resave" : "/sw/users/schmied/lifeline/Fiji.app.lifeline2/ImageJ-linux64",
+	"fiji-good-4-deconv" : "/projects/pilot_spim/Christopher/Test_pipeline_3.0/test_unicore/unicore_jobs/Fiji.app.cuda_new/ImageJ-linux64",
+	"fiji-prefix" : "/sw/bin/xvfb-run -a",
+	"lsf_extra" : "-R span[hosts=1]",
+	"lsf_queue" : "short"	
+    },
+ 
+    "registration" :
+    {
+        "lsf_extra" : "-R span[hosts=1] -R rusage[mem=100000]",
+	"lsf_queue" : "gpu"
+    },
+
+    "produce" :
+    {
+	"lsf_queue" : "short"
+    }
+}

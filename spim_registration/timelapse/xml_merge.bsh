@@ -1,0 +1,34 @@
+import ij.IJ;
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+ 
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+
+System.out.println( "Load Parameters:");
+
+	// Getting parameters from job file
+image_file_directory = System.getProperty( "image_file_directory" );
+merged_xml = System.getProperty( "merged_xml" );
+
+// Printing parameters into output file
+System.out.println( "directory=" + image_file_directory );
+System.out.println( "merged_xml=" + merged_xml );
+
+System.out.println( "=======================================================" );
+System.out.println( "Start to merge .xml files" );
+
+// Executing Fiji plugin
+IJ.run("Merge Cluster Jobs", 
+	"directory=" + image_file_directory + " " + 	
+	"filename_contains=job_ " + 
+	"filename_also_contains=.xml " +
+	"display " +
+//	"delete_xml's " + 
+	"merged_xml=" + merged_xml + ".xml");
+ 
+/* shutdown */
+runtime.exit(0);

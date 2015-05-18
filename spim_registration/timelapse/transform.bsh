@@ -1,0 +1,56 @@
+import ij.IJ;
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+
+// Load Parameters form job file
+image_file_directory = System.getProperty( "image_file_directory" );
+merged_xml = System.getProperty( "merged_xml" );
+transform_angle = System.getProperty( "transform_angle" );
+transform_channel = System.getProperty( "transform_channel" );
+transform_illumination = System.getProperty( "transform_illumination" );
+transform_timepoint = System.getProperty( "transform_timepoint" );
+transformation = System.getProperty( "transformation" );
+apply_transformation  = System.getProperty( "apply_transformation" );
+define_mode_transform = System.getProperty( "define_mode_transform" );
+matrix_transform = System.getProperty( "matrix_transform" );
+
+// Print Parameters into output file
+
+System.out.println( "browse = " + image_file_directory );
+System.out.println( "select_xml = " + image_file_directory + merged_xml + ".xml" );
+System.out.println( "apply_to_angle = " + transform_angle );
+System.out.println( "apply_to_channel = " + transform_channel );
+System.out.println( "apply_to_illumination = " + transform_illumination );
+System.out.println( "apply_to_timepoint = " + transform_timepoint );
+System.out.println( "transformation = " + transformation );
+System.out.println( "apply = " + apply_transformation );
+System.out.println( "define = " + define_mode_transform );
+System.out.println( "all_timepoints_channel_0_illumination_0_all_angles = " + matrix_transform );
+
+// Execute Fiji Plugin
+IJ.run("Apply Transformations", 
+	"browse=" + image_file_directory + " " + 
+	"select_xml=" + image_file_directory + merged_xml + ".xml " +
+	"apply_to_angle=[" + transform_angle + "] " +
+	"apply_to_channel=[" + transform_channel + "] " +
+	"apply_to_illumination=[" + transform_illumination + "] " +
+	"apply_to_timepoint=[" + transform_timepoint + "] " + 
+	"transformation=" + transformation + " " +
+	"apply=[" + apply_transformation + "] " +
+	"define=" + define_mode_transform + " " + 
+	"same_transformation_for_all_timepoints " + 
+	"same_transformation_for_all_angles " +
+//	"all_timepoints_channel_0_illumination_0_all_angles=[0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0]");
+	"all_timepoints_channel_0_illumination_0_all_angles=[" + matrix_transform + "]");
+
+/* shutdown */
+runtime.exit(0);
+	
+
+

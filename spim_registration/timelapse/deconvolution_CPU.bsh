@@ -1,0 +1,135 @@
+// Load Fiji dependencies
+import ij.IJ;
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+ 
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+System.out.println( "Start to load Parameters:" );
+
+// Select xml
+image_file_directory = System.getProperty( "image_file_directory" );
+merged_xml = System.getProperty( "merged_xml" );
+
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Load xml file: " );
+System.out.println( "selected_xml = " + image_file_directory + merged_xml + ".xml");
+
+// Load general Parameters
+parallel_timepoints = System.getProperty( "parallel_timepoints" );
+process_timepoint = System.getProperty( "process_timepoint" );
+process_channel = System.getProperty( "process_channel" );
+process_illumination = System.getProperty( "process_illumination" );
+process_angle = System.getProperty( "process_angle" ); 
+
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "General parameters: " );
+System.out.println( "timepoint_processed = " + parallel_timepoints );
+System.out.println( "process_timepoints = " + process_timepoint ); 
+System.out.println( "process_channel = " + process_channel );
+System.out.println( "process_illumination = " + process_illumination );
+System.out.println( "process_angle = " + process_angle );
+
+// Load bounding box
+minimal_x_deco = System.getProperty( "minimal_x_deco" );
+minimal_y_deco = System.getProperty( "minimal_y_deco" );
+minimal_z_deco = System.getProperty( "minimal_z_deco" );
+maximal_x_deco = System.getProperty( "maximal_x_deco" );
+maximal_y_deco = System.getProperty( "maximal_y_deco" );
+maximal_z_deco = System.getProperty( "maximal_z_deco" );
+
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Bounding box: " );
+System.out.println( "minimal_x_deco = " + minimal_x_deco );
+System.out.println( "minimal_y_deco = " + minimal_y_deco );
+System.out.println( "minimal_z_deco = " + minimal_z_deco );
+System.out.println( "maximal_x_deco = " + maximal_x_deco );
+System.out.println( "maximal_y_deco = " + maximal_y_deco );
+System.out.println( "maximal_z_deco = " + maximal_z_deco );
+
+// Load deconvolution Parameters
+imglib2_container_deco = System.getProperty( "imglib2_container_deco" );
+type_of_iteration = System.getProperty( "type_of_iteration" );
+osem_acceleration = System.getProperty( "osem_acceleration" );
+Tikhonov_parameter = System.getProperty( "Tikhonov_parameter" );
+//float Tikhonov_parameter = Float.parseFloat( System.getProperty( "Tikhonov_parameter" ) );
+compute = System.getProperty( "compute" );
+psf_estimation = System.getProperty( "psf_estimation" );
+iterations = System.getProperty( "iterations" );
+deco_output_file_directory = System.getProperty( "deco_output_file_directory" );
+detections_to_extract_psf_for_channel_0 = System.getProperty( "detections_to_extract_psf_for_channel_0" );
+detections_to_extract_psf_for_channel_1 = System.getProperty( " detections_to_extract_psf_for_channel_1" );
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Deconvolution settings: " );
+System.out.println( "imglib2_container = " + imglib2_container_deco );
+System.out.println( "type_of_iteration = "+ type_of_iteration );
+System.out.println( "osem_acceleration = " + osem_acceleration );
+System.out.println( "Tikhonov_parameter = " + Tikhonov_parameter );
+System.out.println( "compute = " + compute );
+System.out.println( "psf_estimation = " + psf_estimation );
+System.out.println( "number_of_iterations = " + iterations );
+System.out.println( "deco_output_file_directory = " + deco_output_file_directory );
+System.out.println( "detections_to_extract_psf_for_channel_0 = " + detections_to_extract_psf_for_channel_0 );
+System.out.println( "detections_to_extract_psf_for_channel_1 = " + detections_to_extract_psf_for_channel_1 );
+
+// Search for CUDA
+directory_cuda = System.getProperty( "directory_cuda" );
+
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Loading CUDA directory: " );
+System.out.println( "directory_cuda = " + directory_cuda );
+
+// PSF Parameters
+psf_size_x = System.getProperty( "psf_size_x" );
+psf_size_y = System.getProperty( "psf_size_y" );
+psf_size_z = System.getProperty( "psf_size_z" );
+
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "PSF Parameters: " );
+System.out.println( "psf_size_x = " + psf_size_x );
+System.out.println( "psf_size_y = " + psf_size_y );
+System.out.println( "psf_size_z = " + psf_size_z );
+
+// Execute Fiji Plugin
+System.out.println( "=======================================================" );
+System.out.println( "Starting Deconvolution" );
+
+IJ.run("Fuse/Deconvolve Dataset", 
+	"select_xml=" + image_file_directory + merged_xml + ".xml " + 
+	"process_angle=[All angles] " +
+	"process_channel=[All channels] " + 
+	"process_illumination=[All illuminations] " +
+	"process_timepoint=[" + process_timepoint + "] " +
+	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " + 
+	"type_of_image_fusion=[Multi-view deconvolution] " +
+	"bounding_box=[Define manually] " +
+	"fused_image=[Save as TIFF stack] " +
+	"minimal_x=" + minimal_x_deco + " " +
+	"minimal_y=" + minimal_y_deco + " " +
+	"minimal_z=" + minimal_z_deco + " " +
+	"maximal_x=" + maximal_x_deco + " " +
+	"maximal_y=" + maximal_y_deco + " " +
+	"maximal_z=" + maximal_z_deco + " " +
+	"imglib2_container=" + imglib2_container_deco + " " +
+	"type_of_iteration=[" + type_of_iteration + "] " +
+	"osem_acceleration=[" + osem_acceleration + "] " +
+	"number_of_iterations=" + iterations + " " +
+//	"adjust_blending_parameters " +
+	"use_tikhonov_regularization " +
+	"tikhonov_parameter=" + Tikhonov_parameter + " " +
+	"compute=[" + compute + "] " +
+	"compute_on=[CPU (Java)] " +
+	"psf_estimation=[" + psf_estimation + "] " +
+	"psf_display=[Do not show PSFs] " +
+	"output_file_directory=" + deco_output_file_directory + " " +
+	"detections_to_extract_psf_for_channel_0=" + detections_to_extract_psf_for_channel_0 + " " +
+	"detections_to_extract_psf_for_channel_1=" + detections_to_extract_psf_for_channel_1 + " " + // Dual Channel
+	"psf_size_x=" + psf_size_x + " " +
+	"psf_size_y=" + psf_size_y + " " +
+	"psf_size_z=" + psf_size_z + "");
+
+/* shutdown */
+runtime.exit(0);
