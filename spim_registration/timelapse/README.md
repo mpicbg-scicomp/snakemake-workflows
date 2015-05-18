@@ -22,12 +22,20 @@ Expected setup
 * `tomancak.json` contains the parameters that configure the beanshell scripts found in the data directory
 * `Snakefile` from this directory
 * `cluster.json` that resides in the same directory as the `Snakefile`
-
+* cluster runs LSF
 
 
 Submitting Jobs
 ---------------
 
+If DRMAA is supported on your cluster:
+
 ```bash
 snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra}"
+```
+
+If not:
+
+```bash
+snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra}"
 ```
