@@ -1,23 +1,25 @@
-import os, glob, sys
+import os, glob, sys, re
 
-#where are we
-if "datadir" not in config.keys():
-   JOBDIR=os.path.abspath(os.path.curdir)
-else:
-   if os.path.isdir(config['datadir']):
-      JOBDIR=config['datadir']
-   else:
-      print("given data dir does not exist {data}".format(data=config['datadir']))
-      sys.exit(1)
-
+#where are we (can be configured through -d/--directory flag)
+JOBDIR=os.path.abspath(os.path.curdir)
 if JOBDIR[-1] != "/":
    JOBDIR+="/"
-   
-datasets = glob.glob('*00.h5') 
 
-#data specific config file
+#data specific config file, expected to be inside JOBDIR
 configfile: "tomancak.json"
+   
+datasets = glob.glob('*00.h5')
 
+#TODO: this should go into a python module in this path
+fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
+xml_merge_in = []
+for ds in datasets:
+   bn = os.path.basename(ds)
+   bn_res = fre.search(bn)
+   xml_base,file_id = bn_res.group('xml_base'),bn_res.group('file_id')
+   xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=file_id))
+   
+#TODO: this should go into a python module in this path
 def produce_string(_fstring, *args, **kwargs):
    contents = dict()
    for item in args:
@@ -28,12 +30,11 @@ def produce_string(_fstring, *args, **kwargs):
    return _fstring.format(**contents)
 
 rule done:
-    input: [ ds+"-deconvolved" for ds in datasets ]
-    
+    input: [ ds+"_deconvolved" for ds in datasets ]
+
 rule registration:
     input: "{xml_base}-{file_id,\d+}-00.h5"
-    output: "{xml_base}-{file_id,\d+}-00.h5_registered", #convenience files
-            "{xml_base}.job_{file_id,\d+}.xml"
+    output: "{xml_base}.job_{file_id,\d+}.xml"
     log: "{xml_base}-{file_id,\d+}-registration.log"
     run:
         cmd_string = produce_string(
@@ -73,30 +74,31 @@ rule registration:
            jdir=JOBDIR,
            input_xml="{wildcards.xml_base}")
         cmd_string += "> {log} 2>&1 && touch {output}"
+       
         shell(cmd_string)
         #shell("touch {output}")
 
 rule xml_merge:
-    input: [ item+"_registered" for item in datasets ]
+    input: xml_merge_in
     output: "{xml_base}_merge.xml"
     log: "{xml_base}_merge.log"
     run:
-        cmd_string = produce_string("{fiji-prefix} {fiji-app} -Dimage_file_directory={jdir} -Dmerged_xml={merged_xml} -- --no-splash {bsh_file} > {log} 2>&1",
+        cmd_string = produce_string("{fiji-prefix} {fiji-app} -Dimage_file_directory={jdir} -Dmerged_xml={output} -- --no-splash {bsh_file} > {log} 2>&1",
                                     config["common"],
                                     config["xml_merge"],
                                     log="{log}",
-                                    jdir=JOBDIR)
+                                    jdir=JOBDIR,
+                                    output="{output}")
         shell(cmd_string)
 
 rule external_trafo:
     input: rules.xml_merge.output
     output: rules.xml_merge.output[0] + "_external_trafo"
     log: "external_trafo.log"
-#    message: "etrafo {input} -> {output}"
     run:
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
 -Dimage_file_directory={jdir} \
--Dmerged_xml={merged_xml} \
+        -Dmerged_xml={input} \
 -Dtransform_angle={angle} \
 -Dtransform_channel={channel} \
 -Dtransform_illumination={illumination} \
@@ -108,19 +110,20 @@ rule external_trafo:
 -- --no-splash {bsh_file}""",
                                     config["common"], 
                                     config["external_transform"],
-                                    jdir=JOBDIR)
+                                    jdir=JOBDIR,
+                                    input="{input}")
         cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule deconvolution:
-    input: rules.external_trafo.output, "{xml_base}-{file_id,\d+}-00.h5"
-    output: "{xml_base}-{file_id,\d+}-00.h5-deconvolved"
-    log: "{xml_base}-{file_id,\d+}-00.h5-deconvolution.log"
+    input: rules.external_trafo.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolved"
+    log: "{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
 -Dimage_file_directory={jdir} \
 -Ddeco_output_file_directory={jdir} \
--Dmerged_xml={merged_xml} \
+        -Dmerged_xml={merged_xml_file} \
 -Dparallel_timepoints={file_id_w} \
 -Dprocess_timepoint={process_timepoint} \
 -Dprocess_channel={process_channel} \
@@ -145,13 +148,15 @@ rule deconvolution:
 -Dpsf_size_y={psf_size_y} \
 -Dpsf_size_z={psf_size_z} \
 -Diterations={iterations} \
--- --no-splash {bsh_file}""",
+        -- --no-splash {bsh_file}""",
                                     config["common"], 
                                     config["deconvolution"],
                                     file_id_w="{wildcards.file_id}",
-                                    jdir=JOBDIR)
+                                    jdir=JOBDIR,
+                                    merged_xml_file="{input.merged_xml}"
+        )
         cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string)
   
-rule clean:
-    shell : "rm -rf *registered"
+rule distclean:
+    shell : "rm -rf *registered *tif "+str(" ".join(xml_merge_in))
