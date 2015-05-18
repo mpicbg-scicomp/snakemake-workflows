@@ -21,7 +21,7 @@ Expected setup
 
 * `tomancak.json` contains the parameters that configure the beanshell scripts found in the data directory
 * `Snakefile` from this directory
-* `cluster.json` that resides in the same directory than the `Snakefile`
+* `cluster.json` that resides in the same directory as the `Snakefile`
 
 
 
@@ -29,5 +29,5 @@ Submitting Jobs
 ---------------
 
 ```bash
-snakemake -j2 -d /projects/hpcsupport/steinbac/unicore/snakemake-sandbox/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra}"
+snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra}"
 ```
