@@ -67,14 +67,14 @@ rule define_xml_czi:
         shell(cmd_string)
 
 # resave .czi dataset as hdf5	
-rule resave_hdf5:
+rule resave_czi_hdf5:
     input: rules.define_xml_czi.output, glob.glob('*.czi')
-    output: glob.glob('*h5')
+    output: "hdf5_Stock68.h5", "hdf5_Stock68.xml" 
     message: "Execute resave_hdf5 on {input}"
+    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
     log: "export.log"
-    run: 
-        for i in config["resave_hdf5"]["parallel_timepoints"]:
-    	    cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+    run:
+        part_string = produce_string("""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Dfirst_xml_filename={first_xml_filename} \
         -Dhdf5_xml_filename={hdf5_xml_filename} \
@@ -86,17 +86,30 @@ rule resave_hdf5:
         -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
-        -Drun_only_job_number=%i \
-        -- --no-splash {path_bsh}""",
-        config["common"],
-        config["define_xml_czi"],
-        config["resave_hdf5"],
-        jdir=JOBDIR,
-        path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"]) % i 
-            i +=1
+        -Drun_only_job_number={job_number} \
+        -- --no-splash {path_bsh} > {log}-{job_number}.log 2>&1 &\n""", # the & submits everyting at once
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+        cmd_string = ""
+        for i in range(int(config["resave_hdf5"]["parallel_timepoints"])):
+        	cmd_string += part_string.format(job_number=i) 
         
-        cmd_string += "> {log} 2>&1"
-        shell(cmd_string)
+        shell(cmd_string) 
+
+rule define_xml_tif:
+
+rule resave_tif_hdf5
+        
+        
+        
+        
+        
+        
+        
+        
 
 rule registration:
     # input: "{xml_base}-{file_id}-00.h5"
