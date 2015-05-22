@@ -1,0 +1,82 @@
+// Load Fiji dependencies
+import ij.IJ; 		// calls imagej
+import ij.Prefs; 	// calls imagej settings
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+Prefs.setThreads(1); 	// defines the number of threads allowed 
+print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+
+System.out.println("Start loading parameters");
+
+// Directory, and first .czi
+System.out.println("=========================================================");
+System.out.println("Directory:");
+image_file_directory = System.getProperty( "image_file_directory" );
+first_xml_filename = System.getProperty( "first_xml_filename" );
+hdf5_xml_filename = System.getProperty( "hdf5_xml_filename" );
+
+System.out.println( "dir=" + image_file_directory );
+System.out.println( "xml_filename=" + first_xml_filename );
+System.out.println( "hdf5_xml_filename=" + hdf5_xml_filename );
+
+// Dataset settings
+System.out.println("=========================================================");
+System.out.println("Dataset:");
+resave_angle = System.getProperty( "resave_angle" );
+resave_channel = System.getProperty( "resave_channel" );
+resave_illumination = System.getProperty( "resave_illumination" );
+resave_timepoint = System.getProperty( "resave_timepoint" );
+
+System.out.println( "resave_angle=" + resave_angle );
+System.out.println( "resave_channel=" + resave_channel );
+System.out.println( "resave_illumination=" + resave_illumination );
+System.out.println( "resave_timepoint=" + resave_timepoint);
+
+// Hdf5 settings
+System.out.println("=========================================================");
+System.out.println("Hdf5 settings:");
+subsampling_factors = System.getProperty( "subsampling_factors" );
+hdf5_chunk_sizes = System.getProperty( "hdf5_chunk_sizes" );
+timepoints_per_partition = System.getProperty( "timepoints_per_partition" );
+setups_per_partition = System.getProperty( "setups_per_partition" );
+run_only_job_number = System.getProperty( "run_only_job_number" );
+
+System.out.println( "subsampling_factors=" + subsampling_factors);
+System.out.println( "hdf5_chunk_sizes=" + hdf5_chunk_sizes );
+System.out.println( "timepoints_per_partition=" + timepoints_per_partition );
+System.out.println( "setups_per_partition=" + setups_per_partition );
+System.out.println( "run_only_job_number=" + run_only_job_number );
+
+// Activate cluster processing
+System.out.println("=========================================================");
+System.out.println("Cluster setting:");
+IJ.run("Toggle Cluster Processing", "display_cluster");
+
+// Executes Fiji plugin
+System.out.println("=========================================================");
+System.out.println("Start plugin:");
+IJ.run("As HDF5",
+	"select_xml=" + image_file_directory + first_xml_filename + ".xml " +
+	"resave_angle=[" + resave_angle + "] " +
+	"resave_channel=[" + resave_channel + "] " +
+	"resave_illumination=[" + resave_illumination + "] " +
+	"resave_timepoint=[" + resave_timepoint + "] " +
+	"manual_mipmap_setup " +
+	"subsampling_factors=[" + subsampling_factors + "] " +
+	"hdf5_chunk_sizes=[" + hdf5_chunk_sizes + "] " +
+	"split_hdf5 " +
+	"timepoints_per_partition=" + timepoints_per_partition + " " +
+	"setups_per_partition=" + setups_per_partition + " " +
+	"run_only_job_number=" + run_only_job_number + " " +
+	"use_deflate_compression " +
+	"export_path=" + image_file_directory + hdf5_xml_filename );
+
+/* shutdown */
+System.exit(0);
+

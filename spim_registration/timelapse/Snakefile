@@ -32,13 +32,13 @@ def produce_string(_fstring, *args, **kwargs):
 rule done:
     input: [ ds+"_deconvolved" for ds in datasets ]
 
-# add part for defining xml file on czi dataset
+# defining xml for czi dataset
 rule define_xml_czi:
     input: glob.glob('*.czi')
     output: config["define_xml_czi"]["first_xml_filename"] + ".xml"
     threads: 1
     message: "Execute define xml with {threads} threads on the following files {input}"
-    log: "define_xml.log"
+    log: "define_xml_czi.log"
     run: 
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
@@ -57,13 +57,18 @@ rule define_xml_czi:
 	-Dpixel_distance_z={pixel_distance_z} \
 	-Dpixel_unit={pixel_unit} \
 	-Dfirst_xml_filename={first_xml_filename} \
-	-- --no-splash {bsh_file}""",
+	-- --no-splash {path_bsh}""",
 	config["common"],
 	config["define_xml_czi"],
-	jdir=JOBDIR)
+	jdir=JOBDIR,
+	path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
 	
+	cmd_string += "> {log} 2>&1"
         shell(cmd_string)
-	
+
+# resave .czi dataset as hdf5	
+rule resave_hdf5: 
+
 rule registration:
     input: "{xml_base}-{file_id}-00.h5"
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"

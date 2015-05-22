@@ -1,0 +1,88 @@
+// Load Fiji dependencies
+import ij.IJ; 		// calls imagej
+import ij.Prefs; 	// calls imagej settings
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+//Prefs.setThreads(2); 	// defines the number of threads allowed
+//print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+
+System.out.println("Start loading parameters");
+
+// Directory, and first .czi
+System.out.println("---------------------------------------------------------");
+System.out.println("Directory:");
+image_file_directory = System.getProperty( "image_file_directory" );
+first_xml_filename = System.getProperty( "first_xml_filename" );
+first_czi = System.getProperty( "first_czi" );
+
+System.out.println( "xml_file_path = " + image_file_directory + first_xml_filename + ".xml" );
+System.out.println( "first_czi_path = " + image_file_directory + first_czi );
+
+// Dataset settings
+System.out.println("---------------------------------------------------------");
+System.out.println("Dataset:");
+angle_1 = System.getProperty( "angle_1" );
+angle_2 = System.getProperty( "angle_2" );
+angle_3 = System.getProperty( "angle_3" );
+angle_4 = System.getProperty( "angle_4" );
+angle_5 = System.getProperty( "angle_5" );
+channel_1 = System.getProperty( "channel_1" );
+channel_2 = System.getProperty( "channel_2" );
+illumination_1 = System.getProperty( "illumination_1" );
+rotation_around = System.getProperty( "rotation_around" );
+
+System.out.println( "angle_1 = " + angle_1 );
+System.out.println( "angle_2 = " + angle_2 );
+System.out.println( "angle_3 = " + angle_3 );
+System.out.println( "angle_4 = " + angle_4 );
+System.out.println( "angle_5 = " + angle_5 );
+System.out.println( "channel_1 = " + channel_1 );
+System.out.println( "channel_2 = " + channel_2 );
+System.out.println( "illumination_1 = " + illumination_1 );
+System.out.println( "rotation_around = " + rotation_around );
+
+// Calibaration
+System.out.println("=========================================================");
+System.out.println("Calibration:");
+float pixel_distance_x = Float.parseFloat( System.getProperty( "pixel_distance_x" ) );
+float pixel_distance_y = Float.parseFloat( System.getProperty( "pixel_distance_y" ) );
+float pixel_distance_z = Float.parseFloat( System.getProperty( "pixel_distance_z" ) );
+pixel_unit = System.getProperty( "pixel_unit" );
+
+System.out.println( "pixel_distance_x = " + pixel_distance_x );
+System.out.println( "pixel_distance_y = " + pixel_distance_y );
+System.out.println( "pixel_distance_z = " + pixel_distance_z );
+System.out.println( "pixel_unit = " + pixel_unit );
+
+// Executes Fiji plugin
+System.out.println("=========================================================");
+System.out.println("Start plugin:");
+IJ.run("Define Multi-View Dataset", 
+	"type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
+	"xml_filename=" + first_xml_filename + ".xml " +
+	"browse=" + image_file_directory + first_czi + " " + 
+	"first_czi=" + image_file_directory + first_czi + " " + 
+	"angle_1=" + angle_1 + " " +
+	"angle_2=" + angle_2 + " " + 
+	"angle_3=" + angle_3 + " " +
+	"angle_4=" + angle_4 + " " + 
+	"angle_5=" + angle_5 + " " +
+	"channel_1=" + channel_1 + " " +
+//	"channel_2=" + channel_2 + " " + // for dual channel comment out if single channel
+ 	"_______illumination_1=" + illumination_1 + " " +
+	"modify_calibration " + 
+	"modify_rotation_axis " +
+	"pixel_distance_x=" + pixel_distance_x + " " + 
+	"pixel_distance_y=" + pixel_distance_y + " " + 
+	"pixel_distance_z=" + pixel_distance_z + " " +
+	"pixel_unit=" + pixel_unit + " " +
+	"rotation_around=" + rotation_around + "");
+	
+/* shutdown */
+runtime.exit(0);
