@@ -36,8 +36,7 @@ rule done:
 rule define_xml_czi:
     input: glob.glob('*.czi')
     output: config["define_xml_czi"]["first_xml_filename"] + ".xml"
-    threads: 1
-    message: "Execute define xml with {threads} threads on the following files {input}"
+    message: "Execute define_xml_czi on the following files {input}"
     log: "define_xml_czi.log"
     run: 
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
@@ -67,7 +66,34 @@ rule define_xml_czi:
         shell(cmd_string)
 
 # resave .czi dataset as hdf5	
-rule resave_hdf5: 
+rule resave_hdf5:
+    input: rules.define_xml_czi.output, glob.glob('*.czi')
+    output: glob.glob('*h5')
+    threads: 1
+    message: Execute resave_hdf5 on {input}
+    log: "export.log"
+    run:
+        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dfirst_xml_filename={first_xml_filename} \
+        -Dhdf5_xml_filename={hdf5_xml_filename} \
+        -Dresave_angle={resave_angle} \
+        -Dresave_channel={resave_channel} \
+        -Dresave_illumination={resave_illumination} \
+        -Dresave_timepoint={resave_timepoint} \
+        -Dsubsampling_factors={subsampling_factors} \
+        -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+        -Dtimepoints_per_partition={timepoints_per_partition} \
+        -Dsetups_per_partition={setups_per_partition} \
+        -Drun_only_job_number={i} \
+        -- --no-splash {path_bsh}""",
+        config["common"],
+        config["define_xml_czi"],
+        config["resave_hdf5"],
+        jdir=JOBDIR,
+        path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+        
+        shell(cmd_string)
 
 rule registration:
     input: "{xml_base}-{file_id}-00.h5"

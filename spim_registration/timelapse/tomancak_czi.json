@@ -30,10 +30,16 @@
     
     "resave_hdf5" :
     {
+    	    "hdf5_xml_filename" : "\"hdf5_Stock68\"",
     	    "resave_angle" : "\"All angles\"",
     	    "resave_channel" : "\"All channels\"",
     	    "resave_illumination" : "\"All illuminations\"",
-    	    "resave_timepoint" : "\"All Timepoints\""
+    	    "resave_timepoint" : "\"All Timepoints\"",
+    	    "subsampling_factors" : "\"{ {1,1,1}, {2,2,1}, {4,4,1}, {8,8,1} }\"",
+    	    "hdf5_chunk_sizes" : "\"{ {32,32,4}, {32,32,4}, {16,16,16}, {16,16,16} }\"",
+    	    "timepoints_per_partition" : "1",
+    	    "setups_per_partition" : "0",
+    	    "bsh_file" : "export.bsh"
     },
     
     "registration" :
