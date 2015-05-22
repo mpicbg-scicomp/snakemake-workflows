@@ -5,12 +5,12 @@
 	"fiji-prefix" : "/sw/bin/xvfb-run -a",
 	"directory_cuda" : "/lustre/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/lib/",
 	"merged_xml" : "hdf5_test_unicore_merge",
-	"bsh_directory" : "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/"
+	"bsh_directory" : "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
+	"first_xml_filename" : "Stock68"
     },
     
     "define_xml_czi" :
     {
-    	    "first_xml_filename" : "Stock68",
     	    "pixel_distance_x" : "0.2875535786151886",
     	    "pixel_distance_y" : "0.2875535786151886",
     	    "pixel_distance_z" : "1.50000", 
@@ -41,6 +41,25 @@
     	    "timepoints_per_partition" : "1",
     	    "setups_per_partition" : "0",
     	    "bsh_file" : "export.bsh"
+    },
+    
+    "define_xml_tif" :
+    {
+	"timepoints" : "1-2",
+	"acquisition_angles" : "1,2,3,4,5",
+	"channels" : "0,1",
+	"image_file_pattern" : "spim_TL{{tt}}_Angle{{a}}.tif",
+	"pixel_distance_x"  : "0.2875535786151886",
+	"pixel_distance_y" : "0.2875535786151886",
+	"pixel_distance_z" : "1.50000",
+	"pixel_unit" : "um",
+	"multiple_timepoints" : "\"YES (one file per time-point)\"",
+	"multiple_channels" : "\"YES (one file per channel)\"",
+	"multiple_illumination_directions" : "\"NO (one illumination direction)\"",
+	"multiple_angles" : "\"YES (one file per angle)\"",
+	"type_of_dataset" : "\"Image Stacks (ImageJ Opener)\"",
+	"imglib_container" : "\"ArrayImg (faster)\"",
+	"bsh_file" : "define_tif_zip.bsh" 
     },
     
     "registration" :

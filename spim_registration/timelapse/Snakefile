@@ -35,7 +35,7 @@ rule done:
 # defining xml for czi dataset
 rule define_xml_czi:
     input: glob.glob('*.czi')
-    output: config["define_xml_czi"]["first_xml_filename"] + ".xml"
+    output: config["common"]["first_xml_filename"] + ".xml"
     message: "Execute define_xml_czi on the following files {input}"
     log: "define_xml_czi.log"
     run: 
@@ -71,7 +71,7 @@ rule resave_czi_hdf5:
     input: rules.define_xml_czi.output, glob.glob('*.czi')
     output: "hdf5_Stock68.h5", "hdf5_Stock68.xml" 
     message: "Execute resave_hdf5 on {input}"
-    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
+#    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
     log: "export.log"
     run:
         part_string = produce_string("""{fiji-prefix} {fiji-app} \
@@ -99,21 +99,45 @@ rule resave_czi_hdf5:
         
         shell(cmd_string) 
 
+# defining xml for tif dataset
 rule define_xml_tif:
-
+    input: glob.glob('*.tif')
+    output: config["common"]["first_xml_filename"] + ".xml"
+    message: "Execute define_xml_czi on the following files {input}"
+    log: "define_xml_tif.log"
+    run:
+        cmd_string = produce_string(
+        		"""{fiji-prefix} {fiji-app} \
+        	-Dimage_file_directory={jdir} \
+        	-Dtimepoints={timepoints} \
+        	-Dacquisition_angles={acquisition_angles} \
+        	-Dchannels={channels} \
+        	-Dimage_file_pattern={image_file_pattern} \
+        	-Dpixel_distance_x={pixel_distance_x} \
+        	-Dpixel_distance_y={pixel_distance_y} \
+        	-Dpixel_distance_z={pixel_distance_z} \
+        	-Dpixel_unit={pixel_unit} \
+        	-Dxml_filename={first_xml_filename} \
+        	-Dtype_of_dataset={type_of_dataset} \
+        	-Dmultiple_timepoints={multiple_timepoints} \
+        	-Dmultiple_channels={multiple_channels} \
+        	-Dmultiple_illumination_directions={multiple_illumination_directions} \
+        	-Dmultiple_angles={multiple_angles} \
+        	-Dimglib_container={imglib_container} \
+		-- --no-splash {path_bsh}""",
+	config["common"],
+	config["define_xml_tif"],
+	jdir=JOBDIR,
+	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
+	cmd_string +="> {log} 2>&1 && touch {output}"
+	shell(cmd_string)
+        
 rule resave_tif_hdf5
         
         
-        
-        
-        
-        
-        
-        
-
 rule registration:
-    # input: "{xml_base}-{file_id}-00.h5"
-    input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"
+    input: "{xml_base}-{file_id}-00.h5"
+    #input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
     log: "{xml_base}-{file_id}-registration.log"
     run:
