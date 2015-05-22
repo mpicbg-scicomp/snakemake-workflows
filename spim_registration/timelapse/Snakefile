@@ -65,40 +65,7 @@ rule define_xml_czi:
 	
 	cmd_string += "> {log} 2>&1"
         shell(cmd_string)
-
-# resave .czi dataset as hdf5	
-rule resave_czi_hdf5:
-    input: rules.define_xml_czi.output, glob.glob('*.czi')
-    output: "hdf5_Stock68.h5", "hdf5_Stock68.xml" 
-    message: "Execute resave_hdf5 on {input}"
-#    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
-    log: "export.log"
-    run:
-        part_string = produce_string("""{fiji-prefix} {fiji-app} \
-        -Dimage_file_directory={jdir} \
-        -Dfirst_xml_filename={first_xml_filename} \
-        -Dhdf5_xml_filename={hdf5_xml_filename} \
-        -Dresave_angle={resave_angle} \
-        -Dresave_channel={resave_channel} \
-        -Dresave_illumination={resave_illumination} \
-        -Dresave_timepoint={resave_timepoint} \
-        -Dsubsampling_factors={subsampling_factors} \
-        -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
-        -Dtimepoints_per_partition={timepoints_per_partition} \
-        -Dsetups_per_partition={setups_per_partition} \
-        -Drun_only_job_number={job_number} \
-        -- --no-splash {path_bsh} > {log}-{job_number}.log 2>&1 &\n""", # the & submits everyting at once
-           config["common"],
-           config["define_xml_czi"],
-           config["resave_hdf5"],
-           jdir=JOBDIR,
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
-        cmd_string = ""
-        for i in range(int(config["resave_hdf5"]["parallel_timepoints"])):
-        	cmd_string += part_string.format(job_number=i) 
         
-        shell(cmd_string) 
-
 # defining xml for tif dataset
 rule define_xml_tif:
     input: glob.glob('*.tif')
@@ -131,10 +98,40 @@ rule define_xml_tif:
 	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
 	cmd_string +="> {log} 2>&1 && touch {output}"
 	shell(cmd_string)
+	
+# resave .czi dataset as hdf5	
+rule resave_czi_hdf5:
+    input: rules.define_xml_czi.output, glob.glob('*.czi')
+    output: "hdf5_Stock68.h5", "hdf5_Stock68.xml" 
+    message: "Execute resave_hdf5 on {input}"
+#    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
+    log: "export_czi.log"
+    run:
+        part_string = produce_string("""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dfirst_xml_filename={first_xml_filename} \
+        -Dhdf5_xml_filename={hdf5_xml_filename} \
+        -Dresave_angle={resave_angle} \
+        -Dresave_channel={resave_channel} \
+        -Dresave_illumination={resave_illumination} \
+        -Dresave_timepoint={resave_timepoint} \
+        -Dsubsampling_factors={subsampling_factors} \
+        -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+        -Dtimepoints_per_partition={timepoints_per_partition} \
+        -Dsetups_per_partition={setups_per_partition} \
+        -Drun_only_job_number={job_number} \
+        -- --no-splash {path_bsh} > {log}-{job_number}.log 2>&1 &\n""", # the & submits everyting at once
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+        cmd_string = ""
+        for i in range(int(config["resave_hdf5"]["parallel_timepoints"])):
+        	cmd_string += part_string.format(job_number=i) 
         
-rule resave_tif_hdf5
-        
-        
+        shell(cmd_string) 
+       	       	
 rule registration:
     input: "{xml_base}-{file_id}-00.h5"
     #input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"

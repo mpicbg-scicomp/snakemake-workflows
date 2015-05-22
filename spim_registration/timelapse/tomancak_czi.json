@@ -6,7 +6,8 @@
 	"directory_cuda" : "/lustre/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/lib/",
 	"merged_xml" : "hdf5_test_unicore_merge",
 	"bsh_directory" : "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
-	"first_xml_filename" : "Stock68"
+	"first_xml_filename" : "Stock68",
+	"hdf5_xml_filename" : "\"hdf5_Stock68\""
     },
     
     "define_xml_czi" :
@@ -31,7 +32,6 @@
     "resave_czi_hdf5" :
     {
     	    "parallel_timepoints" : "2",
-    	    "hdf5_xml_filename" : "\"hdf5_Stock68\"",
     	    "resave_angle" : "\"All angles\"",
     	    "resave_channel" : "\"All channels\"",
     	    "resave_illumination" : "\"All illuminations\"",
@@ -54,7 +54,7 @@
 	"pixel_distance_z" : "1.50000",
 	"pixel_unit" : "um",
 	"multiple_timepoints" : "\"YES (one file per time-point)\"",
-	"multiple_channels" : "\"YES (one file per channel)\"",
+	"multiple_channels" : "\"NO (one channel)\"",
 	"multiple_illumination_directions" : "\"NO (one illumination direction)\"",
 	"multiple_angles" : "\"YES (one file per angle)\"",
 	"type_of_dataset" : "\"Image Stacks (ImageJ Opener)\"",
