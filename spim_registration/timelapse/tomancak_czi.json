@@ -9,18 +9,19 @@
     
     "define_xml_czi" :
     {
-    	    "pixel_distance_x" : "0.2875535786151886" 	# Manual calibration x
-    	    "pixel_distance_y" : "0.2875535786151886" 	# Manual calibration y
-    	    "pixel_distance_z" : "1.50000" 	# Manual calibration z
-    	    "pixel_unit" : "um"			# unit of manual calibration	    
-    	    "first_czi" : "2015-02-21_LZ1_Stock68_3.czi"
-    	    "angle_1" : "0"
-    	    "angle_2" : "72"
-    	    "angle_3" :"144"
-    	    "angle_4" :"216"
-    	    "angle_5" : "288"
-    	    "illumination_1" : "0"
-    	    "bsh_file" : "define_czi.bsh"    
+    	    "first_xml_filename" : "\"Stock68\"",
+    	    "pixel_distance_x" : "0.2875535786151886",
+    	    "pixel_distance_y" : "0.2875535786151886",
+    	    "pixel_distance_z" : "1.50000", 
+    	    "pixel_unit" : "um",				    
+    	    "first_czi" : "2015-02-21_LZ1_Stock68_3.czi",
+    	    "angle_1" : "0",
+    	    "angle_2" : "72",
+    	    "angle_3" :"144",
+    	    "angle_4" :"216",
+    	    "angle_5" : "288",
+    	    "illumination_1" : "0",
+    	    "bsh_file" : "define_czi.bsh" 
     },
     
     "registration" :

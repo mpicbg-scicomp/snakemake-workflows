@@ -2,13 +2,13 @@ import os, glob, sys, re
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
-if JOBDIR[-1] != "/":
+if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a slash
    JOBDIR+="/"
 
 #data specific config file, expected to be inside JOBDIR
 configfile: "tomancak_czi.json"
    
-datasets = glob.glob('*00.h5')
+datasets = glob.glob('*00.h5') # searches JOBDIR for files that match this wildcard expression
 
 #TODO: this should go into a python module in this path
 fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
@@ -33,14 +33,15 @@ rule done:
     input: [ ds+"_deconvolved" for ds in datasets ]
 
 # add part for defining xml file on czi dataset
-rule define_xml:
-	input: "{czi_base}.czi"
-	output: "{xml_name}.xml"
-	threads: 1
-	message: "Execute define xml with {threads} threads on the following files {input}"
-	log: "define_xml.log"
-	run: cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
-	-Dimage_file_directory={jdir}\
+rule define_xml_czi:
+    input: glob.glob('*.czi')
+    output: config["define_xml_czi"]["first_xml_filename"] + ".xml"
+    threads: 1
+    message: "Execute define xml with {threads} threads on the following files {input}"
+    log: "define_xml.log"
+    run: 
+        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
 	-Dfirst_czi={first_czi} \
 	-Dangle_1={angle_1} \
 	-Dangle_2={angle_2} \
@@ -59,10 +60,9 @@ rule define_xml:
 	-- --no-splash {bsh_file}""",
 	config["common"],
 	config["define_xml_czi"],
-	jdir=JOBDIR,
-	output="{output}")
+	jdir=JOBDIR)
 	
-	shell(cmd_string)
+        shell(cmd_string)
 	
 rule registration:
     input: "{xml_base}-{file_id}-00.h5"
