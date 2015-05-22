@@ -6,7 +6,7 @@ if JOBDIR[-1] != "/":
    JOBDIR+="/"
 
 #data specific config file, expected to be inside JOBDIR
-configfile: "tomancak.json"
+configfile: "tomancak_czi.json"
    
 datasets = glob.glob('*00.h5')
 
@@ -32,6 +32,38 @@ def produce_string(_fstring, *args, **kwargs):
 rule done:
     input: [ ds+"_deconvolved" for ds in datasets ]
 
+# add part for defining xml file on czi dataset
+rule define_xml:
+	input: "{czi_base}.czi"
+	output: "{xml_name}.xml"
+	threads: 1
+	message: "Execute define xml with {threads} threads on the following files {input}"
+	log: "define_xml.log"
+	run: cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+	-Dimage_file_directory={jdir}\
+	-Dfirst_czi={first_czi} \
+	-Dangle_1={angle_1} \
+	-Dangle_2={angle_2} \
+	-Dangle_3={angle_3} \
+	-Dangle_4={angle_4} \
+	-Dangle_5={angle_5} \
+	-Dchannel_1={channel_1} \
+	-Dchannel_2={channel_2} \
+	-Dillumination_1={illumination_1} \
+	-Drotation_around={rotation_around} \
+	-Dpixel_distance_x={pixel_distance_x} \
+	-Dpixel_distance_y={pixel_distance_y} \
+	-Dpixel_distance_z={pixel_distance_z} \
+	-Dpixel_unit={pixel_unit} \
+	-Dfirst_xml_filename={first_xml_filename} \
+	-- --no-splash {bsh_file}""",
+	config["common"],
+	config["define_xml_czi"],
+	jdir=JOBDIR,
+	output="{output}")
+	
+	shell(cmd_string)
+	
 rule registration:
     input: "{xml_base}-{file_id}-00.h5"
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
