@@ -30,6 +30,7 @@
     
     "resave_hdf5" :
     {
+    	    "parallel_timepoints" : "range(0,2)",
     	    "hdf5_xml_filename" : "\"hdf5_Stock68\"",
     	    "resave_angle" : "\"All angles\"",
     	    "resave_channel" : "\"All channels\"",

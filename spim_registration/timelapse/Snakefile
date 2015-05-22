@@ -39,7 +39,8 @@ rule define_xml_czi:
     message: "Execute define_xml_czi on the following files {input}"
     log: "define_xml_czi.log"
     run: 
-        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
 	-Dfirst_czi={first_czi} \
 	-Dangle_1={angle_1} \
@@ -69,11 +70,11 @@ rule define_xml_czi:
 rule resave_hdf5:
     input: rules.define_xml_czi.output, glob.glob('*.czi')
     output: glob.glob('*h5')
-    threads: 1
-    message: Execute resave_hdf5 on {input}
+    message: "Execute resave_hdf5 on {input}"
     log: "export.log"
-    run:
-        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+    run: 
+        for i in config["resave_hdf5"]["parallel_timepoints"]:
+    	    cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Dfirst_xml_filename={first_xml_filename} \
         -Dhdf5_xml_filename={hdf5_xml_filename} \
@@ -85,18 +86,21 @@ rule resave_hdf5:
         -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
-        -Drun_only_job_number={i} \
+        -Drun_only_job_number=%i \
         -- --no-splash {path_bsh}""",
         config["common"],
         config["define_xml_czi"],
         config["resave_hdf5"],
         jdir=JOBDIR,
-        path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+        path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"]) % i 
+            i +=1
         
+        cmd_string += "> {log} 2>&1"
         shell(cmd_string)
 
 rule registration:
-    input: "{xml_base}-{file_id}-00.h5"
+    # input: "{xml_base}-{file_id}-00.h5"
+    input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
     log: "{xml_base}-{file_id}-registration.log"
     run:
@@ -161,7 +165,7 @@ rule external_trafo:
     run:
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
 -Dimage_file_directory={jdir} \
-        -Dmerged_xml={input} \
+	-Dmerged_xml={input} \
 -Dtransform_angle={angle} \
 -Dtransform_channel={channel} \
 -Dtransform_illumination={illumination} \
