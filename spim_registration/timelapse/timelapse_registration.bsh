@@ -18,6 +18,8 @@ System.out.println("Xml file:");
 
 xml_path = System.getProperty( "image_file_directory" );
 merged_xml = System.getProperty( "merged_xml" );
+if ( ! merged_xml.endsWith(".xml") )
+    merged_xml = merged.xml + ".xml";
 
 System.out.println( "selected_xml = " + xml_path + merged_xml + ".xml");
 
@@ -69,8 +71,10 @@ System.out.println( "significance = " + significance );
 
 System.out.println( "=======================================================" );
 System.out.println( "Starting Timelapse Registration" );
+
+try {
 IJ.run("Register Dataset based on Interest Points", 
-	"select_xml=" + xml_path + merged_xml + ".xml " + 
+	"select_xml=" + xml_path + merged_xml + " " + 
 	"process_angle=[" + process_angle + "] " + 
 	"process_channel=[" + process_channel_timelapse + "] " +
 	"process_illumination=[" + process_illumination + "] " +  
@@ -87,6 +91,14 @@ IJ.run("Register Dataset based on Interest Points",
 	"lamba=" + lambda + " " +
 	"allowed_error_for_ransac=" + allowed_error_for_ransac + " " +
 	"significance=" + significance + "");
+}
+catch ( e ) { 
+
+    print( "[deconvolution-GPU] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 
 /* shutdown */
 runtime.exit(0);

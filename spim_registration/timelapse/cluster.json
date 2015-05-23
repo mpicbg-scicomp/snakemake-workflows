@@ -9,6 +9,11 @@
     {
         "lsf_extra" : "-R \"span[hosts=1] rusage[mem=100000]\""
     },
+    
+    "timelapse" : 
+    {
+    	"lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=100000]\""
+    },
 
     "external_trafo" :
     {
