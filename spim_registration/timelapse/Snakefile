@@ -30,7 +30,8 @@ def produce_string(_fstring, *args, **kwargs):
    return _fstring.format(**contents)
 
 rule done:
-    input: [ ds+"_deconvolved" for ds in datasets ]
+    #input: [ ds+"_fusion" for ds in datasets ]
+    input: [ ds + "_" + config["common"]["fusion_switch"] for ds in datasets ]
 
 # defining xml for czi dataset
 rule define_xml_czi:
@@ -236,6 +237,50 @@ rule timelapse:
         cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string)
         
+rule fusion:
+    input: rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    output: "{xml_base}-{file_id,\d+}-00.h5_fusion"
+    log: "{xml_base}-{file_id,\d+}-00-fusion.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+    	-Dparallel_timepoints={file_id_w} \
+    	-Dmerged_xml={merged_xml_file} \
+    	-Dprocess_timepoint={process_timepoint} \
+    	-Dprocess_channel={process_channel} \
+    	-Dprocess_illumination={process_illumination} \
+    	-Dprocess_angle={process_angle} \
+    	-Dxml_output={xml_output} \
+    	-Dfused_image={fused_image} \
+    	-Dminimal_x={minimal_x} \
+    	-Dminimal_y={minimal_y} \
+    	-Dminimal_z={minimal_z} \
+    	-Dmaximal_x={maximal_x} \
+    	-Dmaximal_y={maximal_y} \
+    	-Dmaximal_z={maximal_z} \
+    	-Ddownsample={downsample} \
+    	-Dpixel_type={pixel_type} \
+    	-Dimglib2_container_fusion={imglib2_container_fusion} \
+    	-Dprocess_views_in_paralell={process_views_in_paralell} \
+    	-Dinterpolation={interpolation} \
+    	-Dimglib2_data_container={imglib2_data_container} \
+    	-Dsubsampling_factors={subsampling_factors} \
+    	-Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+    	-Dtimepoints_per_partition={timepoints_per_partition} \
+    	-Dsetups_per_partition={setups_per_partition} \
+    		-- --no-splash {path_bsh}""",
+                                    config["common"],
+                                    config["fusion"],
+                                    config["resave_czi_hdf5"],
+                                    path_bsh=config["common"]["bsh_directory"] + config["fusion"]["bsh_file"],
+                                    jdir=JOBDIR,
+                                    file_id_w="{wildcards.file_id}",
+                                    merged_xml_file="{input.merged_xml}"
+        )
+        cmd_string += "> {log} 2>&1 && touch {output}"
+        shell(cmd_string)
+
 rule external_transform:
     input: rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
     output: rules.timelapse.output[0] + "_external_trafo"
@@ -258,13 +303,14 @@ rule external_transform:
                                     config["external_transform"],
                                     path_bsh=config["common"]["bsh_directory"] + config["external_transform"]["bsh_file"],
                                     jdir=JOBDIR,
-                                    merged_xml_file="{input.merged_xml}")
+                                    merged_xml_file="{input.merged_xml}"
+        )
         cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule deconvolution:
     input: rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolved"
+    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
     log: "{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(

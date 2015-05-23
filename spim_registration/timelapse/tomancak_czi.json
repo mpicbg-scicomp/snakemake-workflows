@@ -7,7 +7,8 @@
 	"merged_xml" : "hdf5_test_unicore_merge",
 	"bsh_directory" : "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
 	"first_xml_filename" : "test_unicore",
-	"hdf5_xml_filename" : "\"hdf5_test_unicore\""
+	"hdf5_xml_filename" : "\"hdf5_test_unicore\"",
+	"fusion_switch" : "fusion"
     },
     
     "define_xml_czi" :
@@ -117,6 +118,29 @@
 	"apply_transformation" : "\"Current view transformations (appends to current transforms)\"",
 	"define_mode_transform" : "\"Matrix\"",
 	"matrix_transform" : "\"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0\""
+    },
+    
+    "fusion" :
+    {
+    	    "minimal_x" : "128",	
+    	    "minimal_y" : "-13",
+    	    "minimal_z" : "-407",
+    	    "maximal_x" : "986",
+    	    "maximal_y" : "1927",
+    	    "maximal_z" : "498",
+    	    "downsample" : "1",
+    	    "process_timepoint" : "\"Single Timepoint (Select from List)\"",
+    	    "process_channel" : "\"All channels\"",
+    	    "process_illumination" : "\"All illuminations\"",
+    	    "process_angle" : "\"All angles\"",
+    	    "xml_output" : "\"Save every XML with user-provided unique id\"", 
+    	    "fused_image" : "\"Append to current XML Project\"",
+    	    "pixel_type" : "\"16-bit unsigned integer\"",
+    	    "imglib2_container_fusion" : "\"ArrayImg\"",
+    	    "process_views_in_paralell" : "\"All\"",
+    	    "interpolation" : "\"Linear Interpolation\"",
+    	    "imglib2_data_container" : "\"ArrayImg (faster)\"",
+    	    "bsh_file" : "fusion.bsh"
     },
 
     "deconvolution" :

@@ -1,0 +1,114 @@
+// Load Fiji dependencies
+import ij.IJ; 		// calls imagej
+import ij.Prefs; 	// calls imagej settings
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+ 
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+System.out.println( "Start to load Parameters:" );
+
+Prefs.setThreads(6); 	// defines the number of threads allowed 
+print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+
+System.out.println( "Start to load Parameters:" );
+// select xml
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Load xml file: " );
+image_file_directory = System.getProperty( "image_file_directory" );
+merged_xml = System.getProperty( "merged_xml" );
+if ( ! merged_xml.endsWith(".xml") )
+    merged_xml = merged.xml + ".xml";
+
+System.out.println( "xml_path=" + image_file_directory + merged_xml + ".xml" );
+
+// Load general Parameters
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "General parameters: " );
+int parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
+process_timepoint = System.getProperty( "process_timepoint" );
+process_channel = System.getProperty( "process_channel" );
+process_illumination = System.getProperty( "process_illumination" );
+process_angle = System.getProperty( "process_angle" ); 
+
+System.out.println( process_timepoint );
+System.out.println( "timepoint = " + parallel_timepoints);
+System.out.println( "illuminations = " + process_illumination );
+System.out.println( "angles = " + process_angle );
+
+//Load bounding box
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Load bounding box: " );
+minimal_x = System.getProperty( "minimal_x" );
+minimal_y = System.getProperty( "minimal_y" );
+minimal_z = System.getProperty( "minimal_z" );
+maximal_x = System.getProperty( "maximal_x" );
+maximal_y = System.getProperty( "maximal_y" );
+maximal_z = System.getProperty( "maximal_z" );
+downsample = System.getProperty( "downsample" );
+
+System.out.println( "minimal_x=" + minimal_x );
+System.out.println( "minimal_y=" + minimal_y );
+System.out.println( "minimal_z=" + minimal_z );
+System.out.println( "maximal_x=" + maximal_x );
+System.out.println( "maximal_y=" + maximal_y );
+System.out.println( "maximal_z=" + maximal_z );
+System.out.println( "downsample=" + downsample );
+
+// Load fusion parameters
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Fusion parameters: " );
+pixel_type = System.getProperty( "pixel_type" );
+imglib2_container_fusion = System.getProperty( "imglib2_container_fusion" );
+interpolation = System.getProperty( "interpolation" );
+imglib2_data_container = System.getProperty( "imglib2_data_container" );
+
+System.out.println( "pixel_type=" + pixel_type );
+System.out.println( "imglib2_container_fusion=" + imglib2_container_fusion );
+System.out.println( "interpolation=" + interpolation );
+System.out.println( "imglib2_data_container=" + imglib2_data_container );
+
+// Execute Fiji Plugin
+System.out.println( "=======================================================" );
+System.out.println( "Starting Fusion" );
+
+try{
+IJ.run("Fuse/Deconvolve Dataset", 
+	"select_xml=" + image_file_directory + merged_xml + " " +
+	"process_angle=[" + process_angle + "] " +	
+        "process_illumination=[" + process_illumination + "] " +
+        "process_timepoint=[" + process_timepoint + "] " +
+	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " + 
+//	"xml_output=[Do not process on cluster] " +
+	"processing_timepoint=[Timepoint "+ parallel_timepoints +"] " +
+	"type_of_image_fusion=[Weighted-average fusion] " +
+	"bounding_box=[Define manually] " +
+	"fused_image=[Save as TIFF stack] " + // works but does not create xml file
+	"minimal_x=" + minimal_x + " " +
+	"minimal_y=" + minimal_y + " " +
+	"minimal_z=" + minimal_z + " " +
+	"maximal_x=" + maximal_x + " " +
+	"maximal_y=" + maximal_y + " " +
+	"maximal_z=" + maximal_z + " " +
+	"downsample=" + downsample + " " +
+	"pixel_type=[" + pixel_type + "] " + 
+	"imglib2_container=" + imglib2_container_fusion + " " + 
+	"process_views_in_paralell=All " +
+	"interpolation=[" + interpolation + "] " + 
+	"blend " +
+	"content-based " +
+	"output_file_directory=" + image_file_directory + " " +
+	"lossless " +
+	"imglib2_data_container=[" + imglib2_data_container + "]");
+}
+catch ( e ) {
+	    print( "[deconvolution-GPU] caught exception: "+e );
+	    //important to fail the process if exception occurs
+	    runtime.exit(1);
+}
+
+/* shutdown */
+runtime.exit(0);

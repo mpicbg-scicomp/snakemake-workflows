@@ -21,7 +21,7 @@ System.out.println( "Load xml file: " );
 System.out.println( "selected_xml = " + image_file_directory + merged_xml);
 
 // Load general Parameters
-parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
+int parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
 process_timepoint = System.getProperty( "process_timepoint" );
 process_channel = System.getProperty( "process_channel" );
 process_illumination = System.getProperty( "process_illumination" );
@@ -134,7 +134,6 @@ IJ.run("Fuse/Deconvolve Dataset",
 	"directory=[" + directory_cuda + "] " +
 	"select_native_library_for_cudafourierconvolution=libFourierConvolutionCUDALib.so " + 
 	"gpu_1 " +
-//	"gpu_2 " + 
 	"detections_to_extract_psf_for_channel_0=" + detections_to_extract_psf_for_channel_0 + " " +
 //	"detections_to_extract_psf_for_channel_1=" + detections_to_extract_psf_for_channel_1 + " " + // Dual Channel
 	"psf_size_x=" + psf_size_x + " " +
