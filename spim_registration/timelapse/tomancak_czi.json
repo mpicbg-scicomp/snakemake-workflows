@@ -29,20 +29,6 @@
     	    "bsh_file" : "define_czi.bsh" 
     },
     
-    "resave_czi_hdf5" :
-    {
-    	    "parallel_timepoints" : "2",
-    	    "resave_angle" : "\"All angles\"",
-    	    "resave_channel" : "\"All channels\"",
-    	    "resave_illumination" : "\"All illuminations\"",
-    	    "resave_timepoint" : "\"All Timepoints\"",
-    	    "subsampling_factors" : "\"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}\"",
-    	    "hdf5_chunk_sizes" : "\"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}\"",
-    	    "timepoints_per_partition" : "1",
-    	    "setups_per_partition" : "0",
-    	    "bsh_file" : "export.bsh"
-    },
-    
     "define_xml_tif" :
     {
 	"timepoints" : "1-2",
@@ -62,6 +48,20 @@
 	"bsh_file" : "define_tif_zip.bsh" 
     },
     
+    "resave_czi_hdf5" :
+    {
+    	    "parallel_timepoints" : "2",
+    	    "resave_angle" : "\"All angles\"",
+    	    "resave_channel" : "\"All channels\"",
+    	    "resave_illumination" : "\"All illuminations\"",
+    	    "resave_timepoint" : "\"All Timepoints\"",
+    	    "subsampling_factors" : "\"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}\"",
+    	    "hdf5_chunk_sizes" : "\"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}\"",
+    	    "timepoints_per_partition" : "1",
+    	    "setups_per_partition" : "0",
+    	    "bsh_file" : "export.bsh"
+    },
+    
     "registration" :
     {
 	"timepoint" : "\"Single Timepoint (Select from List)\"",
@@ -72,16 +72,15 @@
 	"algorithm" : "\"Fast 3d geometric hashing (rotation invariant)\"",
 	"label_interest_points" : "\"beads\"",
 	"type_of_registration" : "\"Register timepoints individually\"",
-	"type_of_registration_timelapse" : "\"Match against one reference timepoint (no global optimization)\"",
 	"type_of_detection" : "\"Difference-of-Mean (Integral image based)\"" ,
 	"subpixel_localization" : "\"3-dimensional quadratic fit\"",
 	"imglib_container" : "\"ArrayImg (faster)\"",
 	"radius_1" : "2",
 	"radius_2" : "3",
 	"threshold" : "0.005",
-	"interest_points_channel_0" : "\"[DO NOT register this channel]\"" ,
-	"interest_points_channel_1" : "\"beads\"",
-	"fix_tiles" : "\"Fix first tile\""	,
+	"interest_points_channel_0" : "\"beads\"",
+	"interest_points_channel_1" : "\"[DO NOT register this channel]\"",
+	"fix_tiles" : "\"Fix first tile\"",
 	"map_back_tiles" : "\"Map back to first tile using rigid model\"",
 	"transformation_model" : "Affine",
 	"model_to_regularize_with" : "Rigid",
@@ -96,6 +95,14 @@
     "xml_merge" :
     {
 	"bsh_file" : "xml_merge.bsh"
+    },
+    
+    "timelapse" : 
+    {
+    	  "reference_timepoint" : "0",
+    	  "timelapse_process_timepoints" : "\"All Timepoints\"",
+    	  "type_of_registration_timelapse" : "\"Match against one reference timepoint (no global optimization)\"",
+    	  "bsh_file" : "timelapse_registration.bsh"
     },
 
     "external_transform" :

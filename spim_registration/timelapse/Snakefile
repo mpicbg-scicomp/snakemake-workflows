@@ -63,7 +63,7 @@ rule define_xml_czi:
 	jdir=JOBDIR,
 	path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
 	
-	cmd_string += "> {log} 2>&1"
+	cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string)
         
 # defining xml for tif dataset
@@ -74,24 +74,24 @@ rule define_xml_tif:
     log: "define_xml_tif.log"
     run:
         cmd_string = produce_string(
-        		"""{fiji-prefix} {fiji-app} \
-        	-Dimage_file_directory={jdir} \
-        	-Dtimepoints={timepoints} \
-        	-Dacquisition_angles={acquisition_angles} \
-        	-Dchannels={channels} \
-        	-Dimage_file_pattern={image_file_pattern} \
-        	-Dpixel_distance_x={pixel_distance_x} \
-        	-Dpixel_distance_y={pixel_distance_y} \
-        	-Dpixel_distance_z={pixel_distance_z} \
-        	-Dpixel_unit={pixel_unit} \
-        	-Dxml_filename={first_xml_filename} \
-        	-Dtype_of_dataset={type_of_dataset} \
-        	-Dmultiple_timepoints={multiple_timepoints} \
-        	-Dmultiple_channels={multiple_channels} \
-        	-Dmultiple_illumination_directions={multiple_illumination_directions} \
-        	-Dmultiple_angles={multiple_angles} \
-        	-Dimglib_container={imglib_container} \
-		-- --no-splash {path_bsh}""",
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dtimepoints={timepoints} \
+        -Dacquisition_angles={acquisition_angles} \
+        -Dchannels={channels} \
+        -Dimage_file_pattern={image_file_pattern} \
+        -Dpixel_distance_x={pixel_distance_x} \
+        -Dpixel_distance_y={pixel_distance_y} \
+        -Dpixel_distance_z={pixel_distance_z} \
+        -Dpixel_unit={pixel_unit} \
+       	-Dxml_filename={first_xml_filename} \
+        -Dtype_of_dataset={type_of_dataset} \
+        -Dmultiple_timepoints={multiple_timepoints} \
+        -Dmultiple_channels={multiple_channels} \
+        -Dmultiple_illumination_directions={multiple_illumination_directions} \
+        -Dmultiple_angles={multiple_angles} \
+        -Dimglib_container={imglib_container} \
+	-- --no-splash {path_bsh}""",
 	config["common"],
 	config["define_xml_tif"],
 	jdir=JOBDIR,
@@ -101,13 +101,16 @@ rule define_xml_tif:
 	
 # resave .czi dataset as hdf5	
 rule resave_czi_hdf5:
-    input: rules.define_xml_czi.output, glob.glob('*.czi')
-    output: "hdf5_Stock68.h5", "hdf5_Stock68.xml" 
+#    input: config["common"]["first_xml_filename"] + ".xml"
+    input: rules.define_xml_tif.output, glob.glob('*.tif')
+#    output: "hdf5_Stock68.h5", "hdf5_Stock68.xml"
+    output: config["common"]["hdf5_xml_filename"] + ".xml", config["common"]["hdf5_xml_filename"] + ".h5"
     message: "Execute resave_hdf5 on {input}"
 #    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
     log: "export_czi.log"
     run:
-        part_string = produce_string("""{fiji-prefix} {fiji-app} \
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Dfirst_xml_filename={first_xml_filename} \
         -Dhdf5_xml_filename={hdf5_xml_filename} \
@@ -140,38 +143,39 @@ rule registration:
     run:
         cmd_string = produce_string(
            """{fiji-prefix} {fiji-app} \
--Dparallel_timepoints={file_id_w} \
--Dimage_file_directory={jdir} \
--Dxml_filename={input_xml} \
--Dprocess_timepoint={timepoint} \
--Dprocess_channel={channel} \
--Dprocess_illumination={illuminations} \
--Dprocess_angle={angle} \
--Dprocessing_channel={proc-ch} \
--Dlabel_interest_points={label_interest_points} \
--Dtype_of_registration={type_of_registration} \
--Dtype_of_detection={type_of_detection} \
--Dsubpixel_localization={subpixel_localization} \
--Dimglib_container={imglib_container} \
--Dradius_1={radius_1} \
--Dradius_2={radius_2} \
--Dthreshold={threshold} \
--Dinitial_sigma={initial_sigma} \
--Dthreshold_gaussian={threshold_gaussian} \
--Dregistration_algorithm={algorithm} \
--Dinterest_points_channel_0={interest_points_channel_0} \
--Dinterest_points_channel_1={interest_points_channel_1} \
--Dfix_tiles={fix_tiles} \
--Dmap_back_tiles={map_back_tiles} \
--Dtransformation_model={transformation_model} \
--Dmodel_to_regularize_with={model_to_regularize_with} \
--Dlambda={lambda} \
--Dallowed_error_for_ransac={allowed_error_for_ransac} \
--Ddetection_min_max={detection_min_max} \
--- --no-splash {bsh_file}""",
+        -Dparallel_timepoints={file_id_w} \
+        -Dimage_file_directory={jdir} \
+        -Dxml_filename={input_xml} \
+        -Dprocess_timepoint={timepoint} \
+        -Dprocess_channel={channel} \
+        -Dprocess_illumination={illuminations} \
+        -Dprocess_angle={angle} \
+        -Dprocessing_channel={proc-ch} \
+        -Dlabel_interest_points={label_interest_points} \
+        -Dtype_of_registration={type_of_registration} \
+        -Dtype_of_detection={type_of_detection} \
+        -Dsubpixel_localization={subpixel_localization} \
+        -Dimglib_container={imglib_container} \
+        -Dradius_1={radius_1} \
+        -Dradius_2={radius_2} \
+        -Dthreshold={threshold} \
+        -Dinitial_sigma={initial_sigma} \
+        -Dthreshold_gaussian={threshold_gaussian} \
+        -Dregistration_algorithm={algorithm} \
+        -Dinterest_points_channel_0={interest_points_channel_0} \
+        -Dinterest_points_channel_1={interest_points_channel_1} \
+        -Dfix_tiles={fix_tiles} \
+        -Dmap_back_tiles={map_back_tiles} \
+        -Dtransformation_model={transformation_model} \
+        -Dmodel_to_regularize_with={model_to_regularize_with} \
+        -Dlambda={lambda} \
+        -Dallowed_error_for_ransac={allowed_error_for_ransac} \
+        -Ddetection_min_max={detection_min_max} \
+        -- --no-splash {path_bsh}""",
            config["common"], 
            config["registration"],
            file_id_w="{wildcards.file_id}",
+           path_bsh=config["common"]["bsh_directory"] + config["registration"]["bsh_file"],
            jdir=JOBDIR,
            input_xml="{wildcards.xml_base}")
         cmd_string += "> {log} 2>&1 && touch {output}"
@@ -184,17 +188,56 @@ rule xml_merge:
     output: "{xml_base}_merge.xml"
     log: "{xml_base}_merge.log"
     run:
-        cmd_string = produce_string("{fiji-prefix} {fiji-app} -Dimage_file_directory={jdir} -Dmerged_xml={output} -- --no-splash {bsh_file} > {log} 2>&1",
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dmerged_xml={output} \
+        -- --no-splash {path_bsh}""",
                                     config["common"],
                                     config["xml_merge"],
                                     log="{log}",
+                                    path_bsh=config["common"]["bsh_directory"] + config["xml_merge"]["bsh_file"],
                                     jdir=JOBDIR,
                                     output="{output}")
+        cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
-rule external_trafo:
+rule timelapse:
     input: rules.xml_merge.output
-    output: rules.xml_merge.output[0] + "_external_trafo"
+    output: rules.xml_merge.output[0] + "_timelapse"
+    log: "timelapse.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dmerged_xml={input} \
+        -Dtimelapse_process_timepoints={timelapse_process_timepoints} \
+        -Dprocess_channel_timelapse={channel} \
+        -Dprocess_illumination={illuminations} \
+        -Dprocess_angle={angle} \
+        -Dreference_timepoint={reference_timepoint} \
+        -Dchannel_1={proc-ch} \
+        -Dtype_of_registration_timelapse={type_of_registration_timelapse} \
+        -Dregistration_algorithm={registration_algorithm} \
+        -Dreg_1_interest_points_channel={interest_points_channel_0} \
+        -Dreg_2_interest_points_channel={interest_points_channel_1} \
+        -Dtransformation_model={transformation_model} \
+        -Dmodel_to_regularize_with={model_to_regularize_with} \
+        -Dlambda={lambda} \
+        -Dallowed_error_for_ransac={allowed_error_for_ransac} \
+        -Dsignificance={significance} \
+        -- --no-splash {path_bsh}""",
+                                    config["common"],
+                                    config["registration"],
+                                    config["timelapse"],
+                                    input="{input}",
+                                    path_bsh=config["common"]["bsh_directory"] + config["timelapse"]["bsh_file"],
+                                    jdir=JOBDIR)
+        shell(cmd_string)
+        
+rule external_trafo:
+    input: rules.timelapse.output
+    output: rules.timelapse.output[0] + "_external_trafo"
     log: "external_trafo.log"
     run:
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
@@ -208,9 +251,10 @@ rule external_trafo:
 -Dapply_transformation={apply_transformation} \
 -Ddefine_mode_transform={define_mode_transform} \
 -Dmatrix_transform={matrix_transform} \
--- --no-splash {bsh_file}""",
+-- --no-splash {path_bsh}""",
                                     config["common"], 
                                     config["external_transform"],
+                                    path_bsh=config["common"]["bsh_directory"] + config["external_trafo"]["bsh_file"],
                                     jdir=JOBDIR,
                                     input="{input}")
         cmd_string += "> {log} 2>&1 && touch {output}"
@@ -249,10 +293,11 @@ rule deconvolution:
 -Dpsf_size_y={psf_size_y} \
 -Dpsf_size_z={psf_size_z} \
 -Diterations={iterations} \
-        -- --no-splash {bsh_file}""",
+        -- --no-splash {path_bsh}""",
                                     config["common"], 
                                     config["deconvolution"],
                                     file_id_w="{wildcards.file_id}",
+                                    path_bsh=config["common"]["bsh_directory"] + config["deconvolution"]["bsh_file"],
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
