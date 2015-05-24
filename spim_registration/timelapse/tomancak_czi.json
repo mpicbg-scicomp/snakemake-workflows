@@ -8,7 +8,7 @@
 	"bsh_directory" : "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
 	"first_xml_filename" : "test_unicore",
 	"hdf5_xml_filename" : "\"hdf5_test_unicore\"",
-	"fusion_switch" : "fusion"
+	"fusion_switch" : "deconvolution"
     },
     
     "define_xml_czi" :
@@ -49,9 +49,9 @@
 	"bsh_file" : "define_tif_zip.bsh" 
     },
     
-    "resave_czi_hdf5" :
+    "resave_hdf5" :
     {
-    	    "parallel_timepoints" : "2",
+    	    "parallel_timepoints" : "3",
     	    "resave_angle" : "\"All angles\"",
     	    "resave_channel" : "\"All channels\"",
     	    "resave_illumination" : "\"All illuminations\"",

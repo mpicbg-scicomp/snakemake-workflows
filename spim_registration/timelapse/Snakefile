@@ -71,7 +71,7 @@ rule define_xml_czi:
 rule define_xml_tif:
     input: glob.glob('*.tif')
     output: config["common"]["first_xml_filename"] + ".xml"
-    message: "Execute define_xml_czi on the following files {input}"
+    message: "Execute define_xml_tif on the following files {input}"
     log: "define_xml_tif.log"
     run:
         cmd_string = produce_string(
@@ -97,18 +97,17 @@ rule define_xml_tif:
 	config["define_xml_tif"],
 	jdir=JOBDIR,
 	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
+	
 	cmd_string +="> {log} 2>&1 && touch {output}"
 	shell(cmd_string)
 	
 # resave .czi dataset as hdf5	
-rule resave_czi_hdf5:
-#    input: config["common"]["first_xml_filename"] + ".xml"
+rule resave_hdf5:
     input: rules.define_xml_tif.output, glob.glob('*.tif')
-#    output: "hdf5_Stock68.h5", "hdf5_Stock68.xml"
-    output: config["common"]["hdf5_xml_filename"] + ".xml", config["common"]["hdf5_xml_filename"] + ".h5"
+    output: "hdf5_test_unicore.xml", "hdf5_test_unicore.h5"
     message: "Execute resave_hdf5 on {input}"
-#    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
-    log: "export_czi.log"
+    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
+    log: "resave_hdf5.log"
     run:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
@@ -130,14 +129,16 @@ rule resave_czi_hdf5:
            config["resave_hdf5"],
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+
         cmd_string = ""
         for i in range(int(config["resave_hdf5"]["parallel_timepoints"])):
         	cmd_string += part_string.format(job_number=i) 
-        
+    		
+   	#cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string) 
        	       	
 rule registration:
-    input: "{xml_base}-{file_id}-00.h5"
+    input: "{xml_base}-{file_id}-00.h5", rules.resave_hdf5.output
     #input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
     log: "{xml_base}-{file_id}-registration.log"
