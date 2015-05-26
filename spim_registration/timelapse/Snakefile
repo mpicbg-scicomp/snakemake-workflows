@@ -111,9 +111,8 @@ ruleorder: define_xml_tif > define_xml_czi
 # create mother .xml/.h5
 rule hdf5_xml:
     input: config["common"]["first_xml_filename"] + ".xml" 
-    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"]),
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
             expand("{xml_base}-{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"])))
-    
     log: "hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -142,15 +141,14 @@ rule hdf5_xml:
 
         #create dummy files according to the number of timepoints found
         for index in range(int(config["common"]["ntimepoints"])):
-           shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"],file_id=index))
+           shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id=index))
         
 
 # resave .czi dataset as hdf5	
 rule resave_hdf5:
-    input: "{xml_base}-{file_id}-00.h5_empty"
+    input: "{xml_base}-{file_id}-00.h5_empty" # rules.hdf5_xml.output
     output: "{xml_base}-{file_id}-00.h5"
     message: "Execute resave_hdf5 on {input}"
-    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
     log: "resave_hdf5-{file_id}.log"
     run:
         part_string = produce_string(
@@ -167,20 +165,19 @@ rule resave_hdf5:
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
-        -- --no-splash {path_bsh} > {log}-{job_number}.log 2>&1 &\n""", # the & submits everyting at once
+        -- --no-splash {path_bsh}""", # the & submits everyting at once
            config["common"],
            config["define_xml_czi"],
            config["resave_hdf5"],
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
-           intput_xml_base="{wildcards.xml_base}",
-           job_number=int("{wildcards.file_id}")+1
-        )
+           input_xml_base="{wildcards.xml_base}",
+           job_number="{wildcards.file_id}")
    	part_string += "> {log} 2>&1"
         shell(part_string) 
        	       	
 rule registration:
-    input: "{xml_base}-{file_id}-00.h5", rules.resave_hdf5.output
+    input:  "{xml_base}-{file_id}-00.h5" # rules.resave_hdf5.output 
     #input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
     log: "{xml_base}-{file_id}-registration.log"
