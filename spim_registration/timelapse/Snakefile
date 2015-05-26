@@ -7,8 +7,9 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 
 #data specific config file, expected to be inside JOBDIR
 configfile: "tomancak_czi.json"
-   
-datasets = expand("{xml_base}-{file_id}-00.h5", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"])))  # searches JOBDIR for files that match this wildcard expression
+
+# problematic needs padding of file_id
+datasets = expand("{xml_base}-0{file_id}-00.h5", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ], file_id=range(int(config["common"]["ntimepoints"])))  # searches JOBDIR for files that match this wildcard expression
 
 #TODO: this should go into a python module in this path
 fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
@@ -112,7 +113,7 @@ ruleorder: define_xml_tif > define_xml_czi
 rule hdf5_xml:
     input: config["common"]["first_xml_filename"] + ".xml" 
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-            expand("{xml_base}-{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"])))
+            expand("{xml_base}-0{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"]))) # problematic needs padding of file_id
     log: "hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -141,13 +142,13 @@ rule hdf5_xml:
 
         #create dummy files according to the number of timepoints found
         for index in range(int(config["common"]["ntimepoints"])):
-           shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id=index))
+           shell("touch {basename}-0{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id=index)) # problematic needs padding of file_id
         
 
 # resave .czi dataset as hdf5	
 rule resave_hdf5:
-    input: "{xml_base}-{file_id}-00.h5_empty" # rules.hdf5_xml.output
-    output: "{xml_base}-{file_id}-00.h5"
+    input: "{xml_base}-{file_id,\d+}-00.h5_empty" # rules.hdf5_xml.output
+    output: "{xml_base}-{file_id,\d+}-00.h5"
     message: "Execute resave_hdf5 on {input}"
     log: "resave_hdf5-{file_id}.log"
     run:
@@ -172,7 +173,7 @@ rule resave_hdf5:
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
            input_xml_base="{wildcards.xml_base}",
-           job_number="{wildcards.file_id}")
+           job_number=int("{wildcards.file_id}")+1) # problematic calculation not possible in cannot deal wiht wildcards file_id
    	part_string += "> {log} 2>&1"
         shell(part_string) 
        	       	

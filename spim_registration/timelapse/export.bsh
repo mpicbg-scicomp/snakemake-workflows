@@ -46,7 +46,6 @@ hdf5_chunk_sizes = System.getProperty( "hdf5_chunk_sizes" );
 timepoints_per_partition = System.getProperty( "timepoints_per_partition" );
 setups_per_partition = System.getProperty( "setups_per_partition" );
 int run_only_job_number =  Integer.parseInt( System.getProperty( "run_only_job_number" ) );
-run_only_job_number = run_only_job_number + 1;
 
 System.out.println( "subsampling_factors=" + subsampling_factors);
 System.out.println( "hdf5_chunk_sizes=" + hdf5_chunk_sizes );
