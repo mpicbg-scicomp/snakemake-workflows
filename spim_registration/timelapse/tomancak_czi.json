@@ -8,7 +8,8 @@
 	"bsh_directory" : "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
 	"first_xml_filename" : "test_unicore",
 	"hdf5_xml_filename" : "\"hdf5_test_unicore\"",
-	"fusion_switch" : "deconvolution"
+	"fusion_switch" : "deconvolution",
+	"ntimepoints" : 2
     },
     
     "define_xml_czi" :

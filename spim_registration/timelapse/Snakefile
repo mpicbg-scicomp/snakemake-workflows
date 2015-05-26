@@ -8,16 +8,18 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 #data specific config file, expected to be inside JOBDIR
 configfile: "tomancak_czi.json"
    
-datasets = glob.glob('*00.h5') # searches JOBDIR for files that match this wildcard expression
+datasets = expand("{xml_base}-{file_id}-00.h5", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"])))  # searches JOBDIR for files that match this wildcard expression
 
 #TODO: this should go into a python module in this path
 fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
 xml_merge_in = []
+                      
 for ds in datasets:
    bn = os.path.basename(ds)
    bn_res = fre.search(bn)
-   xml_base,file_id = bn_res.group('xml_base'),bn_res.group('file_id')
-   xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=int(file_id)))
+   if bn_res:
+      xml_base,file_id = bn_res.group('xml_base'),bn_res.group('file_id')
+      xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=int(file_id)))
    
 #TODO: this should go into a python module in this path
 def produce_string(_fstring, *args, **kwargs):
@@ -33,9 +35,12 @@ rule done:
     #input: [ ds+"_fusion" for ds in datasets ]
     input: [ ds + "_" + config["common"]["fusion_switch"] for ds in datasets ]
 
+rule resave_prepared:
+    input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
+
 # defining xml for czi dataset
 rule define_xml_czi:
-    input: glob.glob('*.czi')
+    input: config["define_xml_czi"]["first_czi"]
     output: config["common"]["first_xml_filename"] + ".xml"
     message: "Execute define_xml_czi on the following files {input}"
     log: "define_xml_czi.log"
@@ -100,20 +105,59 @@ rule define_xml_tif:
 	
 	cmd_string +="> {log} 2>&1 && touch {output}"
 	shell(cmd_string)
-	
-# resave .czi dataset as hdf5	
-rule resave_hdf5:
-    input: rules.define_xml_tif.output, glob.glob('*.tif')
-    output: "hdf5_test_unicore.xml", "hdf5_test_unicore.h5"
-    message: "Execute resave_hdf5 on {input}"
-    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
-    log: "resave_hdf5.log"
+
+ruleorder: define_xml_tif > define_xml_czi 
+
+# create mother .xml/.h5
+rule hdf5_xml:
+    input: config["common"]["first_xml_filename"] + ".xml" 
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"]),
+            expand("{xml_base}-{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"])))
+    
+    log: "hdf5_xml.log"
     run:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
-        -Dimage_file_directory={jdir} \
-        -Dfirst_xml_filename={first_xml_filename} \
-        -Dhdf5_xml_filename={hdf5_xml_filename} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={first_xml_filename} \
+                -Dhdf5_xml_filename={hdf5_xml_filename} \
+                -Dresave_angle={resave_angle} \
+                -Dresave_channel={resave_channel} \
+                -Dresave_illumination={resave_illumination} \
+                -Dresave_timepoint={resave_timepoint} \
+                -Dsubsampling_factors={subsampling_factors} \
+                -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+                -Dtimepoints_per_partition={timepoints_per_partition} \
+                -Dsetups_per_partition={setups_per_partition} \
+                -Drun_only_job_number=0 \
+                -- --no-splash {path_bsh}""", # the & submits everyting at once
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+
+        part_string += "> {log} 2>&1"
+        shell(part_string)
+
+        #create dummy files according to the number of timepoints found
+        for index in range(int(config["common"]["ntimepoints"])):
+           shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"],file_id=index))
+        
+
+# resave .czi dataset as hdf5	
+rule resave_hdf5:
+    input: "{xml_base}-{file_id}-00.h5_empty"
+    output: "{xml_base}-{file_id}-00.h5"
+    message: "Execute resave_hdf5 on {input}"
+    threads: int(config["resave_hdf5"]["parallel_timepoints"]) # parallel timepoints should tell me how many timepoints to expect 
+    log: "resave_hdf5-{file_id}.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={first_xml_filename} \
+                -Dhdf5_xml_filename={input_xml_base} \
         -Dresave_angle={resave_angle} \
         -Dresave_channel={resave_channel} \
         -Dresave_illumination={resave_illumination} \
@@ -128,14 +172,12 @@ rule resave_hdf5:
            config["define_xml_czi"],
            config["resave_hdf5"],
            jdir=JOBDIR,
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
-
-        cmd_string = ""
-        for i in range(int(config["resave_hdf5"]["parallel_timepoints"])):
-        	cmd_string += part_string.format(job_number=i) 
-    		
-   	#cmd_string += "> {log} 2>&1 && touch {output}"
-        shell(cmd_string) 
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
+           intput_xml_base="{wildcards.xml_base}",
+           job_number=int("{wildcards.file_id}")+1
+        )
+   	part_string += "> {log} 2>&1"
+        shell(part_string) 
        	       	
 rule registration:
     input: "{xml_base}-{file_id}-00.h5", rules.resave_hdf5.output
