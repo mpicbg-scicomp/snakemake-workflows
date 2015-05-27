@@ -112,7 +112,6 @@ rule hdf5_xml:
                 -Dtimepoints_per_partition={timepoints_per_partition} \
                 -Dsetups_per_partition={setups_per_partition} \
                 -Drun_only_job_number=0 \
-                -Djob_type=xml \
                 -- --no-splash {path_bsh}""", 
            config["common"],
            config["define_xml_czi"],
@@ -148,7 +147,6 @@ rule resave_hdf5:
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
-        -Djob_type=hdf5 \
         -- --no-splash {path_bsh}""", # the & submits everyting at once
            config["common"],
            config["define_xml_czi"],
@@ -379,39 +377,38 @@ rule deconvolution:
 
 rule define_output:
     input: glob.glob('TP*')
-    output: config["hdf5_output"]["output_xml"] + ".xml"
+    output: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     log: "define_xml_tif.log"
     run:
         cmd_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Dtimepoints={output_timepoints} \
-        -Dacquisition_angles={acquisition_angles} \
         -Dchannels={output_channels} \
         -Dimage_file_pattern={output_image_file_pattern} \
         -Dpixel_distance_x={output_pixel_distance_x} \
         -Dpixel_distance_y={output_pixel_distance_y} \
         -Dpixel_distance_z={output_pixel_distance_z} \
         -Dpixel_unit={output_pixel_unit} \
-       	-Dxml_filename={first_xml_filename} \
-        -Dtype_of_dataset={type_of_dataset} \
-        -Dmultiple_timepoints={multiple_timepoints} \
-        -Dmultiple_channels={multiple_channels} \
-        -Dmultiple_illumination_directions={multiple_illumination_directions} \
-        -Dmultiple_angles={multiple_angles} \
-        -Dimglib_container={imglib_container} \
+       	-Dxml_filename={output_xml} \
+        -Dtype_of_dataset={output_type_of_dataset} \
+        -Dmultiple_timepoints={output_multiple_timepoints} \
+        -Dmultiple_channels={output_multiple_channels} \
+        -Dmultiple_illumination_directions={output_illumination_directions} \
+        -Dmultiple_angles={output_multiple_angles} \
+        -Dimglib_container={output_imglib_container} \
 	-- --no-splash {path_bsh}""",
 	config["common"],
-	config["define_xml_tif"],
+	config["hdf5_output"],
 	jdir=JOBDIR,
-	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
+	path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_define"])
 	
 	cmd_string +=" > {log} 2>&1"
 	shell(cmd_string)
 
 # create mother .xml/.h5
 rule hdf5_xml_output:
-    input: config["hdf5_output"]["output_xml"] + ".xml"
+    input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["hdf5_output"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
             [ item+"_output" for item in datasets ]
     log: "hdf5_xml.log"
@@ -419,8 +416,8 @@ rule hdf5_xml_output:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
                 -Dimage_file_directory={jdir} \
-                -Dfirst_xml_filename={first_xml_filename} \
-                -Dhdf5_xml_filename={hdf5_xml_filename} \
+                -Dfirst_xml_filename={output_xml} \
+                -Dhdf5_xml_filename={output_hdf5_xml} \
                 -Dresave_angle={resave_angle} \
                 -Dresave_channel={resave_channel} \
                 -Dresave_illumination={resave_illumination} \
@@ -430,10 +427,11 @@ rule hdf5_xml_output:
                 -Dtimepoints_per_partition={timepoints_per_partition} \
                 -Dsetups_per_partition={setups_per_partition} \
                 -Drun_only_job_number=0 \
-                -Djob_type=xml \
+                -Doutput_data_type={output_data_type} \
+                -Dconvert_32bit={convert_32bit}\
                 -- --no-splash {path_bsh}""", 
            config["common"],
-           config["define_xml_czi"],
+           config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
@@ -444,13 +442,13 @@ rule hdf5_xml_output:
 rule resave_hdf5_output:
     input: rules.hdf5_xml_output.output
     output: "{xml_base}-{file_id,\d+}-00.h5_output_hdf5"
-    log: "resave_hdf5-{file_id}.log"
+    log: "resave_output-{file_id}.log"
     run:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
                 -Dimage_file_directory={jdir} \
-                -Dfirst_xml_filename={first_xml_filename} \
-                -Dhdf5_xml_filename={input_xml_base} \
+                -Dfirst_xml_filename={output_xml} \
+                -Dhdf5_xml_filename={output_hdf5_xml} \
         -Dresave_angle={resave_angle} \
         -Dresave_channel={resave_channel} \
         -Dresave_illumination={resave_illumination} \
@@ -460,10 +458,11 @@ rule resave_hdf5_output:
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
-        -Djob_type=hdf5 \
-        -- --no-splash {path_bsh}""", # the & submits everyting at once
+        -Doutput_data_type={output_data_type} \
+        -Dconvert_32bit={convert_32bit}\
+        -- --no-splash {path_bsh}""", 
            config["common"],
-           config["define_xml_czi"],
+           config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],

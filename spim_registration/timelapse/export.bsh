@@ -52,9 +52,6 @@ System.out.println( "hdf5_chunk_sizes=" + hdf5_chunk_sizes );
 System.out.println( "timepoints_per_partition=" + timepoints_per_partition );
 System.out.println( "setups_per_partition=" + setups_per_partition );
 
-
-// job switch
-
 int run_only_job_number =  Integer.parseInt( System.getProperty( "run_only_job_number" ) );
 System.out.println( "run_only_job_number=" + run_only_job_number );
 
