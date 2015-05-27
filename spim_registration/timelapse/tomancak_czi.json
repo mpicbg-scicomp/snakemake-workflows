@@ -33,10 +33,10 @@
     
     "define_xml_tif" :
     {
-	"timepoints" : "1-2",
-	"acquisition_angles" : "1,2,3,4,5",
-	"channels" : "0,1",
-	"image_file_pattern" : "spim_TL{{tt}}_Angle{{a}}.tif",
+	"timepoints" : "0-1",
+	"acquisition_angles" : "0,72,144,216,288",
+	"channels" : "0",
+	"image_file_pattern" : "img_TL{{t}}_Angle{{a}}.tif",
 	"pixel_distance_x"  : "0.2875535786151886",
 	"pixel_distance_y" : "0.2875535786151886",
 	"pixel_distance_z" : "1.50000",
@@ -70,7 +70,7 @@
 	"illuminations" : "\"All illuminations\"",
 	"angle" : "\"All angles\"",
 	"channel" : "\"All channels\"",
-	"proc-ch" : "\"channel 1\"",
+	"proc-ch" : "\"channel 0\"",
 	"algorithm" : "\"Fast 3d geometric hashing (rotation invariant)\"",
 	"label_interest_points" : "\"beads\"",
 	"type_of_registration" : "\"Register timepoints individually\"",
