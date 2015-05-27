@@ -70,7 +70,7 @@ else if ( job_type.equalsIgnoreCase( "hdf5" ) )
 		job_number = run_only_job_number + 1;
 	}
 
-
+System.out.println( "Job Number = " + job_number );
 // Activate cluster processing
 System.out.println("=========================================================");
 try{

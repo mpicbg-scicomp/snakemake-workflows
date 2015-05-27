@@ -1,4 +1,5 @@
 import os, glob, sys, re
+from timelaps_utils import produce_xml_merge_job_files, produce_string
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
@@ -9,28 +10,9 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 configfile: "tomancak_czi.json"
 
 # problematic needs padding of file_id
-datasets = expand("{xml_base}-0{file_id}-00.h5", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ], file_id=range(int(config["common"]["ntimepoints"])))  # searches JOBDIR for files that match this wildcard expression
+datasets = [ config["common"]["hdf5_xml_filename"].strip('\"')+"-{0:02d}-00.h5".format(item) for item in range(int(config["common"]["ntimepoints"])) ]
 
-#TODO: this should go into a python module in this path
-fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
-xml_merge_in = []
-                      
-for ds in datasets:
-   bn = os.path.basename(ds)
-   bn_res = fre.search(bn)
-   if bn_res:
-      xml_base,file_id = bn_res.group('xml_base'),bn_res.group('file_id')
-      xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=int(file_id)))
-   
-#TODO: this should go into a python module in this path
-def produce_string(_fstring, *args, **kwargs):
-   contents = dict()
-   for item in args:
-      if type(item) == type(kwargs):
-         contents.update(item)
-         
-   contents.update(kwargs)
-   return _fstring.format(**contents)
+xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
     #input: [ ds+"_fusion" for ds in datasets ]
@@ -43,7 +25,6 @@ rule resave_prepared:
 rule define_xml_czi:
     input: config["define_xml_czi"]["first_czi"]
     output: config["common"]["first_xml_filename"] + ".xml"
-    message: "Execute define_xml_czi on the following files {input}"
     log: "define_xml_czi.log"
     run: 
         cmd_string = produce_string(
@@ -70,14 +51,13 @@ rule define_xml_czi:
 	jdir=JOBDIR,
 	path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
 	
-	cmd_string += "> {log} 2>&1"
+	cmd_string += " > {log} 2>&1"
         shell(cmd_string)
         
 # defining xml for tif dataset
 rule define_xml_tif:
     input: glob.glob('*.tif')
     output: config["common"]["first_xml_filename"] + ".xml"
-    message: "Execute define_xml_tif on the following files {input}"
     log: "define_xml_tif.log"
     run:
         cmd_string = produce_string(
@@ -104,7 +84,7 @@ rule define_xml_tif:
 	jdir=JOBDIR,
 	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
 	
-	cmd_string +="> {log} 2>&1"
+	cmd_string +=" > {log} 2>&1"
 	shell(cmd_string)
 
 ruleorder: define_xml_tif > define_xml_czi 
@@ -113,7 +93,7 @@ ruleorder: define_xml_tif > define_xml_czi
 rule hdf5_xml:
     input: config["common"]["first_xml_filename"] + ".xml" 
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-            expand("{xml_base}-0{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ], file_id=range(int(config["common"]["ntimepoints"]))) # problematic needs padding of file_id
+            [ item+"_empty" for item in datasets ]
     log: "hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -138,19 +118,18 @@ rule hdf5_xml:
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
 
-        part_string += "> {log} 2>&1"
+        part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
 
         #create dummy files according to the number of timepoints found
-        for index in range(int(config["common"]["ntimepoints"])):
-           shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id="%02d" % index)) # problematic needs padding of file_id
+        # for index in range(int(config["common"]["ntimepoints"])):
+        #    shell("touch {basename}-0{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id=index)) # problematic needs padding of file_id
         
 
 # resave  .czi/.tif dataset as hdf5	
 rule resave_hdf5:
     input: "{xml_base}-{file_id,\d+}-00.h5_empty" # rules.hdf5_xml.output
     output: "{xml_base}-{file_id,\d+}-00.h5"
-    message: "Execute resave_hdf5 on {input}"
     log: "resave_hdf5-{file_id}.log"
     run:
         part_string = produce_string(
@@ -175,8 +154,8 @@ rule resave_hdf5:
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
            input_xml_base="{wildcards.xml_base}",
-           job_number="{wildcards.file_id}") # problematic calculation not possible in cannot deal wiht wildcards file_id
-   	part_string += "> {log} 2>&1"
+           job_number=int(wildcards.file_id)+1) # problematic calculation not possible in cannot deal wiht wildcards file_id
+   	part_string += " > {log} 2>&1"
         shell(part_string) 
        	       	
 rule registration:
@@ -222,7 +201,7 @@ rule registration:
            path_bsh=config["common"]["bsh_directory"] + config["registration"]["bsh_file"],
            jdir=JOBDIR,
            input_xml="{wildcards.xml_base}")
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
        
         shell(cmd_string)
         #shell("touch {output}")
@@ -243,7 +222,7 @@ rule xml_merge:
                                     path_bsh=config["common"]["bsh_directory"] + config["xml_merge"]["bsh_file"],
                                     jdir=JOBDIR,
                                     output="{output}")
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule timelapse:
@@ -277,7 +256,7 @@ rule timelapse:
                                     input="{input}",
                                     path_bsh=config["common"]["bsh_directory"] + config["timelapse"]["bsh_file"],
                                     jdir=JOBDIR)
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
         
 rule fusion:
@@ -321,7 +300,7 @@ rule fusion:
                                     file_id_w="{wildcards.file_id}",
                                     merged_xml_file="{input.merged_xml}"
         )
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule external_transform:
@@ -348,7 +327,7 @@ rule external_transform:
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule deconvolution:
@@ -393,7 +372,7 @@ rule deconvolution:
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
         
 rule hdf5_output_define_xml:
@@ -468,4 +447,7 @@ rule hdf5_output_define_hdf5:
            shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id="%02d" % index)) # problematic needs padding of file_id
 
 rule distclean:
-    shell : "rm -rf *registered *tif *log *_deconvolved *.xml~* interestpoints "+str(" ".join(xml_merge_in))
+    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*log"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])# xml_merge_in, 
+   
+    message : "removing {params}"
+    shell : "rm -rf {params}"
