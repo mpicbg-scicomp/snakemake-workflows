@@ -17,8 +17,8 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 rule done:
     #input: [ ds+"_fusion" for ds in datasets ]
     #input: [ ds + "_" + config["common"]["fusion_switch"] for ds in datasets ]
-    #input: [ ds + "_" + config["common"]["fusion_switch"] for ds in datasets ]
-    input: config["hdf5_output"]["output_xml"] + ".xml"
+    #input: config["hdf5_output"]["output_xml"] + ".xml"
+    input: [ ds + "_output_hdf5" for ds in datasets ]
     
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
@@ -385,14 +385,14 @@ rule define_output:
         cmd_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
-        -Dtimepoints={timepoints} \
+        -Dtimepoints={output_timepoints} \
         -Dacquisition_angles={acquisition_angles} \
-        -Dchannels={channels} \
-        -Dimage_file_pattern={image_file_pattern} \
-        -Dpixel_distance_x={pixel_distance_x} \
-        -Dpixel_distance_y={pixel_distance_y} \
-        -Dpixel_distance_z={pixel_distance_z} \
-        -Dpixel_unit={pixel_unit} \
+        -Dchannels={output_channels} \
+        -Dimage_file_pattern={output_image_file_pattern} \
+        -Dpixel_distance_x={output_pixel_distance_x} \
+        -Dpixel_distance_y={output_pixel_distance_y} \
+        -Dpixel_distance_z={output_pixel_distance_z} \
+        -Dpixel_unit={output_pixel_unit} \
        	-Dxml_filename={first_xml_filename} \
         -Dtype_of_dataset={type_of_dataset} \
         -Dmultiple_timepoints={multiple_timepoints} \
@@ -409,8 +409,68 @@ rule define_output:
 	cmd_string +=" > {log} 2>&1"
 	shell(cmd_string)
 
+# create mother .xml/.h5
+rule hdf5_xml_output:
+    input: config["hdf5_output"]["output_xml"] + ".xml"
+    output: expand("{dataset}.{suffix}",dataset=[ config["hdf5_output"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
+            [ item+"_output" for item in datasets ]
+    log: "hdf5_xml.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={first_xml_filename} \
+                -Dhdf5_xml_filename={hdf5_xml_filename} \
+                -Dresave_angle={resave_angle} \
+                -Dresave_channel={resave_channel} \
+                -Dresave_illumination={resave_illumination} \
+                -Dresave_timepoint={resave_timepoint} \
+                -Dsubsampling_factors={subsampling_factors} \
+                -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+                -Dtimepoints_per_partition={timepoints_per_partition} \
+                -Dsetups_per_partition={setups_per_partition} \
+                -Drun_only_job_number=0 \
+                -Djob_type=xml \
+                -- --no-splash {path_bsh}""", 
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
 
+        part_string += " > {log} 2>&1 && touch {output}"
+        shell(part_string)
 
+rule resave_hdf5_output:
+    input: rules.hdf5_xml_output.output
+    output: "{xml_base}-{file_id,\d+}-00.h5_output_hdf5"
+    log: "resave_hdf5-{file_id}.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={first_xml_filename} \
+                -Dhdf5_xml_filename={input_xml_base} \
+        -Dresave_angle={resave_angle} \
+        -Dresave_channel={resave_channel} \
+        -Dresave_illumination={resave_illumination} \
+        -Dresave_timepoint={resave_timepoint} \
+        -Dsubsampling_factors={subsampling_factors} \
+        -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+        -Dtimepoints_per_partition={timepoints_per_partition} \
+        -Dsetups_per_partition={setups_per_partition} \
+        -Drun_only_job_number={job_number} \
+        -Djob_type=hdf5 \
+        -- --no-splash {path_bsh}""", # the & submits everyting at once
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
+           input_xml_base="{wildcards.xml_base}",
+           job_number=int(wildcards.file_id)+1) 
+   	part_string += " > {log} 2>&1 && touch {output}"
+        shell(part_string) 
        	       
 
 rule distclean:
