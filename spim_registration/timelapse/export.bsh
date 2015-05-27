@@ -58,21 +58,6 @@ System.out.println( "setups_per_partition=" + setups_per_partition );
 int run_only_job_number =  Integer.parseInt( System.getProperty( "run_only_job_number" ) );
 System.out.println( "run_only_job_number=" + run_only_job_number );
 
-job_type = System.getProperty( "job_type" );
-System.out.println( "Job type = " + job_type );
-
-//
-//if ( job_type.equalsIgnoreCase( "xml" ) )
-//	{
-//		job_number = 0;
-//	}
-//else if ( job_type.equalsIgnoreCase( "hdf5" ) )
-//	{
-//		job_number = run_only_job_number + 1;
-//	}
-//
-//System.out.println( "Job Number = " + job_number );
-
 // Activate cluster processing
 System.out.println("=========================================================");
 try{
