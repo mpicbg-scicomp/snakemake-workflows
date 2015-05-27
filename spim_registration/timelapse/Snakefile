@@ -19,6 +19,7 @@ rule done:
     #input: [ ds + "_" + config["common"]["fusion_switch"] for ds in datasets ]
     #input: config["hdf5_output"]["output_xml"] + ".xml"
     input: [ ds + "_output_hdf5" for ds in datasets ]
+    #input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
@@ -376,7 +377,7 @@ rule deconvolution:
         shell(cmd_string)
 
 rule define_output:
-    input: glob.glob('TP*')
+    input: [ item + "_" + config["common"]["fusion_switch"] for item in datasets ], glob.glob('TP*')
     output: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     log: "define_xml_tif.log"
     run:
@@ -409,8 +410,8 @@ rule define_output:
 # create mother .xml/.h5
 rule hdf5_xml_output:
     input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
-    output: expand("{dataset}.{suffix}",dataset=[ config["hdf5_output"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
-            [ item+"_output" for item in datasets ]
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
+    	    [ item+"_output" for item in datasets ] # expand("{dataset}.{suffix}",dataset=[ config["hdf5_output"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]), "{xml_base}-{file_id,\d+}-00.h5_output_hdf5_xml"
     log: "hdf5_xml.log"
     run:
         part_string = produce_string(
