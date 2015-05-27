@@ -1,4 +1,5 @@
 import os, glob, sys, re
+from timelaps_utils import produce_xml_merge_job_files, produce_string
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
@@ -9,28 +10,9 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 configfile: "tomancak_czi.json"
 
 # problematic needs padding of file_id
-datasets = expand("{xml_base}-0{file_id}-00.h5", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ], file_id=range(int(config["common"]["ntimepoints"])))  # searches JOBDIR for files that match this wildcard expression
+datasets = [ config["common"]["hdf5_xml_filename"].strip('\"')+"-{0:02d}-00.h5".format(item) for item in range(int(config["common"]["ntimepoints"])) ]
 
-#TODO: this should go into a python module in this path
-fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
-xml_merge_in = []
-                      
-for ds in datasets:
-   bn = os.path.basename(ds)
-   bn_res = fre.search(bn)
-   if bn_res:
-      xml_base,file_id = bn_res.group('xml_base'),bn_res.group('file_id')
-      xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=int(file_id)))
-   
-#TODO: this should go into a python module in this path
-def produce_string(_fstring, *args, **kwargs):
-   contents = dict()
-   for item in args:
-      if type(item) == type(kwargs):
-         contents.update(item)
-         
-   contents.update(kwargs)
-   return _fstring.format(**contents)
+xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
     #input: [ ds+"_fusion" for ds in datasets ]
@@ -111,7 +93,7 @@ ruleorder: define_xml_tif > define_xml_czi
 rule hdf5_xml:
     input: config["common"]["first_xml_filename"] + ".xml" 
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-            expand("{xml_base}-0{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"]))) # problematic needs padding of file_id
+            [ item+"_empty" for item in datasets ]
     log: "hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -217,7 +199,7 @@ rule registration:
            path_bsh=config["common"]["bsh_directory"] + config["registration"]["bsh_file"],
            jdir=JOBDIR,
            input_xml="{wildcards.xml_base}")
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
        
         shell(cmd_string)
         #shell("touch {output}")
@@ -238,7 +220,7 @@ rule xml_merge:
                                     path_bsh=config["common"]["bsh_directory"] + config["xml_merge"]["bsh_file"],
                                     jdir=JOBDIR,
                                     output="{output}")
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule timelapse:
@@ -272,7 +254,7 @@ rule timelapse:
                                     input="{input}",
                                     path_bsh=config["common"]["bsh_directory"] + config["timelapse"]["bsh_file"],
                                     jdir=JOBDIR)
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
         
 rule fusion:
@@ -316,7 +298,7 @@ rule fusion:
                                     file_id_w="{wildcards.file_id}",
                                     merged_xml_file="{input.merged_xml}"
         )
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule external_transform:
@@ -343,7 +325,7 @@ rule external_transform:
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
 rule deconvolution:
@@ -388,7 +370,7 @@ rule deconvolution:
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
   
 rule distclean:
