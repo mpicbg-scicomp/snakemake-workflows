@@ -70,7 +70,7 @@ rule define_xml_czi:
 	jdir=JOBDIR,
 	path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
 	
-	cmd_string += "> {log} 2>&1 && touch {output}"
+	cmd_string += "> {log} 2>&1"
         shell(cmd_string)
         
 # defining xml for tif dataset
@@ -104,7 +104,7 @@ rule define_xml_tif:
 	jdir=JOBDIR,
 	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
 	
-	cmd_string +="> {log} 2>&1 && touch {output}"
+	cmd_string +="> {log} 2>&1"
 	shell(cmd_string)
 
 ruleorder: define_xml_tif > define_xml_czi 
@@ -113,7 +113,7 @@ ruleorder: define_xml_tif > define_xml_czi
 rule hdf5_xml:
     input: config["common"]["first_xml_filename"] + ".xml" 
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-            expand("{xml_base}-0{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"]))) # problematic needs padding of file_id
+            expand("{xml_base}-0{file_id}-00.h5_empty", xml_base=[ config["common"]["hdf5_xml_filename"].strip('\"') ], file_id=range(int(config["common"]["ntimepoints"]))) # problematic needs padding of file_id
     log: "hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -130,7 +130,8 @@ rule hdf5_xml:
                 -Dtimepoints_per_partition={timepoints_per_partition} \
                 -Dsetups_per_partition={setups_per_partition} \
                 -Drun_only_job_number=0 \
-                -- --no-splash {path_bsh}""", # the & submits everyting at once
+                -Djob_type=xml \
+                -- --no-splash {path_bsh}""", 
            config["common"],
            config["define_xml_czi"],
            config["resave_hdf5"],
@@ -142,10 +143,10 @@ rule hdf5_xml:
 
         #create dummy files according to the number of timepoints found
         for index in range(int(config["common"]["ntimepoints"])):
-           shell("touch {basename}-0{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id=index)) # problematic needs padding of file_id
+           shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id="%02d" % index)) # problematic needs padding of file_id
         
 
-# resave .czi dataset as hdf5	
+# resave  .czi/.tif dataset as hdf5	
 rule resave_hdf5:
     input: "{xml_base}-{file_id,\d+}-00.h5_empty" # rules.hdf5_xml.output
     output: "{xml_base}-{file_id,\d+}-00.h5"
@@ -166,6 +167,7 @@ rule resave_hdf5:
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
+        -Djob_type=hdf5 \
         -- --no-splash {path_bsh}""", # the & submits everyting at once
            config["common"],
            config["define_xml_czi"],
@@ -173,12 +175,12 @@ rule resave_hdf5:
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
            input_xml_base="{wildcards.xml_base}",
-           job_number=int("{wildcards.file_id}")+1) # problematic calculation not possible in cannot deal wiht wildcards file_id
+           job_number="{wildcards.file_id}") # problematic calculation not possible in cannot deal wiht wildcards file_id
    	part_string += "> {log} 2>&1"
         shell(part_string) 
        	       	
 rule registration:
-    input:  "{xml_base}-{file_id}-00.h5" # rules.resave_hdf5.output 
+    input:  rules.resave_hdf5.output # "{xml_base}-{file_id,\d+}-00.h5" 
     #input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
     log: "{xml_base}-{file_id}-registration.log"
@@ -393,6 +395,77 @@ rule deconvolution:
         )
         cmd_string += "> {log} 2>&1 && touch {output}"
         shell(cmd_string)
-  
+        
+rule hdf5_output_define_xml:
+    input: glob.glob('*.tif'), "{xml_base}-{file_id,\d+}-00.h5_" + config["common"]["fusion_switch"]
+    output: config["hdf5_output"]["output_xml"] + ".xml"
+    message: "Execute define_xml_tif on the following files {input}"
+    log: "hdf5_output_define_xml.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dtimepoints={output_timepoints} \
+        -Dchannels={output_channels} \
+        -Dimage_file_pattern={output_image_file_pattern} \
+        -Dpixel_distance_x={output_pixel_distance_x} \
+        -Dpixel_distance_y={output_pixel_distance_y} \
+        -Dpixel_distance_z={output_pixel_distance_z} \
+        -Dpixel_unit={output_pixel_unit} \
+       	-Dxml_filename={output_xml} \
+        -Dtype_of_dataset={output_type_of_dataset} \
+        -Dmultiple_timepoints={output_multiple_timepoints} \
+        -Dmultiple_channels={output_multiple_channels} \
+        -Dmultiple_illumination_directions={output_illumination_directions} \
+        -Dmultiple_angles={output_multiple_angles} \
+        -Dimglib_container={output_imglib_container} \
+	-- --no-splash {path_bsh}""",
+	config["common"],
+	config["hdf5_output"],
+	jdir=JOBDIR,
+	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
+	
+	cmd_string +="> {log} 2>&1 && touch {output}"
+	shell(cmd_string)
+
+ruleorder: define_xml_tif > define_xml_czi 
+
+# create mother .xml/.h5
+rule hdf5_output_define_hdf5:
+    input: config["hdf5_output"]["output_xml"] + ".xml" 
+    output: expand("{dataset}.{suffix}",dataset=[ config["hdf5_output"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
+            expand("{xml_base}-{file_id}-00.h5_empty", xml_base=[ config["hdf5_output"]["output_hdf5_xml"].strip('\"') ],file_id=range(int(config["common"]["ntimepoints"]))) # problematic needs padding of file_id
+    log: "hdf5_output_define_hdf5.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={output_xml} \
+                -Dhdf5_xml_filename={output_hdf5_xml} \
+                -Dresave_angle={resave_angle} \
+                -Dresave_channel={resave_channel} \
+                -Dresave_illumination={resave_illumination} \
+                -Dresave_timepoint={resave_timepoint} \
+                -Dsubsampling_factors={subsampling_factors} \
+                -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+                -Dtimepoints_per_partition={timepoints_per_partition} \
+                -Dsetups_per_partition={setups_per_partition} \
+                -Drun_only_job_number=0 \
+                -Doutput_data_type={output_data_type} \
+                -- --no-splash {path_bsh}""", # the & submits everyting at once
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           config["hdf5_output"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+
+        part_string += "> {log} 2>&1"
+        shell(part_string)
+
+        #create dummy files according to the number of timepoints found
+        for index in range(int(config["common"]["ntimepoints"])):
+           shell("touch {basename}-{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id="%02d" % index)) # problematic needs padding of file_id
+
 rule distclean:
     shell : "rm -rf *registered *tif *log *_deconvolved *.xml~* interestpoints "+str(" ".join(xml_merge_in))

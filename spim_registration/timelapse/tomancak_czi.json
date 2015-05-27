@@ -171,6 +171,33 @@
 	"psf_size_x" : "19",
 	"psf_size_y" : "19",
 	"psf_size_z" : "25"
+    },
+    
+    "hdf5_output" :
+    {
+    	    "output_image_file_pattern" : "TP{t}_Ch{c}_Ill0_Ang0,72,144,216,288.tif",
+    	    "output_data_type" : "16Bit",
+    	    "output_xml" : "\"fused_Dual_Channel\"",
+    	    "output_hdf5_xml" : "\"hdf5_fused_Stock68\"",
+    	    "output_multiple_channels" : "\"NO (one channel)\"",	
+    	    "output_timepoints" : "0-1",
+    	    "output_channels" : "green",
+    	    "output_pixel_distance_x" : "0.5718", 	
+    	    "output_pixel_distance_y" : "0.5718", 	
+    	    "output_pixel_distance_z" : "0.5718", 	
+    	    "output_pixel_unit" : "um",			
+    	    "output_multiple_timepoints" : "\"YES (one file per time-point)\"",   	
+    	    "output_illumination_directions" : "\"NO (one illumination direction)\"",	
+    	    "output_multiple_angles" : "\"NO (one angle)\"",					
+    	    "output_type_of_dataset" : "\"Image Stacks (ImageJ Opener)\"", 		
+    	    "output_imglib_container" : "\"ArrayImg (faster)\"",
+    	    "fusion_output_export" : "/export_output.bsh", 	
+    	    "convert_32bit" : "\"[Use min/max of first image (might saturate intenities over time)]\""
+    	    
     }
+
+    
+    
+    
     
 }
