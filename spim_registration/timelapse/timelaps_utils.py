@@ -25,4 +25,9 @@ def produce_string(_fstring, *args, **kwargs):
    return _fstring.format(**contents)
 
 def padding_of_file_id(_n_timepoints):
-   return math.ceil(math.log10(_n_timepoints))
+   value = math.ceil(math.log10(_n_timepoints))
+
+   if value < 2:
+      return 2
+   else:
+      return value
