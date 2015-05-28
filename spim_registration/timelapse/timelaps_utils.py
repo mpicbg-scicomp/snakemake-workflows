@@ -1,5 +1,6 @@
 import re
 import os
+import math
 
 def produce_xml_merge_job_files(_datasets):
    fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
@@ -22,3 +23,6 @@ def produce_string(_fstring, *args, **kwargs):
          
    contents.update(kwargs)
    return _fstring.format(**contents)
+
+def padding_of_file_id(_n_timepoints):
+   return math.ceil(math.log10(_n_timepoints))
