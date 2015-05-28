@@ -1,5 +1,5 @@
 import os, glob, sys, re
-from timelaps_utils import produce_xml_merge_job_files, produce_string
+from timelaps_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
@@ -9,8 +9,9 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 #data specific config file, expected to be inside JOBDIR
 configfile: "tomancak_czi.json"
 
+padding_format = "-{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}-00.h5"
 # problematic needs padding of file_id
-datasets = [ config["common"]["hdf5_xml_filename"].strip('\"')+"-{0:02d}-00.h5".format(item) for item in range(int(config["common"]["ntimepoints"])) ]
+datasets = [ config["common"]["hdf5_xml_filename"].strip('\"')+padding_format.format(item) for item in range(int(config["common"]["ntimepoints"])) ]
 
 xml_merge_in = produce_xml_merge_job_files(datasets)
 
@@ -122,11 +123,7 @@ rule hdf5_xml:
 
         part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
-
-        #create dummy files according to the number of timepoints found
-        # for index in range(int(config["common"]["ntimepoints"])):
-        #    shell("touch {basename}-0{file_id}-00.h5_empty".format(basename=config["common"]["hdf5_xml_filename"], file_id=index)) # problematic needs padding of file_id
-        
+       
 
 # resave  .czi/.tif dataset as hdf5	
 rule resave_hdf5:
@@ -160,8 +157,8 @@ rule resave_hdf5:
         shell(part_string) 
        	       	
 rule registration:
-    input:  rules.resave_hdf5.output # "{xml_base}-{file_id,\d+}-00.h5" 
-    #input: rules.resave_hdf5.output, "{xml_base}-{file_id}-00.h5"
+
+    input:  "{xml_base}-{file_id}-00.h5" 
     output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
     log: "{xml_base}-{file_id}-registration.log"
     run:
@@ -198,10 +195,10 @@ rule registration:
         -- --no-splash {path_bsh}""",
            config["common"], 
            config["registration"],
-           file_id_w="{wildcards.file_id}",
+           file_id_w=wildcards.file_id,
            path_bsh=config["common"]["bsh_directory"] + config["registration"]["bsh_file"],
            jdir=JOBDIR,
-           input_xml="{wildcards.xml_base}")
+           input_xml=wildcards.xml_base)
         cmd_string += " > {log} 2>&1 && touch {output}"
        
         shell(cmd_string)
