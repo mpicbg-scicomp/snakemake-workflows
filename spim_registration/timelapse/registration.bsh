@@ -24,6 +24,7 @@ System.out.println( "-------------------------------------------------------" );
 System.out.println( "General parameters: " );
 
 parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
+unique_id = System.getProperty( "parallel_timepoints" );
 process_timepoint = System.getProperty( "process_timepoint" );
 process_channel = System.getProperty( "process_channel" );
 process_illumination = System.getProperty( "process_illumination" );
@@ -120,7 +121,7 @@ System.out.println( "Starting Detection of Interest Points" );
 try {
 IJ.run("Detect Interest Points for Registration", 
 	"select_xml=" + xml_path + xml_filename + ".xml " +  
-	"unique_id=" + parallel_timepoints + " " +
+	"unique_id=" + unique_id + " " +
 	"process_angle=[" + process_angle + "] " + 
 	"process_channel=[" + process_channel + "] " +
 	"process_illumination=[" + process_illumination + "] " + 
@@ -151,7 +152,7 @@ System.out.println( "Starting Registration" );
 
 try {
     IJ.run("Register Dataset based on Interest Points",
-	   "select_xml=" + xml_path + xml_filename + ".job_" + parallel_timepoints + ".xml " +
+	   "select_xml=" + xml_path + xml_filename + ".job_" + unique_id + ".xml " +
 	   "process_angle=[" + process_angle + "] " +
 	   "process_channel=[" + process_channel + "] " +
 	   "process_illumination=[" + process_illumination + "] " +
