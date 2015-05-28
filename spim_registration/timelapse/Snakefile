@@ -9,9 +9,10 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 #data specific config file, expected to be inside JOBDIR
 configfile: "tomancak_czi.json"
 
-padding_format = "-{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}-00.h5"
+padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
+ds_format = "-"+padding_format+"-00.h5"
 # problematic needs padding of file_id
-datasets = [ config["common"]["hdf5_xml_filename"].strip('\"')+padding_format.format(item) for item in range(int(config["common"]["ntimepoints"])) ]
+datasets = [ str(config["common"]["hdf5_xml_filename"].strip('\"')+(ds_format.format(item))) for item in range(int(config["common"]["ntimepoints"])) ]
 
 xml_merge_in = produce_xml_merge_job_files(datasets)
 
@@ -28,32 +29,32 @@ rule define_xml_czi:
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "define_xml_czi.log"
     run: 
-        cmd_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
-	-Dfirst_czi={first_czi} \
-	-Dangle_1={angle_1} \
-	-Dangle_2={angle_2} \
-	-Dangle_3={angle_3} \
-	-Dangle_4={angle_4} \
-	-Dangle_5={angle_5} \
-	-Dchannel_1={channel_1} \
-	-Dchannel_2={channel_2} \
-	-Dillumination_1={illumination_1} \
-	-Drotation_around={rotation_around} \
-	-Dpixel_distance_x={pixel_distance_x} \
-	-Dpixel_distance_y={pixel_distance_y} \
-	-Dpixel_distance_z={pixel_distance_z} \
-	-Dpixel_unit={pixel_unit} \
-	-Dfirst_xml_filename={first_xml_filename} \
-	-- --no-splash {path_bsh}""",
-	config["common"],
-	config["define_xml_czi"],
-	jdir=JOBDIR,
-	path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
-	
-	cmd_string += " > {log} 2>&1"
+           -Dfirst_czi={first_czi} \
+           -Dangle_1={angle_1} \
+           -Dangle_2={angle_2} \
+           -Dangle_3={angle_3} \
+           -Dangle_4={angle_4} \
+           -Dangle_5={angle_5} \
+           -Dchannel_1={channel_1} \
+           -Dchannel_2={channel_2} \
+           -Dillumination_1={illumination_1} \
+           -Drotation_around={rotation_around} \
+           -Dpixel_distance_x={pixel_distance_x} \
+           -Dpixel_distance_y={pixel_distance_y} \
+           -Dpixel_distance_z={pixel_distance_z} \
+           -Dpixel_unit={pixel_unit} \
+           -Dfirst_xml_filename={first_xml_filename} \
+           -- --no-splash {path_bsh}""",
+                                       config["common"],
+                                       config["define_xml_czi"],
+                                       jdir=JOBDIR,
+                                       path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
+        cmd_string += " > {log} 2>&1"
         shell(cmd_string)
+
+        
         
 # defining xml for tif dataset
 rule define_xml_tif:
@@ -80,10 +81,12 @@ rule define_xml_tif:
         -Dmultiple_angles={multiple_angles} \
         -Dimglib_container={imglib_container} \
 	-- --no-splash {path_bsh}""",
-	config["common"],
-	config["define_xml_tif"],
-	jdir=JOBDIR,
-	path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"])
+	   config["common"],
+	   config["define_xml_tif"],
+	   jdir=JOBDIR,
+	   path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"],
+           timepoints="1-"+str(config["common"]["ntimepoints"])
+        )
 	
 	cmd_string +=" > {log} 2>&1"
 	shell(cmd_string)
@@ -155,7 +158,7 @@ rule resave_hdf5:
        	       	
 rule registration:
     input:  "{xml_base}-{file_id}-00.h5" 
-    output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
+    output: "{xml_base}.job_{file_id,\d+}.xml"#, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
@@ -201,7 +204,7 @@ rule registration:
         #shell("touch {output}")
 
 rule xml_merge:
-    input: [ item+"_registered" for item in datasets ] #xml_merge_in 
+    input: [ str(config["common"]["hdf5_xml_filename"].strip('\"')+".job_"+(padding_format.format(item))+".xml") for item in range(int(config["common"]["ntimepoints"])) ] #[ item+"_registered" for item in datasets ] 
     output: "{xml_base}_merge.xml"
     log: "{xml_base}_merge.log"
     run:
@@ -212,7 +215,6 @@ rule xml_merge:
         -- --no-splash {path_bsh}""",
                                     config["common"],
                                     config["xml_merge"],
-                                    log="{log}",
                                     path_bsh=config["common"]["bsh_directory"] + config["xml_merge"]["bsh_file"],
                                     jdir=JOBDIR,
                                     output="{output}")
