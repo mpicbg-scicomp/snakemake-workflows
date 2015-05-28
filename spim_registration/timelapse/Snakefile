@@ -370,7 +370,7 @@ rule deconvolution:
         shell(cmd_string)
   
 rule distclean:
-    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*log"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])# xml_merge_in, 
+    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])# xml_merge_in, 
    
-    message : "removing {params}"
+    message : os.path.abspath(os.path.curdir) + ": rm -rf {params}"
     shell : "rm -rf {params}"
