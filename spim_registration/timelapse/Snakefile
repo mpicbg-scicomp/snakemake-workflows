@@ -11,17 +11,14 @@ configfile: "tomancak_czi.json"
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
+
 # problematic needs padding of file_id
 datasets = [ str(config["common"]["hdf5_xml_filename"].strip('\"')+(ds_format.format(item))) for item in range(int(config["common"]["ntimepoints"])) ]
 
 xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
-    #input: [ ds+"_fusion" for ds in datasets ]
-    #input: [ ds + "_" + config["common"]["fusion_switch"] for ds in datasets ]
-    #input: config["hdf5_output"]["output_xml"] + ".xml"
     input: [ ds + "_output_hdf5" for ds in datasets ]
-    #input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
@@ -377,7 +374,7 @@ rule deconvolution:
 rule define_output:
     input: [ item + "_" + config["common"]["fusion_switch"] for item in datasets ], glob.glob('TP*')
     output: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
-    log: "define_xml_tif.log"
+    log: "define_output.log"
     run:
         cmd_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
