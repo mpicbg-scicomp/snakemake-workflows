@@ -5,7 +5,7 @@
 	"fiji-prefix" : "/sw/bin/xvfb-run -a",
 	"directory_cuda" : "/lustre/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/lib/",
 	"merged_xml" : "hdf5_test_unicore_merge",
-	"bsh_directory" : "/home/steinbac/development/cschmied-snakemake-workflows/spim_registration/timelapse/",
+	"bsh_directory" : "/home/steinbac/development/schmied-snakemake-workflows/spim_registration/timelapse/",
 	"first_xml_filename" : "test_unicore",
 	"hdf5_xml_filename" : "\"hdf5_test_unicore\"",
 	"fusion_switch" : "deconvolution",
@@ -33,7 +33,6 @@
     
     "define_xml_tif" :
     {
-	"timepoints" : "0-4",
 	"acquisition_angles" : "0,72,144,216,288",
 	"channels" : "0",
 	"image_file_pattern" : "img_TL{{t}}_Angle{{a}}.tif",
