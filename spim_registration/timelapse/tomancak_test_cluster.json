@@ -51,7 +51,6 @@
     
     "resave_hdf5" :
     {
-    	    "parallel_timepoints" : "5",
     	    "resave_angle" : "\"All angles\"",
     	    "resave_channel" : "\"All channels\"",
     	    "resave_illumination" : "\"All illuminations\"",
