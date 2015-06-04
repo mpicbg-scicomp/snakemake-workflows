@@ -58,7 +58,7 @@ rule define_xml_czi:
         
 # defining xml for tif dataset
 rule define_xml_tif:
-    input: glob.glob('*.tif')
+    input: glob.glob(re.sub("{{.}}","*",config["define_xml_tif"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "define_xml_tif.log"
     run:
