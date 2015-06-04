@@ -85,7 +85,7 @@ rule define_xml_tif:
 	   config["define_xml_tif"],
 	   jdir=JOBDIR,
 	   path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"],
-           timepoints="1-"+str(config["common"]["ntimepoints"])
+           timepoints="0-"+str(int(config["common"]["ntimepoints"])-1)
         )
 	
 	cmd_string +=" > {log} 2>&1"
