@@ -7,7 +7,7 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
    JOBDIR+="/"
 
 #data specific config file, expected to be inside JOBDIR
-configfile: "tomancak_czi.json"
+configfile: "tomancak_test_cluster.json"
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
@@ -28,7 +28,7 @@ rule resave_prepared:
 
 # defining xml for czi dataset
 rule define_xml_czi:
-    input: config["define_xml_czi"]["first_czi"]
+    input:glob.glob('*.czi'), config["define_xml_czi"]["first_czi"]
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "define_xml_czi.log"
     run: 
@@ -94,7 +94,7 @@ rule define_xml_tif:
 	cmd_string +=" > {log} 2>&1"
 	shell(cmd_string)
 
-ruleorder: define_xml_tif > define_xml_czi 
+ruleorder: define_xml_tif > define_xml_czi
 
 # create mother .xml/.h5
 rule hdf5_xml:
