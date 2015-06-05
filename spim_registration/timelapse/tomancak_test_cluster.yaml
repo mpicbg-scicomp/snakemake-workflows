@@ -3,7 +3,7 @@ common:
   # directory that contains the bean shell scripts
   bsh_directory: "/home/steinbac/development/schmied-snakemake-workflows/spim_registration/timelapse/",
   directory_cuda: "/lustre/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/lib/",
-  fiji-app: "/projects/hpcsupport/steinbac/unicore/christopher-sandbox/unicore_jobs/Fiji.app.cuda_new/ImageJ-linux64",
+  fiji-app: "/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/ImageJ-linux64",
   fiji-prefix: "/sw/bin/xvfb-run -a",
   first_xml_filename: "test_unicore",
   fusion_switch: "deconvolution",
