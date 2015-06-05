@@ -406,7 +406,7 @@ rule define_output:
 rule hdf5_xml_output:
     input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-    	    [ item+"_output" for item in datasets ] # expand("{dataset}.{suffix}",dataset=[ config["hdf5_output"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]), "{xml_base}-{file_id,\d+}-00.h5_output_hdf5_xml"
+    	    [ item+"_output" for item in datasets ] 
     log: "hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -469,7 +469,7 @@ rule resave_hdf5_output:
        	       
 
 rule distclean:
-    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])# xml_merge_in, 
+    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), glob.glob("*_output_hdf5"), glob.glob("*_output")# xml_merge_in, 
    
     message : os.path.abspath(os.path.curdir) + ": rm -rf {params}"
     shell : "rm -rf {params}"
