@@ -28,7 +28,8 @@ System.out.println( "selected_xml = " + xml_path + xml_filename + ".xml");
 System.out.println( "-------------------------------------------------------" );
 System.out.println( "General parameters: " );
 
-parallel_timepoints = System.getProperty( "parallel_timepoints" );
+int parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
+unique_id = System.getProperty( "parallel_timepoints" );
 reg_process_timepoint = System.getProperty( "reg_process_timepoint" );
 reg_process_illumination = System.getProperty( "reg_process_illumination" );
 reg_process_angle = System.getProperty( "reg_process_angle" ); 
@@ -290,7 +291,7 @@ System.out.println( "=======================================================" );
 System.out.println( "Starting Detection of Interest Points" );
 
 System.out.println("Detect Interest Points for Registration , select_xml=" + xml_path + xml_filename + ".xml " +  
-	"unique_id=" + parallel_timepoints + " " +
+	"unique_id=" + unique_id + " " +
 	"process_angle=[" + reg_process_angle + "] " + 
 	"process_channel=[" + reg_process_channel + "] " +
 	"process_illumination=[" + reg_process_illumination + "] " + 
@@ -308,7 +309,7 @@ System.out.println("Detect Interest Points for Registration , select_xml=" + xml
 try {
 IJ.run("Detect Interest Points for Registration", 
 	"select_xml=" + xml_path + xml_filename + ".xml " +  
-	"unique_id=" + parallel_timepoints + " " +
+	"unique_id=" + unique_id + " " +
 	"process_angle=[" + reg_process_angle + "] " + 
 	"process_channel=[" + reg_process_channel + "] " +
 	"process_illumination=[" + reg_process_illumination + "] " + 
@@ -325,7 +326,7 @@ IJ.run("Detect Interest Points for Registration",
 }
 catch ( e ) { 
 
-    print( "[registration::activate_cluster_processing] caught exception: "+e );
+    print( "[registration::interest_points] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     
@@ -335,7 +336,7 @@ catch ( e ) {
 System.out.println( "=======================================================" );
 System.out.println( "Starting Registration" );
 
-System.out.println("Register Dataset based on Interest Points , select_xml=" + xml_path + xml_filename + ".job_" + parallel_timepoints + ".xml " +
+System.out.println("Register Dataset based on Interest Points , select_xml=" + xml_path + xml_filename + ".job_" + unique_id + ".xml " +
         "process_angle=[" + reg_process_angle + "] " +
         "process_channel=[" + reg_process_channel + "] " +
         "process_illumination=[" + reg_process_illumination + "] " +
@@ -357,7 +358,7 @@ System.out.println("Register Dataset based on Interest Points , select_xml=" + x
 
 try {
 IJ.run("Register Dataset based on Interest Points",
-	"select_xml=" + xml_path + xml_filename + ".job_" + parallel_timepoints + ".xml " +
+	"select_xml=" + xml_path + xml_filename + ".job_" + unique_id + ".xml " +
         "process_angle=[" + reg_process_angle + "] " +
         "process_channel=[" + reg_process_channel + "] " +
         "process_illumination=[" + reg_process_illumination + "] " +
@@ -379,7 +380,7 @@ IJ.run("Register Dataset based on Interest Points",
 }
 catch ( e ) { 
 
-    print( "[registration::activate_cluster_processing] caught exception: "+e );
+    print( "[registration::based_on_interestpoints] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     

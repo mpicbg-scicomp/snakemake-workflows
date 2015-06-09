@@ -230,15 +230,14 @@ rule timelapse:
         -Dimage_file_directory={jdir} \
         -Dmerged_xml={input} \
         -Dtimelapse_process_timepoints={timelapse_process_timepoints} \
-        -Dprocess_channel_timelapse={channel} \
-        -Dprocess_illumination={illuminations} \
-        -Dprocess_angle={angle} \
+        -Dreg_process_channel={reg_process_channel} \
+        -Dreg_process_illumination={reg_process_illumination} \
+        -Dreg_process_angle={reg_process_angle} \
         -Dreference_timepoint={reference_timepoint} \
-        -Dchannel_1={proc-ch} \
+        -Dchannels={channels} \
         -Dtype_of_registration_timelapse={type_of_registration_timelapse} \
         -Dregistration_algorithm={algorithm} \
-        -Dreg_1_interest_points_channel={interest_points_channel_0} \
-        -Dreg_2_interest_points_channel={interest_points_channel_1} \
+        -Dreg_interest_points_channel={reg_interest_points_channel} \
         -Dtransformation_model={transformation_model} \
         -Dmodel_to_regularize_with={model_to_regularize_with} \
         -Dlambda={lambda} \
@@ -307,10 +306,10 @@ rule external_transform:
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
 	-Dmerged_xml={merged_xml_file} \
-	-Dtransform_angle={angle} \
-	-Dtransform_channel={channel} \
-	-Dtransform_illumination={illumination} \
-	-Dtransform_timepoint={timepoint} \
+	-Dtransform_angle={transform_angle} \
+	-Dtransform_channel={transform_channel} \
+	-Dtransform_illumination={transform_illumination} \
+	-Dtransform_timepoint={transform_timepoint} \
 	-Dtransformation={transformation} \
 	-Dapply_transformation={apply_transformation} \
 	-Ddefine_mode_transform={define_mode_transform} \

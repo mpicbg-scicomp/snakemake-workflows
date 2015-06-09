@@ -72,7 +72,6 @@ registration: {
   map_back_tiles: '"Map back to first tile using rigid model"',
   model_to_regularize_with: "Rigid",
   lambda: '0.10',
-  
   imglib_container: '"ArrayImg (faster)"',
   bsh_file: "registration.bsh"
   }
@@ -82,10 +81,16 @@ xml_merge: {
   }
   
 timelapse: {
-  bsh_file: "timelapse_registration.bsh",
   reference_timepoint: '0',
+  type_of_registration_timelapse: '"Match against one reference timepoint (no global optimization)"',
   timelapse_process_timepoints: '"All Timepoints"',
-  type_of_registration_timelapse: '"Match against one reference timepoint (no global optimization)"'
+  bsh_file: "timelapse_registration.bsh"
+  }
+  
+Dublicate_transformations: {
+  source_dublication: "red",
+  target_dublication: "green",
+  bsh_file: "dublicate_channel.bsh"
   }
   
 fusion: {
@@ -111,16 +116,15 @@ fusion: {
   }
 
 external_transform: {
-  angle: '"All angles"',
-  apply_transformation: '"Current view transformations
-  (appends to current transforms)"',
-  bsh_file: "transform.bsh",
-  channel: '"All channels"',
+  transform_timepoint: '"All Timepoints"',
+  transform_angle: '"All angles"',
+  transform_channel: '"All channels"',
+  transform_illumination: '"All illuminations"',
+  apply_transformation: '"Current view transformations (appends to current transforms)"',
   define_mode_transform: '"Matrix"',
-  illumination: '"All illuminations"',
   matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',
-  timepoint: '"All Timepoints"',
-  transformation: '"Rigid"'
+  transformation: '"Rigid"',
+  bsh_file: "transform.bsh"
   }
 
 deconvolution: {
