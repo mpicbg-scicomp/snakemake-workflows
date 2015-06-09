@@ -89,7 +89,7 @@ rule define_xml_tif:
 	cmd_string +=" > {log} 2>&1"
 	shell(cmd_string)
 
-ruleorder: define_xml_tif > define_xml_czi
+ruleorder: define_xml_czi > define_xml_tif 
 
 # create mother .xml/.h5
 rule hdf5_xml:
@@ -339,12 +339,13 @@ rule deconvolution:
         -Dprocess_channel={process_channel} \
         -Dprocess_illumination={process_illumination} \
         -Dprocess_angle={process_angle} \
-        -Dminimal_x_deco={minimal_x} \
-        -Dminimal_y_deco={minimal_y} \
-        -Dminimal_z_deco={minimal_z} \
-        -Dmaximal_x_deco={maximal_x} \
-        -Dmaximal_y_deco={maximal_y} \
-        -Dmaximal_z_deco={maximal_z} \
+        -Dchannels={channels} \
+        -Dminimal_x_deco={minimal_x_deco} \
+        -Dminimal_y_deco={minimal_y_deco} \
+        -Dminimal_z_deco={minimal_z_deco} \
+        -Dmaximal_x_deco={maximal_x_deco} \
+        -Dmaximal_y_deco={maximal_y_deco} \
+        -Dmaximal_z_deco={maximal_z_deco} \
         -Dimglib2_container_deco={imglib2_container} \
         -Dtype_of_iteration={type_of_iteration} \
         -Dosem_acceleration={osem_acceleration} \
@@ -352,8 +353,7 @@ rule deconvolution:
         -Dcompute={compute} \
         -Dpsf_estimation={psf_estimation} \
         -Ddirectory_cuda={directory_cuda} \
-        -Ddetections_to_extract_psf_for_channel_0={detections_to_extract_psf_for_channel_0} \
-        -Ddetections_to_extract_psf_for_channel_1={detections_to_extract_psf_for_channel_1} \
+        -Ddetections_to_extract_psf_for_channel={detections_to_extract_psf_for_channel} \
         -Dpsf_size_x={psf_size_x} \
         -Dpsf_size_y={psf_size_y} \
         -Dpsf_size_z={psf_size_z} \

@@ -1,7 +1,7 @@
 common: {
   # directory that contains the bean shell scripts
   bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
-  directory_cuda: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/lib/lib/",
+  directory_cuda: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/lib/",
   fiji-app: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/ImageJ-linux64",
   fiji-prefix: "/sw/bin/xvfb-run -a",
   first_xml_filename: "test_unicore",
@@ -128,30 +128,31 @@ external_transform: {
   }
 
 deconvolution: {
-  Tikhonov_parameter: '0.0006',
-  bsh_file: "deconvolution_GPU.bsh",
-  compute: '"in 512x512x512 blocks"',
-  compute_on: '"GPU (Nvidia CUDA via JNA)"',
-  detections_to_extract_psf_for_channel_0: '"beads"',
-  detections_to_extract_psf_for_channel_1: '"beads"',
-  imglib2_container: '"ArrayImg"',
   iterations: '5',
-  maximal_x: '509',
-  maximal_y: '970',
-  maximal_z: '243',
-  minimal_x: '95',
-  minimal_y: '-8',
-  minimal_z: '-174',
-  osem_acceleration: '"1 (balanced)"',
+  maximal_x_deco: '509',
+  maximal_y_deco: '970',
+  maximal_z_deco: '243',
+  minimal_x_deco: '95',
+  minimal_y_deco: '-8',
+  minimal_z_deco: '-174',
+  detections_to_extract_psf_for_channel: '"beads"',
+  #detections_to_extract_psf_for_channel_0: '"beads"',
+  #detections_to_extract_psf_for_channel_1: '"beads"',
+  process_timepoint: '"Single Timepoint (Select from List)"',
   process_angle: '"All angles"',
   process_channel: '"All channels"',
   process_illumination: '"All illuminations"',
-  process_timepoint: '"Single Timepoint (Select from List)"',
+  Tikhonov_parameter: '0.0006',
+  compute: '"in 512x512x512 blocks"',
+  compute_on: '"GPU (Nvidia CUDA via JNA)"',
+  imglib2_container: '"ArrayImg"',
+  osem_acceleration: '"1 (balanced)"',
   psf_estimation: '"Extract from beads"',
   psf_size_x: '19',
   psf_size_y: '19',
   psf_size_z: '25',
-  type_of_iteration: '"Efficient Bayesian - Optimization I (fast, precise)"'
+  type_of_iteration: '"Efficient Bayesian - Optimization I (fast, precise)"',
+  bsh_file: "deconvolution_GPU.bsh"
   }
   
 hdf5_output: {
