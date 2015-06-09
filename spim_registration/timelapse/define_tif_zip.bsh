@@ -24,27 +24,90 @@ System.out.println( "xml_filename = " + xml_filename );
 // Dataset settings
 System.out.println("=========================================================");
 System.out.println("Dataset:");
-timepoints = System.getProperty( "timepoints" );
-channels = System.getProperty( "channels" ); 
-acquisition_angles = System.getProperty( "acquisition_angles" );
 image_file_pattern = System.getProperty( "image_file_pattern" );
 type_of_dataset = System.getProperty( "type_of_dataset" );
+timepoints = System.getProperty( "timepoints" );
+angles = System.getProperty( "angles" );
+
+System.out.println( "image_file_pattern = " + image_file_pattern );
+System.out.println( "type_of_dataset = " + type_of_dataset );
+System.out.println( "timepoints = " + timepoints );
+System.out.println( "angles = " + angles );
+
 multiple_timepoints = System.getProperty( "multiple_timepoints" );
 multiple_channels = System.getProperty( "multiple_channels" );
 multiple_illumination_directions = System.getProperty( "multiple_illumination_directions" );
 multiple_angles = System.getProperty( "multiple_angles" );
 imglib_container = System.getProperty( "imglib_container" );
 
-System.out.println( "timepoints = " + timepoints );
-System.out.println( "channels = " + channels );
-System.out.println( "acquisition_angles = " + acquisition_angles );
-System.out.println( "image_file_pattern = " + image_file_pattern );
-System.out.println( "type_of_dataset = " + type_of_dataset );
 System.out.println( "multiple_timepoints = " + multiple_timepoints );
 System.out.println( "multiple_channels = " + multiple_channels );
 System.out.println( "multiple_illumination_directions = " + multiple_illumination_directions );
 System.out.println( "multiple_angles = " + multiple_angles );
 System.out.println( "imglib_container = " + imglib_container );
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Channel setting:");
+
+// Channel switch: parses channels and determines if Single or Multi Channel
+// assembles the appropriate string for the channel setting
+channels = System.getProperty( "channels" ); 
+
+String channel_string = null;
+		
+String delims = "[,]";
+String[] channel_token = channels.split(delims);
+		
+if (channels.equalsIgnoreCase(""))
+	{
+	System.out.println("Warning: There are no channels set");
+	}
+			
+else if ( channel_token.length == 1  )
+	{
+	channel_string="";
+	System.out.println("Single Channel");
+	}
+		
+	else if ( channel_token.length > 1)
+	{
+	channel_string = "channels_=" + channels + " ";
+	System.out.println("Multi Channel");
+	}
+		
+System.out.println( "Channels = " + channel_string );
+
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Illumination setting:");
+// Illuminatin switch: parses illumination and determines if there is a single
+// or multiple illumination sides and then assembles the illum_string
+
+illumination = System.getProperty( "illumination" );
+
+String illum_string = null;
+		
+String delims = "[,]";
+String[] illum_token = illumination.split(delims);
+		
+if (illumination.equalsIgnoreCase(""))
+	{
+	System.out.println("Warning: There are no illuminations set");
+	}
+			
+	else if ( illum_token.length == 1  )
+	{
+	illum_string="";
+	System.out.println("One illumination side or fused illumination");
+	}
+		
+	else if ( illum_token.length > 1)
+	{
+	illum_string = "illumination_=" + illumination + " ";
+	System.out.println("Dual Illumination sides");
+	}
+		
+System.out.println( "Illuminations = " + illum_string );
 
 // Calibaration
 System.out.println("=========================================================");
@@ -59,6 +122,26 @@ System.out.println( "pixel_distance_y = " + pixel_distance_y );
 System.out.println( "pixel_distance_z = " + pixel_distance_z );
 System.out.println( "pixel_unit = " + pixel_unit );
 
+
+System.out.println("Define Multi-View Dataset , type_of_dataset=[" + type_of_dataset + "] " +
+	"xml_filename=[" + xml_filename + ".xml] " +
+	"multiple_timepoints=[" + multiple_timepoints + "] " +
+	"multiple_channels=[" + multiple_channels + "] " +
+	"_____multiple_illumination_directions=[" + multiple_illumination_directions + "] " + 
+	"multiple_angles=[" + multiple_angles + "] " +
+	"image_file_directory=" + image_file_directory + " " +
+	"image_file_pattern=" + image_file_pattern + " " + 
+	"timepoints_=" + timepoints + " " +
+	channel_string +
+	illum_string +
+	"acquisition_angles_=" + acquisition_angles + " " +  
+	"calibration_type=[Same voxel-size for all views] calibration_definition=[User define voxel-size(s)]" + " " + 
+	"imglib2_data_container=[" + imglib_container + "] " + 
+	"pixel_distance_x=" + pixel_distance_x + " " + 
+	"pixel_distance_y=" + pixel_distance_y + " " + 
+	"pixel_distance_z=" + pixel_distance_z + " " +
+	"pixel_unit=" + pixel_unit + "");
+
 // Executes Fiji plugin
 System.out.println("=========================================================");
 System.out.println("Start plugin:");
@@ -72,8 +155,9 @@ IJ.run("Define Multi-View Dataset",
 	"image_file_directory=" + image_file_directory + " " +
 	"image_file_pattern=" + image_file_pattern + " " + 
 	"timepoints_=" + timepoints + " " +
-//	"channels_=" + channels	+ " " +		// for dual channel comment out if single channel
-	"acquisition_angles_=" + acquisition_angles + " " +  
+	channel_string +
+	illum_string +
+	"acquisition_angles_=" + angles + " " +  
 	"calibration_type=[Same voxel-size for all views] calibration_definition=[User define voxel-size(s)]" + " " + 
 	"imglib2_data_container=[" + imglib_container + "] " + 
 	"pixel_distance_x=" + pixel_distance_x + " " + 

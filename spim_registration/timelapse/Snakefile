@@ -7,8 +7,8 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
    JOBDIR+="/"
 
 #data specific config file, expected to be inside JOBDIR
-configfile: "tomancak_test_cluster.json"
-# configfile: "tomancak_test_cluster.yaml"
+# configfile: "tomancak_test_cluster.json"
+configfile: "tomancak_test_cluster.yaml"
 
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
@@ -34,20 +34,15 @@ rule define_xml_czi:
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
            -Dfirst_czi={first_czi} \
-           -Dangle_1={angle_1} \
-           -Dangle_2={angle_2} \
-           -Dangle_3={angle_3} \
-           -Dangle_4={angle_4} \
-           -Dangle_5={angle_5} \
-           -Dchannel_1={channel_1} \
-           -Dchannel_2={channel_2} \
-           -Dillumination_1={illumination_1} \
-           -Drotation_around={rotation_around} \
+           -Dangles={angles} \
+           -Dchannels={channels} \
+           -Dillumination={illumination} \
            -Dpixel_distance_x={pixel_distance_x} \
            -Dpixel_distance_y={pixel_distance_y} \
            -Dpixel_distance_z={pixel_distance_z} \
            -Dpixel_unit={pixel_unit} \
            -Dfirst_xml_filename={first_xml_filename} \
+           -Drotation_around={rotation_around} \
            -- --no-splash {path_bsh}""",
                                        config["common"],
                                        config["define_xml_czi"],
@@ -68,8 +63,9 @@ rule define_xml_tif:
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Dtimepoints={timepoints} \
-        -Dacquisition_angles={acquisition_angles} \
+        -Dangles={angles} \
         -Dchannels={channels} \
+        -Dillumination={illumination} \
         -Dimage_file_pattern={image_file_pattern} \
         -Dpixel_distance_x={pixel_distance_x} \
         -Dpixel_distance_y={pixel_distance_y} \
