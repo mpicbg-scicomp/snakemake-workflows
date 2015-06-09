@@ -146,6 +146,7 @@ System.out.println("Define Multi-View Dataset type_of_dataset=[Zeiss Lightsheet 
 	"pixel_unit=" + pixel_unit + " " +
 	"rotation_around=" + rotation_around + "");
 
+try {
 IJ.run("Define Multi-View Dataset", 
 	"type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
 	"xml_filename=" + first_xml_filename + ".xml " +
@@ -161,6 +162,13 @@ IJ.run("Define Multi-View Dataset",
 	"pixel_distance_z=" + pixel_distance_z + " " +
 	"pixel_unit=" + pixel_unit + " " +
 	"rotation_around=" + rotation_around + "");
-	
+}
+catch ( e ) { 
+
+    print( "[registration::interest_points] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 /* shutdown */
 runtime.exit(0);

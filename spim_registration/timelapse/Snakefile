@@ -131,7 +131,7 @@ rule resave_hdf5:
     run:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
-                -Dimage_file_directory={jdir} \
+        	-Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={first_xml_filename} \
                 -Dhdf5_xml_filename={input_xml_base} \
         -Dresave_angle={resave_angle} \
@@ -164,24 +164,24 @@ rule registration:
         -Dparallel_timepoints={file_id_w} \
         -Dimage_file_directory={jdir} \
         -Dxml_filename={input_xml} \
-        -Dprocess_timepoint={timepoint} \
-        -Dprocess_channel={channel} \
-        -Dprocess_illumination={illuminations} \
-        -Dprocess_angle={angle} \
-        -Dprocessing_channel={proc-ch} \
+	-Dreg_process_timepoint={reg_process_timepoint} \
+	-Dreg_process_channel={reg_process_channel} \
+	-Dreg_process_illumination={reg_process_illumination} \
+	-Dreg_process_angle={reg_process_angle} \
+	-Dchannels={channels} \
+	-Dreg_processing_channel={reg_processing_channel} \
         -Dlabel_interest_points={label_interest_points} \
         -Dtype_of_registration={type_of_registration} \
         -Dtype_of_detection={type_of_detection} \
         -Dsubpixel_localization={subpixel_localization} \
         -Dimglib_container={imglib_container} \
-        -Dradius_1={radius_1} \
-        -Dradius_2={radius_2} \
-        -Dthreshold={threshold} \
+	-Dreg_radius_1={reg_radius_1} \
+	-Dreg_radius_2={reg_radius_2} \
+        -Dreg_threshold={reg_threshold} \
         -Dinitial_sigma={initial_sigma} \
         -Dthreshold_gaussian={threshold_gaussian} \
         -Dregistration_algorithm={algorithm} \
-        -Dinterest_points_channel_0={interest_points_channel_0} \
-        -Dinterest_points_channel_1={interest_points_channel_1} \
+        -Dreg_interest_points_channel={reg_interest_points_channel} \
         -Dfix_tiles={fix_tiles} \
         -Dmap_back_tiles={map_back_tiles} \
         -Dtransformation_model={transformation_model} \
@@ -189,6 +189,7 @@ rule registration:
         -Dlambda={lambda} \
         -Dallowed_error_for_ransac={allowed_error_for_ransac} \
         -Ddetection_min_max={detection_min_max} \
+        -Dsignificance={significance} \
         -- --no-splash {path_bsh}""",
            config["common"], 
            config["registration"],

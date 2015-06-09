@@ -36,7 +36,6 @@ define_xml_tif: {
   }
   
 resave_hdf5: {
-  bsh_file: "export.bsh",
   hdf5_chunk_sizes: '"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}"',
   resave_angle: '"All angles"',
   resave_channel: '"All channels"',
@@ -44,37 +43,38 @@ resave_hdf5: {
   resave_timepoint: '"All Timepoints"',
   setups_per_partition: '0',
   subsampling_factors: '"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}"',
-  timepoints_per_partition: '1'
+  timepoints_per_partition: '1',
+  bsh_file: "export.bsh"
   }
 
 registration: {
-  algorithm: '"Fast 3d geometric hashing (rotation invariant)"',
-  allowed_error_for_ransac: '5',
-  angle: '"All angles"',
-  bsh_file: "registration.bsh",
-  channel: '"All channels"',
-  detection_min_max: "find_maxima",
-  fix_tiles: '"Fix first tile"',
-  illuminations: '"All illuminations"',
-  imglib_container: '"ArrayImg (faster)"',
+  reg_process_channel: '"Single Channel"',
+  reg_processing_channel: '"green"',
+  reg_interest_points_channel: '"beads"',
+  reg_radius_1: '2',
+  reg_radius_2: '3',
+  reg_threshold: '0.005',
   initial_sigma: '1.8',
-  interest_points_channel_0: '"beads"',
-  interest_points_channel_1: '"beads"',
+  threshold_gaussian: '0.0080',
+  type_of_detection: '"Difference-of-Mean (Integral image based)"',
   label_interest_points: '"beads"',
-  lambda: '0.10',
+  reg_process_timepoint: '"Single Timepoint (Select from List)"',
+  reg_process_angle: '"All angles"',
+  reg_process_illumination: '"All illuminations"',
+  subpixel_localization: '"3-dimensional quadratic fit"',
+  detection_min_max: "find_maxima",
+  type_of_registration: '"Register timepoints individually"',
+  algorithm: '"Fast 3d geometric hashing (rotation invariant)"',
+  transformation_model: "Affine",
+  allowed_error_for_ransac: '5',
+  significance: '10',
+  fix_tiles: '"Fix first tile"',
   map_back_tiles: '"Map back to first tile using rigid model"',
   model_to_regularize_with: "Rigid",
-  proc-ch: '"channel 0"',
-  radius_1: '2',
-  radius_2: '3',
-  significance: '10',
-  subpixel_localization: '"3-dimensional quadratic fit"',
-  threshold: '0.005',
-  threshold_gaussian: '0.0080',
-  timepoint: '"Single Timepoint (Select from List)"',
-  transformation_model: "Affine",
-  type_of_detection: '"Difference-of-Mean (Integral image based)"',
-  type_of_registration: '"Register timepoints individually"'
+  lambda: '0.10',
+  
+  imglib_container: '"ArrayImg (faster)"',
+  bsh_file: "registration.bsh"
   }
 
 xml_merge: {
