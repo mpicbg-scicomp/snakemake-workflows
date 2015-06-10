@@ -48,7 +48,8 @@ resave_hdf5: {
   }
 
 registration: {
-  reg_process_channel: '"Single Channel"',
+  # "Single Channel" is not a valid choice for "Process_channel"
+  reg_process_channel: '"Single Channel"', 
   reg_processing_channel: '"green"',
   reg_interest_points_channel: '"beads"',
   reg_radius_1: '2',
@@ -116,9 +117,12 @@ fusion: {
   }
 
 external_transform: {
+  # channel setting: '"all_channels"'
+  channel_setting: '"green"',
   transform_timepoint: '"All Timepoints"',
   transform_angle: '"All angles"',
   transform_channel: '"All channels"',
+  # illumination setting only one illumination side
   transform_illumination: '"All illuminations"',
   apply_transformation: '"Current view transformations (appends to current transforms)"',
   define_mode_transform: '"Matrix"',
@@ -128,7 +132,7 @@ external_transform: {
   }
 
 deconvolution: {
-  iterations: '5',
+  iterations: '1',
   maximal_x_deco: '509',
   maximal_y_deco: '970',
   maximal_z_deco: '243',
@@ -136,8 +140,6 @@ deconvolution: {
   minimal_y_deco: '-8',
   minimal_z_deco: '-174',
   detections_to_extract_psf_for_channel: '"beads"',
-  #detections_to_extract_psf_for_channel_0: '"beads"',
-  #detections_to_extract_psf_for_channel_1: '"beads"',
   process_timepoint: '"Single Timepoint (Select from List)"',
   process_angle: '"All angles"',
   process_channel: '"All channels"',
@@ -156,24 +158,24 @@ deconvolution: {
   }
   
 hdf5_output: {
-  bsh_file_define: "define_output.bsh",
-  bsh_file_hdf5: "export_output.bsh",
-  convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
-  output_channels: "green",
-  output_data_type: "32Bit",
+  output_image_file_pattern: 'TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif',
+  output_xml: '"fused_Single_Channel"',
   output_hdf5_xml: '"hdf5_fused_Stock68"',
-  output_illumination_directions: '"NO (one illumination direction)"',
-  output_image_file_pattern: 'TP{{t}}_Ch{{c}}_Ill0_Ang0,72,144,216,288.tif',
-  output_imglib_container: '"ArrayImg (faster)"',
-  output_multiple_angles: '"NO (one angle)"',
   output_multiple_channels: '"NO (one channel)"',
-  output_multiple_timepoints: '"YES (one file per time-point)"',
+  output_timepoints: '0-4',
   output_pixel_distance_x: 0.5718,
   output_pixel_distance_y: 0.5718,
   output_pixel_distance_z: 0.5718,
   output_pixel_unit: 'um',
-  output_timepoints: '0-4',
+  output_channels: "green",
+  output_data_type: "32Bit",
+  convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
   output_type_of_dataset: '"Image Stacks (ImageJ Opener)"',
-  output_xml: '"fused_Dual_Channel"'
+  output_multiple_timepoints: '"YES (one file per time-point)"',
+  output_multiple_angles: '"NO (one angle)"',
+  output_illumination_directions: '"NO (one illumination direction)"',
+  output_imglib_container: '"ArrayImg (faster)"',
+  bsh_file_define: "define_output.bsh",
+  bsh_file_hdf5: "export_output.bsh"
   }
 

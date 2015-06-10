@@ -1,3 +1,5 @@
+// is problematic needs to be adjusted for
+// multi channel and multi illumination datasets
 import ij.IJ;
 import ij.ImagePlus;
 import java.lang.Runtime;
@@ -15,8 +17,7 @@ transform_angle = System.getProperty( "transform_angle" );
 transform_channel = System.getProperty( "transform_channel" );
 transform_illumination = System.getProperty( "transform_illumination" );
 transform_timepoint = System.getProperty( "transform_timepoint" );
-channel_1 = System.getProperty( "channel_1" );
-channel_2 = System.getProperty( "channel_2" );
+channel_setting = System.getProperty( "channel_setting" );
 transformation = System.getProperty( "transformation" );
 apply_transformation  = System.getProperty( "apply_transformation" );
 define_mode_transform = System.getProperty( "define_mode_transform" );
@@ -30,12 +31,11 @@ System.out.println( "apply_to_angle = " + transform_angle );
 System.out.println( "apply_to_channel = " + transform_channel );
 System.out.println( "apply_to_illumination = " + transform_illumination );
 System.out.println( "apply_to_timepoint = " + transform_timepoint );
-System.out.println( "channel_1 = " + channel_1 ); 
-System.out.println( "channel_2 = " + channel_2 ); 
+System.out.println( "Channel_setting = " + channel_setting );
 System.out.println( "transformation = " + transformation );
 System.out.println( "apply = " + apply_transformation );
 System.out.println( "define = " + define_mode_transform );
-System.out.println( "all_timepoints_channel_" + channel_1 + "_illumination_0_all_angles = " + matrix_transform );
+System.out.println( "all_timepoints_channel_" + channel_setting + "_illumination_0_all_angles = " + matrix_transform );
 
 // Execute Fiji Plugin
 try {
@@ -51,11 +51,11 @@ IJ.run("Apply Transformations",
 	"define=" + define_mode_transform + " " + 
 	"same_transformation_for_all_timepoints " + 
 	"same_transformation_for_all_angles " +
-	"all_timepoints_channel_" + channel_1 + "_illumination_0_all_angles=[" + matrix_transform + "]");
+	"all_timepoints_channel_" + channel_setting + "_illumination_0_all_angles=[" + matrix_transform + "]");
 }
 catch ( e ) { 
 
-    print( "[registration::interest_points] caught exception: "+e );
+    print( "[external transformation] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     

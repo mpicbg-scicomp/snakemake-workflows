@@ -306,6 +306,7 @@ rule external_transform:
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
 	-Dmerged_xml={merged_xml_file} \
+	-Dchannel_setting={channel_setting} \
 	-Dtransform_angle={transform_angle} \
 	-Dtransform_channel={transform_channel} \
 	-Dtransform_illumination={transform_illumination} \
@@ -405,7 +406,7 @@ rule hdf5_xml_output:
     input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
     	    [ item+"_output" for item in datasets ] 
-    log: "hdf5_xml.log"
+    log: "output_hdf5_xml.log"
     run:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \

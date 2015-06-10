@@ -25,7 +25,6 @@ System.out.println( "xml_filename = " + xml_filename );
 System.out.println("=========================================================");
 System.out.println("Dataset:");
 timepoints = System.getProperty( "timepoints" );
-
 image_file_pattern = System.getProperty( "image_file_pattern" );
 type_of_dataset = System.getProperty( "type_of_dataset" );
 multiple_timepoints = System.getProperty( "multiple_timepoints" );
@@ -37,7 +36,6 @@ System.out.println( "timepoints = " + timepoints );
 System.out.println( "image_file_pattern = " + image_file_pattern );
 System.out.println( "type_of_dataset = " + type_of_dataset );
 System.out.println( "multiple_timepoints = " + multiple_timepoints );
-
 System.out.println( "multiple_illumination_directions = " + multiple_illumination_directions );
 System.out.println( "multiple_angles = " + multiple_angles );
 System.out.println( "imglib_container = " + imglib_container );
@@ -55,7 +53,7 @@ System.out.println( "pixel_distance_y = " + pixel_distance_y );
 System.out.println( "pixel_distance_z = " + pixel_distance_z );
 System.out.println( "pixel_unit = " + pixel_unit );
 
-// Channel Switch
+// Channel switch
 System.out.println("=========================================================");
 System.out.println("Channel Switch:");
 multiple_channels = System.getProperty( "multiple_channels" );
@@ -63,7 +61,31 @@ System.out.println( "multiple_channels = " + multiple_channels );
 
 channels = System.getProperty( "channels" ); 
 
-IJ.run("Define Multi-View Dataset , type_of_dataset=[" + type_of_dataset + "] " +
+if ( multiple_channels.equalsIgnoreCase( "NO (one channel)" ) )
+
+{ 
+
+	channels="";
+
+}
+
+else if ( multiple_channels.equalsIgnoreCase( "YES (one file per channel)" ) )
+
+{
+
+	channels = "channels_=" + channels + " ";
+
+}
+
+else {
+
+	System.out.println( "Channel switch setting gibberish" );
+
+}
+
+System.out.println( "channels = " + channels );
+
+System.out.println("Define Multi-View Dataset , type_of_dataset=[" + type_of_dataset + "] " +
 	"xml_filename=[" + xml_filename + ".xml] " +
 	"multiple_timepoints=[" + multiple_timepoints + "] " +
 	"multiple_channels=[" + multiple_channels + "] " +
@@ -78,8 +100,8 @@ IJ.run("Define Multi-View Dataset , type_of_dataset=[" + type_of_dataset + "] " 
 	"pixel_distance_x=" + pixel_distance_x + " " + 
 	"pixel_distance_y=" + pixel_distance_y + " " + 
 	"pixel_distance_z=" + pixel_distance_z + " " +
-	"pixel_unit=" + pixel_unit + "");	
-	
+	"pixel_unit=" + pixel_unit + "");
+
 // Executes Fiji plugin
 System.out.println("=========================================================");
 System.out.println("Start plugin:");

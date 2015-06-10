@@ -20,15 +20,13 @@ System.out.println( "-------------------------------------------------------" );
 System.out.println( "Load xml file: " );
 image_file_directory = System.getProperty( "image_file_directory" );
 merged_xml = System.getProperty( "merged_xml" );
-if ( ! merged_xml.endsWith(".xml") )
-    merged_xml = merged.xml + ".xml";
 
 System.out.println( "xml_path=" + image_file_directory + merged_xml + ".xml" );
 
 // Load general Parameters
 System.out.println( "-------------------------------------------------------" );
 System.out.println( "General parameters: " );
-int parallel_timepoints = Integer.parseInt(System.getProperty( "parallel_timepoints" ));
+parallel_timepoints = System.getProperty( "parallel_timepoints" );
 process_timepoint = System.getProperty( "process_timepoint" );
 process_channel = System.getProperty( "process_channel" );
 process_illumination = System.getProperty( "process_illumination" );
@@ -75,9 +73,8 @@ System.out.println( "imglib2_data_container=" + imglib2_data_container );
 System.out.println( "=======================================================" );
 System.out.println( "Starting Fusion" );
 
-try{
 IJ.run("Fuse/Deconvolve Dataset", 
-	"select_xml=" + image_file_directory + merged_xml + " " +
+	"select_xml=" + image_file_directory + merged_xml + ".xml " +
 	"process_angle=[" + process_angle + "] " +	
         "process_illumination=[" + process_illumination + "] " +
         "process_timepoint=[" + process_timepoint + "] " +
@@ -103,12 +100,6 @@ IJ.run("Fuse/Deconvolve Dataset",
 	"output_file_directory=" + image_file_directory + " " +
 	"lossless " +
 	"imglib2_data_container=[" + imglib2_data_container + "]");
-}
-catch ( e ) {
-	    print( "[deconvolution-GPU] caught exception: "+e );
-	    //important to fail the process if exception occurs
-	    runtime.exit(1);
-}
 
 /* shutdown */
 runtime.exit(0);
