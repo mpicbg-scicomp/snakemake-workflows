@@ -15,7 +15,8 @@ common: {
   pixel_distance_y: '0.28590106964',
   pixel_distance_z: '1.50000',
   pixel_unit: "um",
-  fusion_switch: "deconvolution"
+  # fusion_switch: "deconvolution"
+  fusion_switch: "fusion"
   }
               
 define_xml_czi: {
@@ -96,7 +97,7 @@ Dublicate_transformations: {
   
 fusion: {
   bsh_file: "fusion.bsh",
-  downsample: '1',
+  downsample: '4',
   fused_image: '"Append to current XML Project"',
   imglib2_container_fusion: '"ArrayImg"',
   imglib2_data_container: '"ArrayImg (faster)"',
@@ -160,7 +161,7 @@ deconvolution: {
 hdf5_output: {
   output_image_file_pattern: 'TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif',
   output_xml: '"fused_Single_Channel"',
-  output_hdf5_xml: '"hdf5_fused_Stock68"',
+  output_hdf5_xml: '"hdf5_fused_Single_Channel"',
   output_multiple_channels: '"NO (one channel)"',
   output_timepoints: '0-4',
   output_pixel_distance_x: 0.5718,
@@ -168,13 +169,15 @@ hdf5_output: {
   output_pixel_distance_z: 0.5718,
   output_pixel_unit: 'um',
   output_channels: "green",
-  output_data_type: "32Bit",
+  output_data_type: "16Bit",
   convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
   output_type_of_dataset: '"Image Stacks (ImageJ Opener)"',
   output_multiple_timepoints: '"YES (one file per time-point)"',
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
   output_imglib_container: '"ArrayImg (faster)"',
+  subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
+  chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
   bsh_file_define: "define_output.bsh",
   bsh_file_hdf5: "export_output.bsh"
   }

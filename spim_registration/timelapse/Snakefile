@@ -21,6 +21,7 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
     input: [ ds + "_output_hdf5" for ds in datasets ]
+    #input: [ ds + "_fusion" for ds in datasets ]
     
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
@@ -288,7 +289,7 @@ rule fusion:
     		-- --no-splash {path_bsh}""",
                                     config["common"],
                                     config["fusion"],
-                                    config["resave_czi_hdf5"],
+                                    config["resave_hdf5"],
                                     path_bsh=config["common"]["bsh_directory"] + config["fusion"]["bsh_file"],
                                     jdir=JOBDIR,
                                     file_id_w="{wildcards.file_id}",
@@ -417,8 +418,8 @@ rule hdf5_xml_output:
                 -Dresave_channel={resave_channel} \
                 -Dresave_illumination={resave_illumination} \
                 -Dresave_timepoint={resave_timepoint} \
-                -Dsubsampling_factors={subsampling_factors} \
-                -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+                -Dsubsampling_factors={subsampling_output} \
+                -Dhdf5_chunk_sizes={chunk_sizes_output} \
                 -Dtimepoints_per_partition={timepoints_per_partition} \
                 -Dsetups_per_partition={setups_per_partition} \
                 -Drun_only_job_number=0 \
@@ -429,7 +430,7 @@ rule hdf5_xml_output:
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"])
 
         part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
@@ -448,8 +449,8 @@ rule resave_hdf5_output:
         -Dresave_channel={resave_channel} \
         -Dresave_illumination={resave_illumination} \
         -Dresave_timepoint={resave_timepoint} \
-        -Dsubsampling_factors={subsampling_factors} \
-        -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+        -Dsubsampling_factors={subsampling_output} \
+        -Dhdf5_chunk_sizes={chunk_sizes_output} \
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
@@ -460,7 +461,7 @@ rule resave_hdf5_output:
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
+           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"],
            input_xml_base="{wildcards.xml_base}",
            job_number=int(wildcards.file_id)+1) 
    	part_string += " > {log} 2>&1 && touch {output}"
