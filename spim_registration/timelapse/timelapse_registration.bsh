@@ -86,66 +86,53 @@ System.out.println( "reg_interest_points_channel = " + reg_interest_points_chann
 String delims = "[,]";
 String[] channel_token = channels.split(delims);
 String[] interest_token = reg_interest_points_channel.split(delims);
-		
+				
 String reg_single_channel_string = "";
 StringBuilder reg_multi_channel_string = new StringBuilder();
 
-	if (channels.equalsIgnoreCase(""))
-	{
-		System.out.println("Warning: There are no channels set");
-	}
-		
-	// Returns Error if Single Channel selected but multiple settings in channels or reg_interest_points_channel
-	else if ( reg_process_channel.equalsIgnoreCase( "Single Channel" ) && (channel_token.length > 1 || interest_token.length > 1 ))
-	{
-		System.out.println( "Error: Single Channel selected but multiple settings in channls or reg_interest_points_channel" );
-	}
-	
-	// Assembles string for Single Channel registration
-	else if (reg_process_channel.equalsIgnoreCase( "Single channel" ) && channel_token.length == 1 )	
-	{	
-		reg_multi_channel_string.append( "" );
-		reg_process_channel = "All channels"; // Sets reprocess channel to All channels
-		reg_single_channel_string = "interest_points_channel_" + channels + "=" + reg_interest_points_channel + " ";
-	}
+if (channels.equalsIgnoreCase(""))
+{
+	System.out.println("Warning: There are no channels set");
+}
 
-	// Returns error if Multi Channels are selected but not enough settings in channels or 	reg_interest_points_channel
-	else if (reg_process_channel.equalsIgnoreCase( "All channels" ) &&  ( channel_token.length < 1 || interest_token.length < 1) ) 
-	{
-		System.out.println( "Error: Multi Channel selected but only one setting in channels or reg_interest_points_channel" );
-	}
+// Assembles string for Single Channel registration
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length == 1 )	
+{	
+	reg_multi_channel_string.append( "" );
+	reg_single_channel_string = "interest_points_channel_" + channels + "=" + reg_interest_points_channel + " ";
+}
 	
-	// Assembles string for Multi Channel registration
-	else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length > 1 ) 
-	{
+// Assembles string for Multi Channel registration
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length > 1 ) 
+{
+	for (int channel=0; channel < channel_token.length; channel++ )
+
+		{	
+			String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
+			reg_multi_channel_string.append( channel_part );
+			reg_multi_channel_string.append(" ");
+		}
+}
+				
+// Returns error of Multi Channels one Channel contains the beads is selected but not enough settings in channels or reg_interest_points_channel
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && ( channel_token.length < 1 || interest_token.length < 1 ))
+{
+	System.out.println( "Error: Multi Channel one Channel contains beads selected but only one setting in channls or reg_interest_points_channel" );
+}
+			
+// Assembles string for Multi Channel Processing one Channel Contains the beads	
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1 && interest_token.length > 1 )	
+{
 		for (int channel=0; channel < channel_token.length; channel++ )
 
-			{	
-				String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
-				reg_multi_channel_string.append( channel_part );
-				reg_multi_channel_string.append(" ");
-			}
-	}
-		
-	// Returns error of Multi Channels one Channel contains the beads is selected but not enough settings in channels or reg_interest_points_channel
-	else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && ( channel_token.length < 1 || interest_token.length < 1 ))
-	{
-		System.out.println( "Error: Multi Channel one Channel contains beads selected but only one setting in channls or reg_interest_points_channel" );
-	}
-	
-	// Assembles string for Multi Channel Processing one Channel Contains the beads	
-	else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1 && interest_token.length > 1 )	
-	{
-			for (int channel=0; channel < channel_token.length; channel++ )
-
-			{	
-				String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
-				reg_multi_channel_string.append( channel_part );
-				reg_multi_channel_string.append(" ");
-			}
+		{	
+			String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
+			reg_multi_channel_string.append( channel_part );
+			reg_multi_channel_string.append(" ");
+		}
+					
+}
 			
-	}
-
 System.out.println( "reg_single_channel_string = " + reg_single_channel_string );
 System.out.println( "reg_multi_channel_string = " + reg_multi_channel_string );
 

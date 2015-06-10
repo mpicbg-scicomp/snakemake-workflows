@@ -50,7 +50,7 @@ resave_hdf5: {
 
 registration: {
   # "Single Channel" is not a valid choice for "Process_channel"
-  reg_process_channel: '"Single channels"', 
+  reg_process_channel: '"All channels"', 
   reg_processing_channel: '"green"',
   reg_interest_points_channel: '"beads"',
   reg_radius_1: '2',

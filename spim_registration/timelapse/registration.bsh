@@ -117,16 +117,33 @@ String[] threshold_token = reg_threshold.split(delims);
 String channel_string = "";
 String processing_channel_string = "";
 StringBuilder channel_string_multi = new StringBuilder();
-	
+			
 // If there are no channels set returns an error
 if (channels.equalsIgnoreCase(""))
 {
 	System.out.println("Warning: There are no channels set");
 }
-	
+		
+// Returns an Error if there is one channel in channels but multiple settings in radius and or threshold	
+else if ( channel_token.length == 1 && (radius_1_token.length > 1 || radius_2_token.length > 1 || threshold_token.length > 1 ) )
+{
+	System.out.println( "Error: Only one channel detected but multiple channel settings for radius or threshold" );
+}
+				
+// Assembles String for Singel Channel 
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length == 1 ) 
+{
+	processing_channel_string = "";
+	channel_string_multi.append("");	
+	channel_string = "interest_point_specification=[Advanced ...] " +
+	"radius_1=" + reg_radius_1 + " " +
+	"radius_2=" + reg_radius_2 + " " +
+	"threshold=" + reg_threshold + " " +
+	"find_maxima";
+}	
+		
 // Dual Channels both Channels contain beads
 else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length > 1 )
-
 {
 	// Assembles String using StringBuilder for 2 Channels		
 	for (int channel=0; channel < channel_token.length; channel++ )
@@ -140,41 +157,22 @@ else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token
 		channel_string_multi.append(" ");	
 	}
 
-	}
-		
-// Returns an Error if there is one channel in channels but multiple settings in radius and or threshold
-else if ( channel_token.length == 1 && (radius_1_token.length > 1 || radius_2_token.length > 1 || threshold_token.length > 1 ) )
-{
-	System.out.println( "Error: Only one channel detected but multiple channel settings for radius or threshold" );
 }
-	
+		
 // Returns an Error if set to Dual Channel one Channel contains beads but there is only one channel in channels	
 else if ( reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length == 1 )
 {
 	System.out.println( "Error: reg_process_channel or channels set incorrectly" );
 }
-	
-// Assembles String for Singel Channel 
-else if (reg_process_channel.equalsIgnoreCase( "Single channel" ) && channel_token.length == 1 ) 
-{
-	reg_process_channel = "All channels"; // Sets reprocess channel All channels
-	processing_channel_string = "";
-	channel_string_multi.append("");	
-	channel_string = "interest_point_specification=[Advanced ...] " +
-	"radius_1=" + reg_radius_1 + " " +
-	"radius_2=" + reg_radius_2 + " " +
-	"threshold=" + reg_threshold + " " +
-	"find_maxima";
-}		
 		
-// Returns and Error if set to Dual Channel but there are multiple settings in radius and or threshold
+// Returns and Error if set to Dual Channel processing one channel contains the beads but there are multiple settings in radius and or threshold
 else if ( reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && (radius_1_token.length > 1 || radius_2_token.length > 1 || threshold_token.length > 1 ) )
 {
 	System.out.println( "Error: You said you wanted to process only one channel but there are multiple settings for radius or threshold" );
-}
-
+}	
+		
 // Assembles String for Dual Channel but only one Channel contains beads
-else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1)
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1)			
 {	
 	channel_string_multi.append("");
 	processing_channel_string = "processing_channel=[channel " +  reg_processing_channel + "] ";
@@ -190,9 +188,10 @@ else
 {
 	System.out.println( "Error: Incorrect settings" );
 }
-		
+				
 System.out.println( "Processing Channel = " + processing_channel_string );
 System.out.println( "Channel String: " + channel_string );
+System.out.println( reg_process_channel );
 System.out.println( "Multi channel String: " + channel_string_multi );
 
 // Channel Setting Registration
@@ -207,72 +206,62 @@ reg_interest_points_channel = System.getProperty( "reg_interest_points_channel" 
 System.out.println( "reg_interest_points_channel = " + reg_interest_points_channel );
 
 // Splits up channels, reg_interest_points_channel
-String delims = "[,]";
-String[] channel_token = channels.split(delims);
+// String delims = "[,]";
+// String[] channel_token = channels.split(delims);
+// Splits up channels, reg_interest_points_channel
 String[] interest_token = reg_interest_points_channel.split(delims);
-		
-
 String reg_single_channel_string ="";
 StringBuilder reg_multi_channel_string = new StringBuilder();
-		
+				
 // If there are no channels set returns an error
 if (channels.equalsIgnoreCase(""))
-	{
-		System.out.println("Warning: There are no channels set");
-	}
-		
-	// Returns Error if Single Channel selected but multiple settings in channels or reg_interest_points_channel
-	else if ( reg_process_channel.equalsIgnoreCase( "Single Channel" ) && (channel_token.length > 1 || interest_token.length > 1 ))
-	{
-		System.out.println( "Error: Single Channel selected but multiple settings in channls or reg_interest_points_channel" );
-	}
-	
-	// Assembles string for Single Channel registration
-	else if (reg_process_channel.equalsIgnoreCase( "Single Channel" ) && channel_token.length == 1 && interest_token.length == 1 )	
+{
+	System.out.println("Warning: There are no channels set");
+}
+				
+// Assembles string for Single Channel registration
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length == 1 && interest_token.length == 1 )	
+{	
+	reg_multi_channel_string.append( "" );
+	reg_single_channel_string = "interest_points_channel_" + channels + "=" + reg_interest_points_channel + " ";
+}
+			
+// Returns error if Multi Channels are selected but not enough settings in channels or 	reg_interest_points_channel
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) &&  ( channel_token.length < 1 || interest_token.length < 1) ) 
+{
+	System.out.println( "Error: Multi Channel selected but only one setting in channels or reg_interest_points_channel" );
+}
+			
+// Assembles string for Multi Channel registration
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length > 1 ) 
+{
+	for (int channel=0; channel < channel_token.length; channel++ )
 	{	
-		reg_multi_channel_string.append( "" );
-		reg_process_channel = "All channels"; // Sets reprocess channel to all channels
-		reg_single_channel_string = "interest_points_channel_" + channels + "=" + reg_interest_points_channel + " ";
+		String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
+		reg_multi_channel_string.append( channel_part );
+		reg_multi_channel_string.append(" ");
 	}
-	
-	// Returns error if Multi Channels are selected but not enough settings in channels or 	reg_interest_points_channel
-	else if (reg_process_channel.equalsIgnoreCase( "All channels" ) &&  ( channel_token.length < 1 || interest_token.length < 1) ) 
-	{
-		System.out.println( "Error: Multi Channel selected but only one setting in channels or reg_interest_points_channel" );
-	}
-	
-	// Assembles string for Multi Channel registration
-	else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length > 1 ) 
-	{
-		for (int channel=0; channel < channel_token.length; channel++ )
+}
 
-			{	
-				String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
-				reg_multi_channel_string.append( channel_part );
-				reg_multi_channel_string.append(" ");
-			}
+// Returns error of Multi Channels one Channel contains the beads is selected but not enough settings in channels or reg_interest_points_channel
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && ( channel_token.length < 1 || interest_token.length < 1 ))
+{
+	System.out.println( "Error: Multi Channel one Channel contains beads selected but only one setting in channls or reg_interest_points_channel" );
+}
+				
+// Assembles string for Multi Channel Processing one Channel Contains the beads
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1 && interest_token.length > 1)	
+{
+	for (int channel=0; channel < channel_token.length; channel++ )
+	{	
+		String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
+		reg_multi_channel_string.append( channel_part );
+		reg_multi_channel_string.append(" ");		
 	}
+}
 
-	// Returns error of Multi Channels one Channel contains the beads is selected but not enough settings in channels or reg_interest_points_channel
-	else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && ( channel_token.length < 1 || interest_token.length < 1 ))
-	{
-		System.out.println( "Error: Multi Channel one Channel contains beads selected but only one setting in channls or reg_interest_points_channel" );
-	}
-		
-	// Assembles string for Multi Channel Processing one Channel Contains the beads
-	else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1 && interest_token.length > 1)	
-	{
-			for (int channel=0; channel < channel_token.length; channel++ )
-			{	
-				String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
-				reg_multi_channel_string.append( channel_part );
-				reg_multi_channel_string.append(" ");		
-			}
-	}
-
-System.out.println( "reg_single_channel_string = " + reg_single_channel_string );
-System.out.println( "reg_multi_channel_string = " + reg_multi_channel_string );
-
+		System.out.println( "reg_single_channel_string = " + reg_single_channel_string );
+		System.out.println( "reg_multi_channel_string = " + reg_multi_channel_string );
 
 // activate cluster processing
 System.out.println( "=======================================================" );
