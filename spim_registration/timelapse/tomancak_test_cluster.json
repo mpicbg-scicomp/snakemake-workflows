@@ -1,0 +1,202 @@
+{
+    "common" :
+    {
+	"fiji-app" : "/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/ImageJ-linux64",
+	"fiji-prefix" : "/sw/bin/xvfb-run -a",
+	"directory_cuda" : "/lustre/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/lib/",
+	"merged_xml" : "hdf5_test_unicore_merge",
+	"bsh_directory" : "/home/steinbac/development/schmied-snakemake-workflows/spim_registration/timelapse/",
+	"first_xml_filename" : "test_unicore",
+	"hdf5_xml_filename" : "\"hdf5_test_unicore\"",
+	"fusion_switch" : "deconvolution",
+	"ntimepoints" : 5
+    },
+    
+    "define_xml_czi" :
+    {
+    	    "pixel_distance_x" : "0.28590106964",
+    	    "pixel_distance_y" : "0.28590106964",
+    	    "pixel_distance_z" : "1.50000", 
+    	    "pixel_unit" : "um",				    
+    	    "first_czi" : "2015-04-11_LZ2_Stock68_3.czi",
+    	    "channel_1" : "green",		
+    	    "channel_2" : "red",
+    	    "angle_1" : "0",
+    	    "angle_2" : "72",
+    	    "angle_3" : "144",
+    	    "angle_4" : "216",
+    	    "angle_5" : "288",
+    	    "illumination_1" : "0",
+    	    "rotation_around" : "X-Axis",
+    	    "bsh_file" : "define_czi.bsh" 
+    },
+    
+    "define_xml_tif" :
+    {
+	"acquisition_angles" : "0,72,144,216,288",
+	"channels" : "0",
+	"image_file_pattern" : "img_TL{{t}}_Angle{{a}}.tif",
+	"pixel_distance_x" : "0.28590106964",
+	"pixel_distance_y" : "0.28590106964",
+	"pixel_distance_z" : "1.50000",
+	"pixel_unit" : "um",
+	"multiple_timepoints" : "\"YES (one file per time-point)\"",
+	"multiple_channels" : "\"NO (one channel)\"",
+	"multiple_illumination_directions" : "\"NO (one illumination direction)\"",
+	"multiple_angles" : "\"YES (one file per angle)\"",
+	"type_of_dataset" : "\"Image Stacks (ImageJ Opener)\"",
+	"imglib_container" : "\"ArrayImg (faster)\"",
+	"bsh_file" : "define_tif_zip.bsh" 
+    },
+    
+    "resave_hdf5" :
+    {
+    	    "resave_angle" : "\"All angles\"",
+    	    "resave_channel" : "\"All channels\"",
+    	    "resave_illumination" : "\"All illuminations\"",
+    	    "resave_timepoint" : "\"All Timepoints\"",
+    	    "subsampling_factors" : "\"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}\"",
+    	    "hdf5_chunk_sizes" : "\"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}\"",
+    	    "timepoints_per_partition" : "1",
+    	    "setups_per_partition" : "0",
+    	    "bsh_file" : "export.bsh"
+    },
+    
+    "registration" :
+    {
+	"timepoint" : "\"Single Timepoint (Select from List)\"",
+	"illuminations" : "\"All illuminations\"",
+	"angle" : "\"All angles\"",
+	"channel" : "\"All channels\"",
+	"proc-ch" : "\"channel 0\"",
+	"algorithm" : "\"Fast 3d geometric hashing (rotation invariant)\"",
+	"label_interest_points" : "\"beads\"",
+	"type_of_registration" : "\"Register timepoints individually\"",
+	"type_of_detection" : "\"Difference-of-Mean (Integral image based)\"" ,
+	"subpixel_localization" : "\"3-dimensional quadratic fit\"",
+	"imglib_container" : "\"ArrayImg (faster)\"",
+	"radius_1" : "2",
+	"radius_2" : "3",
+	"threshold" : "0.005",
+	"interest_points_channel_0" : "\"beads\"",
+	"interest_points_channel_1" : "\"beads\"",
+	"fix_tiles" : "\"Fix first tile\"",
+	"map_back_tiles" : "\"Map back to first tile using rigid model\"",
+	"transformation_model" : "Affine",
+	"model_to_regularize_with" : "Rigid",
+	"lambda" : "0.10" ,
+	"allowed_error_for_ransac" : "5",
+	"significance" : "10",
+	"detection_min_max" : "find_maxima",
+	"initial_sigma" : "1.8",
+	"threshold_gaussian" : "0.0080",
+	"bsh_file" : "registration.bsh"
+    },
+ 
+    "xml_merge" :
+    {
+	"bsh_file" : "xml_merge.bsh"
+    },
+    
+    "timelapse" : 
+    {
+    	  "reference_timepoint" : "0",
+    	  "timelapse_process_timepoints" : "\"All Timepoints\"",
+    	  "type_of_registration_timelapse" : "\"Match against one reference timepoint (no global optimization)\"",
+    	  "bsh_file" : "timelapse_registration.bsh"
+    },
+
+    "external_transform" :
+    {
+	"bsh_file" : "transform.bsh",
+	"angle" : "\"All angles\"",
+	"channel" : "\"All channels\"",
+	"illumination" : "\"All illuminations\"",
+	"timepoint" : "\"All Timepoints\"",
+	"transformation" : "\"Rigid\"",
+	"apply_transformation" : "\"Current view transformations (appends to current transforms)\"",
+	"define_mode_transform" : "\"Matrix\"",
+	"matrix_transform" : "\"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0\""
+    },
+    
+    "fusion" :
+    {
+    	    "minimal_x" : "190",	
+    	    "minimal_y" : "-16",
+    	    "minimal_z" : "-348",
+    	    "maximal_x" : "1019",
+    	    "maximal_y" : "1941",
+    	    "maximal_z" : "486",
+    	    "downsample" : "1",
+    	    "process_timepoint" : "\"Single Timepoint (Select from List)\"",
+    	    "process_channel" : "\"All channels\"",
+    	    "process_illumination" : "\"All illuminations\"",
+    	    "process_angle" : "\"All angles\"",
+    	    "xml_output" : "\"Save every XML with user-provided unique id\"", 
+    	    "fused_image" : "\"Append to current XML Project\"",
+    	    "pixel_type" : "\"16-bit unsigned integer\"",
+    	    "imglib2_container_fusion" : "\"ArrayImg\"",
+    	    "process_views_in_paralell" : "\"All\"",
+    	    "interpolation" : "\"Linear Interpolation\"",
+    	    "imglib2_data_container" : "\"ArrayImg (faster)\"",
+    	    "bsh_file" : "fusion.bsh"
+    },
+
+    "deconvolution" :
+    {
+
+	"bsh_file" : "deconvolution_GPU.bsh",
+	"process_timepoint" : "\"Single Timepoint (Select from List)\"",
+	"process_channel" : "\"All channels\"",
+	"process_illumination" : "\"All illuminations\"",
+	"process_angle" : "\"All angles\"",
+	"minimal_x" : "95",
+	"minimal_y" : "-8",
+	"minimal_z" : "-174",
+	"maximal_x" : "509",
+	"maximal_y" : "970",
+	"maximal_z" : "243",
+	"imglib2_container" : "\"ArrayImg \"",
+	"type_of_iteration" : "\"Efficient Bayesian - Optimization I (fast, precise)\"",
+	"osem_acceleration" : "\"1 (balanced)\"",
+	"Tikhonov_parameter" : "0.0006",
+	"compute" : "\"in 512x512x512 blocks\"",
+	"compute_on" : "\"GPU (Nvidia CUDA via JNA)\"",
+	"psf_estimation" : "\"Extract from beads\"",
+	"iterations" : "5",
+	"detections_to_extract_psf_for_channel_0" : "\"beads\"",
+	"detections_to_extract_psf_for_channel_1" : "\"beads\"",
+	"psf_size_x" : "19",
+	"psf_size_y" : "19",
+	"psf_size_z" : "25"
+    },
+    
+    "hdf5_output" :
+    {
+    	    "output_image_file_pattern" : "TP{{t}}_Ch{{c}}_Ill0_Ang0,72,144,216,288.tif",
+    	    "output_data_type" : "32Bit",
+    	    "output_xml" : "\"fused_Dual_Channel\"",
+    	    "output_hdf5_xml" : "\"hdf5_fused_Stock68\"",
+    	    "output_multiple_channels" : "\"NO (one channel)\"",	
+    	    "output_timepoints" : "0-4",
+    	    "output_channels" : "green",
+    	    "output_pixel_distance_x" : "0.5718", 	
+    	    "output_pixel_distance_y" : "0.5718", 	
+    	    "output_pixel_distance_z" : "0.5718", 	
+    	    "output_pixel_unit" : "um",			
+    	    "output_multiple_timepoints" : "\"YES (one file per time-point)\"",   	
+    	    "output_illumination_directions" : "\"NO (one illumination direction)\"",	
+    	    "output_multiple_angles" : "\"NO (one angle)\"",					
+    	    "output_type_of_dataset" : "\"Image Stacks (ImageJ Opener)\"", 		
+    	    "output_imglib_container" : "\"ArrayImg (faster)\"",
+    	    "bsh_file_define" : "/define_output.bsh",
+    	    "bsh_file_hdf5" : "/export_output.bsh", 	
+    	    "convert_32bit" : "\"[Use min/max of first image (might saturate intenities over time)]\""
+    	    
+    }
+
+    
+    
+    
+    
+}

@@ -1,162 +1,475 @@
 import os, glob, sys, re
+from timelaps_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
-if JOBDIR[-1] != "/":
+if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a slash
    JOBDIR+="/"
 
 #data specific config file, expected to be inside JOBDIR
-configfile: "tomancak.json"
-   
-datasets = glob.glob('*00.h5')
+# configfile: "tomancak_test_cluster.json"
+configfile: "tomancak_test_cluster.yaml"
 
-#TODO: this should go into a python module in this path
-fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
-xml_merge_in = []
-for ds in datasets:
-   bn = os.path.basename(ds)
-   bn_res = fre.search(bn)
-   xml_base,file_id = bn_res.group('xml_base'),bn_res.group('file_id')
-   xml_merge_in.append("{xbase}.job_{fid}.xml".format(xbase=xml_base, fid=int(file_id)))
-   
-#TODO: this should go into a python module in this path
-def produce_string(_fstring, *args, **kwargs):
-   contents = dict()
-   for item in args:
-      if type(item) == type(kwargs):
-         contents.update(item)
-         
-   contents.update(kwargs)
-   return _fstring.format(**contents)
+
+padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
+ds_format = "-"+padding_format+"-00.h5"
+
+# problematic needs padding of file_id
+datasets = [ str(config["common"]["hdf5_xml_filename"].strip('\"')+(ds_format.format(item))) for item in range(int(config["common"]["ntimepoints"])) ]
+
+xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
-    input: [ ds+"_deconvolved" for ds in datasets ]
+    input: [ ds + "_output_hdf5" for ds in datasets ]
+    #input: [ ds + "_fusion" for ds in datasets ]
+    
+rule resave_prepared:
+    input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
 
+# defining xml for czi dataset
+rule define_xml_czi:
+    input:glob.glob('*.czi'), config["define_xml_czi"]["first_czi"]
+    output: config["common"]["first_xml_filename"] + ".xml"
+    log: "define_xml_czi.log"
+    run: 
+        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+           -Dfirst_czi={first_czi} \
+           -Dangles={angles} \
+           -Dchannels={channels} \
+           -Dillumination={illumination} \
+           -Dpixel_distance_x={pixel_distance_x} \
+           -Dpixel_distance_y={pixel_distance_y} \
+           -Dpixel_distance_z={pixel_distance_z} \
+           -Dpixel_unit={pixel_unit} \
+           -Dfirst_xml_filename={first_xml_filename} \
+           -Drotation_around={rotation_around} \
+           -- --no-splash {path_bsh}""",
+                                       config["common"],
+                                       config["define_xml_czi"],
+                                       jdir=JOBDIR,
+                                       path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
+        cmd_string += " > {log} 2>&1"
+        shell(cmd_string)
+
+        
+        
+# defining xml for tif dataset
+rule define_xml_tif:
+    input: glob.glob(re.sub("{{.}}","*",config["define_xml_tif"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
+    output: config["common"]["first_xml_filename"] + ".xml"
+    log: "define_xml_tif.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dtimepoints={timepoints} \
+        -Dangles={angles} \
+        -Dchannels={channels} \
+        -Dillumination={illumination} \
+        -Dimage_file_pattern={image_file_pattern} \
+        -Dpixel_distance_x={pixel_distance_x} \
+        -Dpixel_distance_y={pixel_distance_y} \
+        -Dpixel_distance_z={pixel_distance_z} \
+        -Dpixel_unit={pixel_unit} \
+       	-Dxml_filename={first_xml_filename} \
+        -Dtype_of_dataset={type_of_dataset} \
+        -Dmultiple_timepoints={multiple_timepoints} \
+        -Dmultiple_channels={multiple_channels} \
+        -Dmultiple_illumination_directions={multiple_illumination_directions} \
+        -Dmultiple_angles={multiple_angles} \
+        -Dimglib_container={imglib_container} \
+	-- --no-splash {path_bsh}""",
+	   config["common"],
+	   config["define_xml_tif"],
+	   jdir=JOBDIR,
+	   path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"],
+           timepoints="0-"+str(int(config["common"]["ntimepoints"])-1)
+        )
+	
+	cmd_string +=" > {log} 2>&1"
+	shell(cmd_string)
+
+ruleorder: define_xml_czi > define_xml_tif 
+
+# create mother .xml/.h5
+rule hdf5_xml:
+    input: config["common"]["first_xml_filename"] + ".xml" 
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
+            [ item+"_xml" for item in datasets ]
+    log: "hdf5_xml.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={first_xml_filename} \
+                -Dhdf5_xml_filename={hdf5_xml_filename} \
+                -Dresave_angle={resave_angle} \
+                -Dresave_channel={resave_channel} \
+                -Dresave_illumination={resave_illumination} \
+                -Dresave_timepoint={resave_timepoint} \
+                -Dsubsampling_factors={subsampling_factors} \
+                -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+                -Dtimepoints_per_partition={timepoints_per_partition} \
+                -Dsetups_per_partition={setups_per_partition} \
+                -Drun_only_job_number=0 \
+                -- --no-splash {path_bsh}""", 
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+
+        part_string += " > {log} 2>&1 && touch {output}"
+        shell(part_string)
+       
+
+# resave  .czi/.tif dataset as hdf5	
+rule resave_hdf5:
+    input: rules.hdf5_xml.output # "{xml_base}-{file_id,\d+}-00.h5_xml"
+    output: "{xml_base}-{file_id,\d+}-00.h5", "{xml_base}-{file_id,\d+}-00.h5_hdf5"
+    log: "resave_hdf5-{file_id}.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        	-Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={first_xml_filename} \
+                -Dhdf5_xml_filename={input_xml_base} \
+        -Dresave_angle={resave_angle} \
+        -Dresave_channel={resave_channel} \
+        -Dresave_illumination={resave_illumination} \
+        -Dresave_timepoint={resave_timepoint} \
+        -Dsubsampling_factors={subsampling_factors} \
+        -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+        -Dtimepoints_per_partition={timepoints_per_partition} \
+        -Dsetups_per_partition={setups_per_partition} \
+        -Drun_only_job_number={job_number} \
+        -- --no-splash {path_bsh}""", # the & submits everyting at once
+           config["common"],
+           config["define_xml_czi"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
+           input_xml_base="{wildcards.xml_base}",
+           job_number=int(wildcards.file_id)+1) 
+   	part_string += " > {log} 2>&1 && touch {output}"
+        shell(part_string) 
+       	       	
 rule registration:
-    input: "{xml_base}-{file_id}-00.h5"
-    output: "{xml_base}-{file_id,\d+}-00.h5_registered", #"{xml_base}.job_{file_id,\d+}.xml"
+    input:  "{xml_base}-{file_id}-00.h5" 
+    output: "{xml_base}.job_{file_id,\d+}.xml"#, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
            """{fiji-prefix} {fiji-app} \
--Dparallel_timepoints={file_id_w} \
--Dimage_file_directory={jdir} \
--Dxml_filename={input_xml} \
--Dprocess_timepoint={timepoint} \
--Dprocess_channel={channel} \
--Dprocess_illumination={illuminations} \
--Dprocess_angle={angle} \
--Dprocessing_channel={proc-ch} \
--Dlabel_interest_points={label_interest_points} \
--Dtype_of_registration={type_of_registration} \
--Dtype_of_detection={type_of_detection} \
--Dsubpixel_localization={subpixel_localization} \
--Dimglib_container={imglib_container} \
--Dradius_1={radius_1} \
--Dradius_2={radius_2} \
--Dthreshold={threshold} \
--Dinitial_sigma={initial_sigma} \
--Dthreshold_gaussian={threshold_gaussian} \
--Dregistration_algorithm={algorithm} \
--Dinterest_points_channel_0={interest_points_channel_0} \
--Dinterest_points_channel_1={interest_points_channel_1} \
--Dfix_tiles={fix_tiles} \
--Dmap_back_tiles={map_back_tiles} \
--Dtransformation_model={transformation_model} \
--Dmodel_to_regularize_with={model_to_regularize_with} \
--Dlambda={lambda} \
--Dallowed_error_for_ransac={allowed_error_for_ransac} \
--Ddetection_min_max={detection_min_max} \
--- --no-splash {bsh_file}""",
+        -Dparallel_timepoints={file_id_w} \
+        -Dimage_file_directory={jdir} \
+        -Dxml_filename={input_xml} \
+	-Dreg_process_timepoint={reg_process_timepoint} \
+	-Dreg_process_channel={reg_process_channel} \
+	-Dreg_process_illumination={reg_process_illumination} \
+	-Dreg_process_angle={reg_process_angle} \
+	-Dchannels={channels} \
+	-Dreg_processing_channel={reg_processing_channel} \
+        -Dlabel_interest_points={label_interest_points} \
+        -Dtype_of_registration={type_of_registration} \
+        -Dtype_of_detection={type_of_detection} \
+        -Dsubpixel_localization={subpixel_localization} \
+        -Dimglib_container={imglib_container} \
+	-Dreg_radius_1={reg_radius_1} \
+	-Dreg_radius_2={reg_radius_2} \
+        -Dreg_threshold={reg_threshold} \
+        -Dinitial_sigma={initial_sigma} \
+        -Dthreshold_gaussian={threshold_gaussian} \
+        -Dregistration_algorithm={algorithm} \
+        -Dreg_interest_points_channel={reg_interest_points_channel} \
+        -Dfix_tiles={fix_tiles} \
+        -Dmap_back_tiles={map_back_tiles} \
+        -Dtransformation_model={transformation_model} \
+        -Dmodel_to_regularize_with={model_to_regularize_with} \
+        -Dlambda={lambda} \
+        -Dallowed_error_for_ransac={allowed_error_for_ransac} \
+        -Ddetection_min_max={detection_min_max} \
+        -Dsignificance={significance} \
+        -- --no-splash {path_bsh}""",
            config["common"], 
            config["registration"],
-           file_id_w="{wildcards.file_id}",
+           file_id_w=wildcards.file_id,
+           path_bsh=config["common"]["bsh_directory"] + config["registration"]["bsh_file"],
            jdir=JOBDIR,
-           input_xml="{wildcards.xml_base}")
-        cmd_string += "> {log} 2>&1 && touch {output}"
+           input_xml=wildcards.xml_base)
+        cmd_string += " > {log} 2>&1 && touch {output}"
        
         shell(cmd_string)
         #shell("touch {output}")
 
 rule xml_merge:
-    input: [ item+"_registered" for item in datasets ] #xml_merge_in 
+    input: [ str(config["common"]["hdf5_xml_filename"].strip('\"')+".job_"+(padding_format.format(item))+".xml") for item in range(int(config["common"]["ntimepoints"])) ] #[ item+"_registered" for item in datasets ] 
     output: "{xml_base}_merge.xml"
     log: "{xml_base}_merge.log"
     run:
-        cmd_string = produce_string("{fiji-prefix} {fiji-app} -Dimage_file_directory={jdir} -Dmerged_xml={output} -- --no-splash {bsh_file} > {log} 2>&1",
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dmerged_xml={output} \
+        -- --no-splash {path_bsh}""",
                                     config["common"],
                                     config["xml_merge"],
-                                    log="{log}",
+                                    path_bsh=config["common"]["bsh_directory"] + config["xml_merge"]["bsh_file"],
                                     jdir=JOBDIR,
                                     output="{output}")
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
-rule external_trafo:
+rule timelapse:
     input: rules.xml_merge.output
-    output: rules.xml_merge.output[0] + "_external_trafo"
-    log: "external_trafo.log"
+    output: rules.xml_merge.output[0] + "_timelapse"
+    log: "{xml_base}_timelapse.log"
     run:
-        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
--Dimage_file_directory={jdir} \
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
         -Dmerged_xml={input} \
--Dtransform_angle={angle} \
--Dtransform_channel={channel} \
--Dtransform_illumination={illumination} \
--Dtransform_timepoint={timepoint} \
--Dtransformation={transformation} \
--Dapply_transformation={apply_transformation} \
--Ddefine_mode_transform={define_mode_transform} \
--Dmatrix_transform={matrix_transform} \
--- --no-splash {bsh_file}""",
+        -Dtimelapse_process_timepoints={timelapse_process_timepoints} \
+        -Dreg_process_channel={reg_process_channel} \
+        -Dreg_process_illumination={reg_process_illumination} \
+        -Dreg_process_angle={reg_process_angle} \
+        -Dreference_timepoint={reference_timepoint} \
+        -Dchannels={channels} \
+        -Dtype_of_registration_timelapse={type_of_registration_timelapse} \
+        -Dregistration_algorithm={algorithm} \
+        -Dreg_interest_points_channel={reg_interest_points_channel} \
+        -Dtransformation_model={transformation_model} \
+        -Dmodel_to_regularize_with={model_to_regularize_with} \
+        -Dlambda={lambda} \
+        -Dallowed_error_for_ransac={allowed_error_for_ransac} \
+        -Dsignificance={significance} \
+        -- --no-splash {path_bsh}""",
+                                    config["common"],
+                                    config["registration"],
+                                    config["timelapse"],
+                                    input="{input}",
+                                    path_bsh=config["common"]["bsh_directory"] + config["timelapse"]["bsh_file"],
+                                    jdir=JOBDIR)
+        cmd_string += " > {log} 2>&1 && touch {output}"
+        shell(cmd_string)
+        
+rule fusion:
+    input: rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    output: "{xml_base}-{file_id,\d+}-00.h5_fusion"
+    log: "{xml_base}-{file_id,\d+}-00-fusion.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+    	-Dparallel_timepoints={file_id_w} \
+    	-Dmerged_xml={merged_xml_file} \
+    	-Dprocess_timepoint={process_timepoint} \
+    	-Dprocess_channel={process_channel} \
+    	-Dprocess_illumination={process_illumination} \
+    	-Dprocess_angle={process_angle} \
+    	-Dxml_output={xml_output} \
+    	-Dfused_image={fused_image} \
+    	-Dminimal_x={minimal_x} \
+    	-Dminimal_y={minimal_y} \
+    	-Dminimal_z={minimal_z} \
+    	-Dmaximal_x={maximal_x} \
+    	-Dmaximal_y={maximal_y} \
+    	-Dmaximal_z={maximal_z} \
+    	-Ddownsample={downsample} \
+    	-Dpixel_type={pixel_type} \
+    	-Dimglib2_container_fusion={imglib2_container_fusion} \
+    	-Dprocess_views_in_paralell={process_views_in_paralell} \
+    	-Dinterpolation={interpolation} \
+    	-Dimglib2_data_container={imglib2_data_container} \
+    	-Dsubsampling_factors={subsampling_factors} \
+    	-Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+    	-Dtimepoints_per_partition={timepoints_per_partition} \
+    	-Dsetups_per_partition={setups_per_partition} \
+    		-- --no-splash {path_bsh}""",
+                                    config["common"],
+                                    config["fusion"],
+                                    config["resave_hdf5"],
+                                    path_bsh=config["common"]["bsh_directory"] + config["fusion"]["bsh_file"],
+                                    jdir=JOBDIR,
+                                    file_id_w="{wildcards.file_id}",
+                                    merged_xml_file="{input.merged_xml}"
+        )
+        cmd_string += " > {log} 2>&1 && touch {output}"
+        shell(cmd_string)
+
+rule external_transform:
+    input: rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
+    output: rules.timelapse.output[0] + "_external_trafo"
+    log: "external_transform.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+	-Dmerged_xml={merged_xml_file} \
+	-Dchannel_setting={channel_setting} \
+	-Dtransform_angle={transform_angle} \
+	-Dtransform_channel={transform_channel} \
+	-Dtransform_illumination={transform_illumination} \
+	-Dtransform_timepoint={transform_timepoint} \
+	-Dtransformation={transformation} \
+	-Dapply_transformation={apply_transformation} \
+	-Ddefine_mode_transform={define_mode_transform} \
+	-Dmatrix_transform={matrix_transform} \
+	-- --no-splash {path_bsh}""",
                                     config["common"], 
                                     config["external_transform"],
-                                    jdir=JOBDIR,
-                                    input="{input}")
-        cmd_string += "> {log} 2>&1 && touch {output}"
-        shell(cmd_string)
-
-rule deconvolution:
-    input: rules.external_trafo.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolved"
-    log: "{xml_base}-{file_id,\d+}-00-deconvolution.log"
-    run:
-        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
--Dimage_file_directory={jdir} \
--Ddeco_output_file_directory={jdir} \
-        -Dmerged_xml={merged_xml_file} \
--Dparallel_timepoints={file_id_w} \
--Dprocess_timepoint={process_timepoint} \
--Dprocess_channel={process_channel} \
--Dprocess_illumination={process_illumination} \
--Dprocess_angle={process_angle} \
--Dminimal_x_deco={minimal_x} \
--Dminimal_y_deco={minimal_y} \
--Dminimal_z_deco={minimal_z} \
--Dmaximal_x_deco={maximal_x} \
--Dmaximal_y_deco={maximal_y} \
--Dmaximal_z_deco={maximal_z} \
--Dimglib2_container_deco={imglib2_container} \
--Dtype_of_iteration={type_of_iteration} \
--Dosem_acceleration={osem_acceleration} \
--DTikhonov_parameter={Tikhonov_parameter} \
--Dcompute={compute} \
--Dpsf_estimation={psf_estimation} \
--Ddirectory_cuda={directory_cuda} \
--Ddetections_to_extract_psf_for_channel_0={detections_to_extract_psf_for_channel_0} \
--Ddetections_to_extract_psf_for_channel_1={detections_to_extract_psf_for_channel_1} \
--Dpsf_size_x={psf_size_x} \
--Dpsf_size_y={psf_size_y} \
--Dpsf_size_z={psf_size_z} \
--Diterations={iterations} \
-        -- --no-splash {bsh_file}""",
-                                    config["common"], 
-                                    config["deconvolution"],
-                                    file_id_w="{wildcards.file_id}",
+                                    path_bsh=config["common"]["bsh_directory"] + config["external_transform"]["bsh_file"],
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
-        cmd_string += "> {log} 2>&1 && touch {output}"
+        cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
-  
+
+rule deconvolution:
+    input: rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
+    log: "{xml_base}-{file_id,\d+}-00-deconvolution.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Ddeco_output_file_directory={jdir} \
+        -Dmerged_xml={merged_xml_file} \
+        -Dparallel_timepoints={file_id_w} \
+        -Dprocess_timepoint={process_timepoint} \
+        -Dprocess_channel={process_channel} \
+        -Dprocess_illumination={process_illumination} \
+        -Dprocess_angle={process_angle} \
+        -Dchannels={channels} \
+        -Dminimal_x_deco={minimal_x_deco} \
+        -Dminimal_y_deco={minimal_y_deco} \
+        -Dminimal_z_deco={minimal_z_deco} \
+        -Dmaximal_x_deco={maximal_x_deco} \
+        -Dmaximal_y_deco={maximal_y_deco} \
+        -Dmaximal_z_deco={maximal_z_deco} \
+        -Dimglib2_container_deco={imglib2_container} \
+        -Dtype_of_iteration={type_of_iteration} \
+        -Dosem_acceleration={osem_acceleration} \
+        -DTikhonov_parameter={Tikhonov_parameter} \
+        -Dcompute={compute} \
+        -Dpsf_estimation={psf_estimation} \
+        -Ddirectory_cuda={directory_cuda} \
+        -Ddetections_to_extract_psf_for_channel={detections_to_extract_psf_for_channel} \
+        -Dpsf_size_x={psf_size_x} \
+        -Dpsf_size_y={psf_size_y} \
+        -Dpsf_size_z={psf_size_z} \
+        -Diterations={iterations} \
+        -- --no-splash {path_bsh}""",
+                                    config["common"], 
+                                    config["deconvolution"],
+                                    file_id_w="{wildcards.file_id}",
+                                    path_bsh=config["common"]["bsh_directory"] + config["deconvolution"]["bsh_file"],
+                                    jdir=JOBDIR,
+                                    merged_xml_file="{input.merged_xml}"
+        )
+        cmd_string += " > {log} 2>&1 && touch {output}"
+        shell(cmd_string)
+
+rule define_output:
+    input: [ item + "_" + config["common"]["fusion_switch"] for item in datasets ], glob.glob('TP*')
+    output: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
+    log: "define_output.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+        -Dimage_file_directory={jdir} \
+        -Dtimepoints={output_timepoints} \
+        -Dchannels={output_channels} \
+        -Dimage_file_pattern={output_image_file_pattern} \
+        -Dpixel_distance_x={output_pixel_distance_x} \
+        -Dpixel_distance_y={output_pixel_distance_y} \
+        -Dpixel_distance_z={output_pixel_distance_z} \
+        -Dpixel_unit={output_pixel_unit} \
+       	-Dxml_filename={output_xml} \
+        -Dtype_of_dataset={output_type_of_dataset} \
+        -Dmultiple_timepoints={output_multiple_timepoints} \
+        -Dmultiple_channels={output_multiple_channels} \
+        -Dmultiple_illumination_directions={output_illumination_directions} \
+        -Dmultiple_angles={output_multiple_angles} \
+        -Dimglib_container={output_imglib_container} \
+	-- --no-splash {path_bsh}""",
+	config["common"],
+	config["hdf5_output"],
+	jdir=JOBDIR,
+	path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_define"])
+	
+	cmd_string +=" > {log} 2>&1"
+	shell(cmd_string)
+
+# create mother .xml/.h5
+rule hdf5_xml_output:
+    input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
+    	    [ item+"_output" for item in datasets ] 
+    log: "output_hdf5_xml.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={output_xml} \
+                -Dhdf5_xml_filename={output_hdf5_xml} \
+                -Dresave_angle={resave_angle} \
+                -Dresave_channel={resave_channel} \
+                -Dresave_illumination={resave_illumination} \
+                -Dresave_timepoint={resave_timepoint} \
+                -Dsubsampling_factors={subsampling_output} \
+                -Dhdf5_chunk_sizes={chunk_sizes_output} \
+                -Dtimepoints_per_partition={timepoints_per_partition} \
+                -Dsetups_per_partition={setups_per_partition} \
+                -Drun_only_job_number=0 \
+                -Doutput_data_type={output_data_type} \
+                -Dconvert_32bit={convert_32bit}\
+                -- --no-splash {path_bsh}""", 
+           config["common"],
+           config["hdf5_output"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"])
+
+        part_string += " > {log} 2>&1 && touch {output}"
+        shell(part_string)
+
+rule resave_hdf5_output:
+    input: rules.hdf5_xml_output.output
+    output: "{xml_base}-{file_id,\d+}-00.h5_output_hdf5"
+    log: "resave_output-{file_id}.log"
+    run:
+        part_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
+                -Dimage_file_directory={jdir} \
+                -Dfirst_xml_filename={output_xml} \
+                -Dhdf5_xml_filename={output_hdf5_xml} \
+        -Dresave_angle={resave_angle} \
+        -Dresave_channel={resave_channel} \
+        -Dresave_illumination={resave_illumination} \
+        -Dresave_timepoint={resave_timepoint} \
+        -Dsubsampling_factors={subsampling_output} \
+        -Dhdf5_chunk_sizes={chunk_sizes_output} \
+        -Dtimepoints_per_partition={timepoints_per_partition} \
+        -Dsetups_per_partition={setups_per_partition} \
+        -Drun_only_job_number={job_number} \
+        -Doutput_data_type={output_data_type} \
+        -Dconvert_32bit={convert_32bit}\
+        -- --no-splash {path_bsh}""", 
+           config["common"],
+           config["hdf5_output"],
+           config["resave_hdf5"],
+           jdir=JOBDIR,
+           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"],
+           input_xml_base="{wildcards.xml_base}",
+           job_number=int(wildcards.file_id)+1) 
+   	part_string += " > {log} 2>&1 && touch {output}"
+        shell(part_string) 
+       	       
+
 rule distclean:
-    shell : "rm -rf *registered *tif *log *_deconvolved *.xml~* interestpoints "+str(" ".join(xml_merge_in))
+    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), glob.glob("*_output_hdf5"), glob.glob("*_output")# xml_merge_in, 
+   
+    message : os.path.abspath(os.path.curdir) + ": rm -rf {params}"
+    shell : "rm -rf {params}"

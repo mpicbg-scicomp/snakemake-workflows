@@ -9,8 +9,13 @@
     {
         "lsf_extra" : "-R \"span[hosts=1] rusage[mem=100000]\""
     },
+    
+    "timelapse" : 
+    {
+    	"lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=100000]\""
+    },
 
-    "external_trafo" :
+    "external_transfrom" :
     {
         "lsf_extra" : "-R \"span[hosts=1] rusage[mem=10000]\""
     },
@@ -19,5 +24,10 @@
     {
         "lsf_extra" : "-n 7 -R \"span[hosts=1] rusage[mem=50000]\"",
 	"lsf_q" : "gpu"
+    },
+    
+    "resave_hdf5_output" :
+    {
+	"lsf_extra" : "-n 7 -R \"span[hosts=1] rusage[mem=50000]\""
     }
 }

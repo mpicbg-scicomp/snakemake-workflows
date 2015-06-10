@@ -1,0 +1,174 @@
+// Load Fiji dependencies
+import ij.IJ; 		// calls imagej
+import ij.Prefs; 	// calls imagej settings
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+//Prefs.setThreads(2); 	// defines the number of threads allowed
+//print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+
+System.out.println("Start loading parameters");
+
+// Directory, and first .czi
+System.out.println("---------------------------------------------------------");
+System.out.println("Directory:");
+image_file_directory = System.getProperty( "image_file_directory" );
+first_xml_filename = System.getProperty( "first_xml_filename" );
+first_czi = System.getProperty( "first_czi" );
+
+System.out.println( "xml_file_path = " + image_file_directory + first_xml_filename + ".xml" );
+System.out.println( "first_czi_path = " + image_file_directory + first_czi );
+
+// Dataset settings
+System.out.println("---------------------------------------------------------");
+System.out.println("Angle Settings:");
+
+// Angle settings
+// Parses angles and determines the number of angles
+// uses tokens of string angles to assemble the string for angle_string
+// via StringBuilder
+angles = System.getProperty( "angles" );
+System.out.println( "Angles = " + angles );
+
+// Parses string angles
+String delims = "[,]";
+String[] angle_token = angles.split(delims);
+
+// Builds string using the number of tokens and inserts the tokens in the string
+StringBuilder angle_string = new StringBuilder();
+String angle_part;
+
+	for ( int angle = 0; angle < angle_token.length; angle++) {
+		int num_angles = angle + 1;
+		angle_part = "angle_" + num_angles + "=" + angle_token[angle];
+		angle_string.append(angle_part);
+		angle_string.append(" ");
+			
+		}
+
+System.out.println( angle_string );
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Channel Settings:");
+
+// Channel settings
+// This parses channels and determines the number of channels
+// then uses the tokens of channels to assemble the necessary string
+// for channel_string via StringBuilder
+channels = System.getProperty( "channels" );
+System.out.println( "Channel Names = " + channels );
+
+// Parses string channel_names
+String delims = "[,]";
+String[] channel_token = channels.split(delims);
+
+// Builds string using the number of tokens and inserts the tokens in the string
+StringBuilder channel_string = new StringBuilder();
+String channel_part;
+
+	for ( int channel = 0; channel < channel_token.length; channel++) {
+		int num_channel = channel + 1;
+		channel_part = "channel_" + num_channel + "=" + channel_token[channel];
+		channel_string.append(channel_part);
+		channel_string.append(" ");
+			
+		}
+			
+System.out.println( "Channel String = " + channel_string );
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Illumination Settings:");
+
+// Illuminatin settings
+// This parses illumination and determines the number of illuminations
+// then uses the tokens of illuminations to assemble the string for 
+// illum_string via StringBuilder
+illumination = System.getProperty( "illumination" );
+System.out.println( "Illumination = " + illumination );
+
+// Parses string illumination
+String delims = "[,]";
+String[] illum_token = illumination.split(delims);
+
+// Builds string using the number of tokens and inserts the tokens in the string
+StringBuilder illum_string = new StringBuilder();
+String illum_part;
+
+	for ( int illum= 0; illum< illum_token.length; illum++) {
+		int num_illum = illum + 1;
+		illum_part = "_______illumination_" + num_illum + "=" + illum_token[illum];
+		illum_string.append(illum_part);
+		illum_string.append(" ");
+			
+		}
+
+System.out.println( illum_string );
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Rotation setting:");
+
+rotation_around = System.getProperty( "rotation_around" );
+System.out.println( "rotation_around = " + rotation_around );
+
+// Calibaration
+System.out.println("=========================================================");
+System.out.println("Calibration:");
+float pixel_distance_x = Float.parseFloat( System.getProperty( "pixel_distance_x" ) );
+float pixel_distance_y = Float.parseFloat( System.getProperty( "pixel_distance_y" ) );
+float pixel_distance_z = Float.parseFloat( System.getProperty( "pixel_distance_z" ) );
+pixel_unit = System.getProperty( "pixel_unit" );
+
+System.out.println( "pixel_distance_x = " + pixel_distance_x );
+System.out.println( "pixel_distance_y = " + pixel_distance_y );
+System.out.println( "pixel_distance_z = " + pixel_distance_z );
+System.out.println( "pixel_unit = " + pixel_unit );
+
+// Executes Fiji plugin
+System.out.println("=========================================================");
+System.out.println("Start plugin:");
+System.out.println("Define Multi-View Dataset type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
+	"xml_filename=" + first_xml_filename + ".xml " +
+	"browse=" + image_file_directory + first_czi + " " + 
+	"first_czi=" + image_file_directory + first_czi + " " + 
+	angle_string +
+	channel_string + 
+ 	illum_string +
+	"modify_calibration " + 
+	"modify_rotation_axis " +
+	"pixel_distance_x=" + pixel_distance_x + " " + 
+	"pixel_distance_y=" + pixel_distance_y + " " + 
+	"pixel_distance_z=" + pixel_distance_z + " " +
+	"pixel_unit=" + pixel_unit + " " +
+	"rotation_around=" + rotation_around + "");
+
+try {
+IJ.run("Define Multi-View Dataset", 
+	"type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
+	"xml_filename=" + first_xml_filename + ".xml " +
+	"browse=" + image_file_directory + first_czi + " " + 
+	"first_czi=" + image_file_directory + first_czi + " " + 
+	angle_string +
+	channel_string + 
+	illum_string +
+	"modify_calibration " + 
+	"modify_rotation_axis " +
+	"pixel_distance_x=" + pixel_distance_x + " " + 
+	"pixel_distance_y=" + pixel_distance_y + " " + 
+	"pixel_distance_z=" + pixel_distance_z + " " +
+	"pixel_unit=" + pixel_unit + " " +
+	"rotation_around=" + rotation_around + "");
+}
+catch ( e ) { 
+
+    print( "[define_czi] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
+/* shutdown */
+runtime.exit(0);

@@ -1,7 +1,7 @@
 {
     "common" :
     {
-	"fiji-app" : "/projects/hpcsupport/steinbac/unicore/christopher-sandbox/unicore_jobs/Fiji.app.cuda_new/ImageJ-linux64",
+	"fiji-app" : "/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/ImageJ-linux64",
 	"fiji-prefix" : "/sw/bin/xvfb-run -a",
 	"directory_cuda" : "/lustre/projects/hpcsupport/steinbac/unicore/christopher/unicore_jobs/Fiji.app.cuda_new/lib/",
 	"merged_xml" : "hdf5_test_unicore_merge"
