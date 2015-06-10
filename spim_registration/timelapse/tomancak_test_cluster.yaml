@@ -15,8 +15,8 @@ common: {
   pixel_distance_y: '0.28590106964',
   pixel_distance_z: '1.50000',
   pixel_unit: "um",
-  # fusion_switch: "deconvolution"
-  fusion_switch: "fusion"
+  fusion_switch: "deconvolution"
+  # fusion_switch: "fusion"
   }
               
 define_xml_czi: {
@@ -50,7 +50,7 @@ resave_hdf5: {
 
 registration: {
   # "Single Channel" is not a valid choice for "Process_channel"
-  reg_process_channel: '"Single Channel"', 
+  reg_process_channel: '"Single channels"', 
   reg_processing_channel: '"green"',
   reg_interest_points_channel: '"beads"',
   reg_radius_1: '2',
@@ -102,12 +102,12 @@ fusion: {
   imglib2_container_fusion: '"ArrayImg"',
   imglib2_data_container: '"ArrayImg (faster)"',
   interpolation: '"Linear Interpolation"',
-  maximal_x: '1019',
-  maximal_y: '1941',
-  maximal_z: '486',
   minimal_x: '190',
   minimal_y: '-16',
   minimal_z: '-348',
+  maximal_x: '1019',
+  maximal_y: '1941',
+  maximal_z: '486',
   pixel_type: '"16-bit unsigned integer"',
   process_angle: '"All angles"',
   process_channel: '"All channels"',
@@ -134,12 +134,12 @@ external_transform: {
 
 deconvolution: {
   iterations: '1',
-  maximal_x_deco: '509',
-  maximal_y_deco: '970',
-  maximal_z_deco: '243',
-  minimal_x_deco: '95',
-  minimal_y_deco: '-8',
-  minimal_z_deco: '-174',
+  minimal_x_deco: '190',
+  minimal_y_deco: '-16',
+  minimal_z_deco: '-348',
+  maximal_x_deco: '1019',
+  maximal_y_deco: '1941',
+  maximal_z_deco: '486',
   detections_to_extract_psf_for_channel: '"beads"',
   process_timepoint: '"Single Timepoint (Select from List)"',
   process_angle: '"All angles"',
@@ -169,15 +169,17 @@ hdf5_output: {
   output_pixel_distance_z: 0.5718,
   output_pixel_unit: 'um',
   output_channels: "green",
-  output_data_type: "16Bit",
+  output_data_type: "32Bit",
   convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
   output_type_of_dataset: '"Image Stacks (ImageJ Opener)"',
   output_multiple_timepoints: '"YES (one file per time-point)"',
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
   output_imglib_container: '"ArrayImg (faster)"',
-  subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
-  chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
+  subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}}, {{4,4,4}}, {{8,8,8}} }}"',
+  chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}}, {{16,16,16}}, {{16,16,16}} }}"',
+  # subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
+  # chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
   bsh_file_define: "define_output.bsh",
   bsh_file_hdf5: "export_output.bsh"
   }

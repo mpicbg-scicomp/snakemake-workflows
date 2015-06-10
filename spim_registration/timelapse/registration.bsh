@@ -142,52 +142,54 @@ else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token
 
 	}
 		
-	// Returns an Error if there is one channel in channels but multiple settings in radius and or threshold
-	else if ( channel_token.length == 1 && (radius_1_token.length > 1 || radius_2_token.length > 1 || threshold_token.length > 1 ) )
-	{
-		System.out.println( "Error: Only one channel detected but multiple channel settings for radius or threshold" );
-	}
+// Returns an Error if there is one channel in channels but multiple settings in radius and or threshold
+else if ( channel_token.length == 1 && (radius_1_token.length > 1 || radius_2_token.length > 1 || threshold_token.length > 1 ) )
+{
+	System.out.println( "Error: Only one channel detected but multiple channel settings for radius or threshold" );
+}
 	
-	// Returns an Error if set to Dual Channel one Channel contains beads but there is only one channel in channels	
-	else if ( reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length == 1 )
-	{
-		System.out.println( "Error: reg_process_channel or channels set incorrectly" );
-	}
+// Returns an Error if set to Dual Channel one Channel contains beads but there is only one channel in channels	
+else if ( reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length == 1 )
+{
+	System.out.println( "Error: reg_process_channel or channels set incorrectly" );
+}
 	
-	// Assembles String for Singel Channel 
-	else if (reg_process_channel.equalsIgnoreCase( "Single channel" ) && channel_token.length == 1 ) 
-	{
-		processing_channel_string = "";
-		channel_string_multi.append("");	
-		channel_string = "interest_point_specification=[Advanced ...] " +
-		"radius_1=" + reg_radius_1 + " " +
-		"radius_2=" + reg_radius_2 + " " +
-		"threshold=" + reg_threshold + " " +
-		"find_maxima";
-	}		
+// Assembles String for Singel Channel 
+else if (reg_process_channel.equalsIgnoreCase( "Single channel" ) && channel_token.length == 1 ) 
+{
+	reg_process_channel = "All channels"; // Sets reprocess channel All channels
+	processing_channel_string = "";
+	channel_string_multi.append("");	
+	channel_string = "interest_point_specification=[Advanced ...] " +
+	"radius_1=" + reg_radius_1 + " " +
+	"radius_2=" + reg_radius_2 + " " +
+	"threshold=" + reg_threshold + " " +
+	"find_maxima";
+}		
 		
-	// Returns and Error if set to Dual Channel but there are multiple settings in radius and or threshold
-	else if ( reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && (radius_1_token.length > 1 || radius_2_token.length > 1 || threshold_token.length > 1 ) )
-	{
-		System.out.println( "Error: You said you wanted to process only one channel but there are multiple settings for radius or threshold" );
-	}
+// Returns and Error if set to Dual Channel but there are multiple settings in radius and or threshold
+else if ( reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && (radius_1_token.length > 1 || radius_2_token.length > 1 || threshold_token.length > 1 ) )
+{
+	System.out.println( "Error: You said you wanted to process only one channel but there are multiple settings for radius or threshold" );
+}
 
-	// Assembles String for Dual Channel but only one Channel contains beads
-	else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1)
-	{	
-		channel_string_multi.append("");
-		processing_channel_string = "processing_channel=[channel " +  reg_processing_channel + "] ";
-		channel_string = "interest_point_specification=[Advanced ...] " +
-		"radius_1=" + reg_radius_1 + " " +
-		"radius_2=" + reg_radius_2 + " " +
-		"threshold=" + reg_threshold + " " +
-		"find_maxima";
-		}
-	// Returns and Error if no conditions above are met
-	else
-	{
-		System.out.println( "Error: Incorrect settings" );
-	}
+// Assembles String for Dual Channel but only one Channel contains beads
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1)
+{	
+	channel_string_multi.append("");
+	processing_channel_string = "processing_channel=[channel " +  reg_processing_channel + "] ";
+	channel_string = "interest_point_specification=[Advanced ...] " +
+	"radius_1=" + reg_radius_1 + " " +
+	"radius_2=" + reg_radius_2 + " " +
+	"threshold=" + reg_threshold + " " +
+	"find_maxima";
+}
+
+// Returns and Error if no conditions above are met
+else
+{
+	System.out.println( "Error: Incorrect settings" );
+}
 		
 System.out.println( "Processing Channel = " + processing_channel_string );
 System.out.println( "Channel String: " + channel_string );
@@ -229,6 +231,7 @@ if (channels.equalsIgnoreCase(""))
 	else if (reg_process_channel.equalsIgnoreCase( "Single Channel" ) && channel_token.length == 1 && interest_token.length == 1 )	
 	{	
 		reg_multi_channel_string.append( "" );
+		reg_process_channel = "All channels"; // Sets reprocess channel to all channels
 		reg_single_channel_string = "interest_points_channel_" + channels + "=" + reg_interest_points_channel + " ";
 	}
 	

@@ -105,6 +105,7 @@ StringBuilder reg_multi_channel_string = new StringBuilder();
 	else if (reg_process_channel.equalsIgnoreCase( "Single channel" ) && channel_token.length == 1 )	
 	{	
 		reg_multi_channel_string.append( "" );
+		reg_process_channel = "All channels"; // Sets reprocess channel to All channels
 		reg_single_channel_string = "interest_points_channel_" + channels + "=" + reg_interest_points_channel + " ";
 	}
 

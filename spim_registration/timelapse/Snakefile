@@ -327,7 +327,7 @@ rule external_transform:
         shell(cmd_string)
 
 rule deconvolution:
-    input: rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    input: rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
     output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
     log: "{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
