@@ -168,7 +168,7 @@ IJ.run("Define Multi-View Dataset",
 }
 catch ( e ) { 
 
-    print( "[registration::interest_points] caught exception: "+e );
+    print( "[define_tif_zip] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     

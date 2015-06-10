@@ -329,7 +329,7 @@ IJ.run("Detect Interest Points for Registration",
 }
 catch ( e ) { 
 
-    print( "[registration::interest_points] caught exception: "+e );
+    print( "[registration::detection of interest_points] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     
@@ -383,7 +383,7 @@ IJ.run("Register Dataset based on Interest Points",
 }
 catch ( e ) { 
 
-    print( "[registration::based_on_interestpoints] caught exception: "+e );
+    print( "[registration::registration of interest points] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     

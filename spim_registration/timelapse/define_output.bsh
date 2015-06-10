@@ -105,6 +105,7 @@ System.out.println("Define Multi-View Dataset , type_of_dataset=[" + type_of_dat
 // Executes Fiji plugin
 System.out.println("=========================================================");
 System.out.println("Start plugin:");
+try {
 IJ.run("Define Multi-View Dataset", 
 	"type_of_dataset=[" + type_of_dataset + "] " +
 	"xml_filename=[" + xml_filename + ".xml] " +
@@ -122,7 +123,14 @@ IJ.run("Define Multi-View Dataset",
 	"pixel_distance_y=" + pixel_distance_y + " " + 
 	"pixel_distance_z=" + pixel_distance_z + " " +
 	"pixel_unit=" + pixel_unit + "");
- 
+}
+catch ( e ) { 
+
+    print( "[define_output] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 /* shutdown */
 runtime.exit(0);
 

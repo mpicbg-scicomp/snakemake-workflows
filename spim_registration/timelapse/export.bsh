@@ -56,7 +56,16 @@ System.out.println( "run_only_job_number=" + run_only_job_number );
 // Activate cluster processing
 System.out.println("=========================================================");
 System.out.println("Cluster setting:");
+try {
 IJ.run("Toggle Cluster Processing", "display_cluster");
+}
+catch ( e ) { 
+
+    print( "[export::cluster setting] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 
 // Executes Fiji plugin
 System.out.println("=========================================================");
@@ -81,7 +90,7 @@ IJ.run("As HDF5",
 }
 catch ( e ) { 
 
-    print( "[registration::interest_points] caught exception: "+e );
+    print( "[export::resaving] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     

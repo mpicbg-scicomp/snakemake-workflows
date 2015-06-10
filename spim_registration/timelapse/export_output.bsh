@@ -77,7 +77,7 @@ try{
 IJ.run("Toggle Cluster Processing", "display_cluster");
 }
 catch ( e ) { 
-	print( "[export output: cluster setting] caught exception: "+e );
+	print( "[export_output::cluster setting] caught exception: "+e );
 	//important to fail the process if exception occurs
 	runtime.exit(1);
 }
@@ -104,7 +104,7 @@ IJ.run("As HDF5",
 	data_string + "");
 }
 catch ( e ) { 
-	print( "[export output: resaving caught exception: "+e );
+	print( "[export_output::resaving] caught exception: "+e );
 	//important to fail the process if exception occurs
 	runtime.exit(1);
 }
