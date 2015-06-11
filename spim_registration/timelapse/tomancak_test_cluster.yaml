@@ -166,7 +166,7 @@ hdf5_output: {
   output_image_file_pattern: 'TP{{t}}_Ch{{c}}_Ill0_Ang0,72,144,216,288.tif',
   output_xml: '"fused_Dual_Channel"',
   output_hdf5_xml: '"hdf5_fused_Dual_Channel"',
-  output_multiple_channels: '"NO (one channel)"',
+  output_multiple_channels: '"YES (one file per channel)"', # "\"YES (one file per channel)\"" or  "\"NO (one channel)\""
   output_timepoints: '0-1',
   output_pixel_distance_x: 0.28590,
   output_pixel_distance_y: 0.28590,
