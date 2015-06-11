@@ -7,8 +7,8 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
    JOBDIR+="/"
 
 #data specific config file, expected to be inside JOBDIR
-configfile: "tomancak_test_cluster.json"
-# configfile: "tomancak_test_cluster.yaml"
+# configfile: "tomancak_test_cluster.json"
+configfile: "tomancak_test_cluster.yaml"
 
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
@@ -21,6 +21,7 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
     input: [ ds + "_output_hdf5" for ds in datasets ]
+    #input: [ ds + "_fusion" for ds in datasets ]
     
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
@@ -34,20 +35,15 @@ rule define_xml_czi:
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
            -Dfirst_czi={first_czi} \
-           -Dangle_1={angle_1} \
-           -Dangle_2={angle_2} \
-           -Dangle_3={angle_3} \
-           -Dangle_4={angle_4} \
-           -Dangle_5={angle_5} \
-           -Dchannel_1={channel_1} \
-           -Dchannel_2={channel_2} \
-           -Dillumination_1={illumination_1} \
-           -Drotation_around={rotation_around} \
+           -Dangles={angles} \
+           -Dchannels={channels} \
+           -Dillumination={illumination} \
            -Dpixel_distance_x={pixel_distance_x} \
            -Dpixel_distance_y={pixel_distance_y} \
            -Dpixel_distance_z={pixel_distance_z} \
            -Dpixel_unit={pixel_unit} \
            -Dfirst_xml_filename={first_xml_filename} \
+           -Drotation_around={rotation_around} \
            -- --no-splash {path_bsh}""",
                                        config["common"],
                                        config["define_xml_czi"],
@@ -68,8 +64,9 @@ rule define_xml_tif:
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Dtimepoints={timepoints} \
-        -Dacquisition_angles={acquisition_angles} \
+        -Dangles={angles} \
         -Dchannels={channels} \
+        -Dillumination={illumination} \
         -Dimage_file_pattern={image_file_pattern} \
         -Dpixel_distance_x={pixel_distance_x} \
         -Dpixel_distance_y={pixel_distance_y} \
@@ -93,7 +90,7 @@ rule define_xml_tif:
 	cmd_string +=" > {log} 2>&1"
 	shell(cmd_string)
 
-ruleorder: define_xml_tif > define_xml_czi
+ruleorder: define_xml_czi > define_xml_tif 
 
 # create mother .xml/.h5
 rule hdf5_xml:
@@ -135,7 +132,7 @@ rule resave_hdf5:
     run:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
-                -Dimage_file_directory={jdir} \
+        	-Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={first_xml_filename} \
                 -Dhdf5_xml_filename={input_xml_base} \
         -Dresave_angle={resave_angle} \
@@ -168,24 +165,24 @@ rule registration:
         -Dparallel_timepoints={file_id_w} \
         -Dimage_file_directory={jdir} \
         -Dxml_filename={input_xml} \
-        -Dprocess_timepoint={timepoint} \
-        -Dprocess_channel={channel} \
-        -Dprocess_illumination={illuminations} \
-        -Dprocess_angle={angle} \
-        -Dprocessing_channel={proc-ch} \
+	-Dreg_process_timepoint={reg_process_timepoint} \
+	-Dreg_process_channel={reg_process_channel} \
+	-Dreg_process_illumination={reg_process_illumination} \
+	-Dreg_process_angle={reg_process_angle} \
+	-Dchannels={channels} \
+	-Dreg_processing_channel={reg_processing_channel} \
         -Dlabel_interest_points={label_interest_points} \
         -Dtype_of_registration={type_of_registration} \
         -Dtype_of_detection={type_of_detection} \
         -Dsubpixel_localization={subpixel_localization} \
         -Dimglib_container={imglib_container} \
-        -Dradius_1={radius_1} \
-        -Dradius_2={radius_2} \
-        -Dthreshold={threshold} \
+	-Dreg_radius_1={reg_radius_1} \
+	-Dreg_radius_2={reg_radius_2} \
+        -Dreg_threshold={reg_threshold} \
         -Dinitial_sigma={initial_sigma} \
         -Dthreshold_gaussian={threshold_gaussian} \
         -Dregistration_algorithm={algorithm} \
-        -Dinterest_points_channel_0={interest_points_channel_0} \
-        -Dinterest_points_channel_1={interest_points_channel_1} \
+        -Dreg_interest_points_channel={reg_interest_points_channel} \
         -Dfix_tiles={fix_tiles} \
         -Dmap_back_tiles={map_back_tiles} \
         -Dtransformation_model={transformation_model} \
@@ -193,6 +190,7 @@ rule registration:
         -Dlambda={lambda} \
         -Dallowed_error_for_ransac={allowed_error_for_ransac} \
         -Ddetection_min_max={detection_min_max} \
+        -Dsignificance={significance} \
         -- --no-splash {path_bsh}""",
            config["common"], 
            config["registration"],
@@ -233,15 +231,14 @@ rule timelapse:
         -Dimage_file_directory={jdir} \
         -Dmerged_xml={input} \
         -Dtimelapse_process_timepoints={timelapse_process_timepoints} \
-        -Dprocess_channel_timelapse={channel} \
-        -Dprocess_illumination={illuminations} \
-        -Dprocess_angle={angle} \
+        -Dreg_process_channel={reg_process_channel} \
+        -Dreg_process_illumination={reg_process_illumination} \
+        -Dreg_process_angle={reg_process_angle} \
         -Dreference_timepoint={reference_timepoint} \
-        -Dchannel_1={proc-ch} \
+        -Dchannels={channels} \
         -Dtype_of_registration_timelapse={type_of_registration_timelapse} \
         -Dregistration_algorithm={algorithm} \
-        -Dreg_1_interest_points_channel={interest_points_channel_0} \
-        -Dreg_2_interest_points_channel={interest_points_channel_1} \
+        -Dreg_interest_points_channel={reg_interest_points_channel} \
         -Dtransformation_model={transformation_model} \
         -Dmodel_to_regularize_with={model_to_regularize_with} \
         -Dlambda={lambda} \
@@ -292,7 +289,7 @@ rule fusion:
     		-- --no-splash {path_bsh}""",
                                     config["common"],
                                     config["fusion"],
-                                    config["resave_czi_hdf5"],
+                                    config["resave_hdf5"],
                                     path_bsh=config["common"]["bsh_directory"] + config["fusion"]["bsh_file"],
                                     jdir=JOBDIR,
                                     file_id_w="{wildcards.file_id}",
@@ -310,10 +307,11 @@ rule external_transform:
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
 	-Dmerged_xml={merged_xml_file} \
-	-Dtransform_angle={angle} \
-	-Dtransform_channel={channel} \
-	-Dtransform_illumination={illumination} \
-	-Dtransform_timepoint={timepoint} \
+	-Dchannel_setting={channel_setting} \
+	-Dtransform_angle={transform_angle} \
+	-Dtransform_channel={transform_channel} \
+	-Dtransform_illumination={transform_illumination} \
+	-Dtransform_timepoint={transform_timepoint} \
 	-Dtransformation={transformation} \
 	-Dapply_transformation={apply_transformation} \
 	-Ddefine_mode_transform={define_mode_transform} \
@@ -329,7 +327,7 @@ rule external_transform:
         shell(cmd_string)
 
 rule deconvolution:
-    input: rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    input: rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
     output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
     log: "{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
@@ -343,12 +341,13 @@ rule deconvolution:
         -Dprocess_channel={process_channel} \
         -Dprocess_illumination={process_illumination} \
         -Dprocess_angle={process_angle} \
-        -Dminimal_x_deco={minimal_x} \
-        -Dminimal_y_deco={minimal_y} \
-        -Dminimal_z_deco={minimal_z} \
-        -Dmaximal_x_deco={maximal_x} \
-        -Dmaximal_y_deco={maximal_y} \
-        -Dmaximal_z_deco={maximal_z} \
+        -Dchannels={channels} \
+        -Dminimal_x_deco={minimal_x_deco} \
+        -Dminimal_y_deco={minimal_y_deco} \
+        -Dminimal_z_deco={minimal_z_deco} \
+        -Dmaximal_x_deco={maximal_x_deco} \
+        -Dmaximal_y_deco={maximal_y_deco} \
+        -Dmaximal_z_deco={maximal_z_deco} \
         -Dimglib2_container_deco={imglib2_container} \
         -Dtype_of_iteration={type_of_iteration} \
         -Dosem_acceleration={osem_acceleration} \
@@ -356,8 +355,7 @@ rule deconvolution:
         -Dcompute={compute} \
         -Dpsf_estimation={psf_estimation} \
         -Ddirectory_cuda={directory_cuda} \
-        -Ddetections_to_extract_psf_for_channel_0={detections_to_extract_psf_for_channel_0} \
-        -Ddetections_to_extract_psf_for_channel_1={detections_to_extract_psf_for_channel_1} \
+        -Ddetections_to_extract_psf_for_channel={detections_to_extract_psf_for_channel} \
         -Dpsf_size_x={psf_size_x} \
         -Dpsf_size_y={psf_size_y} \
         -Dpsf_size_z={psf_size_z} \
@@ -409,7 +407,7 @@ rule hdf5_xml_output:
     input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
     	    [ item+"_output" for item in datasets ] 
-    log: "hdf5_xml.log"
+    log: "output_hdf5_xml.log"
     run:
         part_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
@@ -420,8 +418,8 @@ rule hdf5_xml_output:
                 -Dresave_channel={resave_channel} \
                 -Dresave_illumination={resave_illumination} \
                 -Dresave_timepoint={resave_timepoint} \
-                -Dsubsampling_factors={subsampling_factors} \
-                -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+                -Dsubsampling_factors={subsampling_output} \
+                -Dhdf5_chunk_sizes={chunk_sizes_output} \
                 -Dtimepoints_per_partition={timepoints_per_partition} \
                 -Dsetups_per_partition={setups_per_partition} \
                 -Drun_only_job_number=0 \
@@ -432,7 +430,7 @@ rule hdf5_xml_output:
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"])
 
         part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
@@ -451,8 +449,8 @@ rule resave_hdf5_output:
         -Dresave_channel={resave_channel} \
         -Dresave_illumination={resave_illumination} \
         -Dresave_timepoint={resave_timepoint} \
-        -Dsubsampling_factors={subsampling_factors} \
-        -Dhdf5_chunk_sizes={hdf5_chunk_sizes} \
+        -Dsubsampling_factors={subsampling_output} \
+        -Dhdf5_chunk_sizes={chunk_sizes_output} \
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
@@ -463,7 +461,7 @@ rule resave_hdf5_output:
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
+           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"],
            input_xml_base="{wildcards.xml_base}",
            job_number=int(wildcards.file_id)+1) 
    	part_string += " > {log} 2>&1 && touch {output}"

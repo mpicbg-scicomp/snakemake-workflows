@@ -17,29 +17,26 @@ System.out.println("---------------------------------------------------------");
 System.out.println("Xml file:");
 
 xml_path = System.getProperty( "image_file_directory" );
+
+xml_path = System.getProperty( "image_file_directory" );
 merged_xml = System.getProperty( "merged_xml" );
 if ( ! merged_xml.endsWith(".xml") )
     merged_xml = merged.xml + ".xml";
 
-System.out.println( "selected_xml = " + xml_path + merged_xml + ".xml");
+System.out.println( "selected_xml = " + xml_path + merged_xml );
 
 // General Registration Parameters and Channel Settings
 System.out.println("---------------------------------------------------------");
 System.out.println( "General parameters: " );
+
 timelapse_process_timepoints = System.getProperty( "timelapse_process_timepoints" );
-process_channel_timelapse = System.getProperty( "process_channel_timelapse" );
-process_illumination = System.getProperty( "process_illumination" );
-process_angle = System.getProperty( "process_angle" ); 
-channel_1 = System.getProperty( "channel_1" );
-channel_2 = System.getProperty( "channel_2" );
+reg_process_illumination = System.getProperty( "reg_process_illumination" );
+reg_process_angle = System.getProperty( "reg_process_angle" ); 
 
 System.out.println( "process_timepoints = " + timelapse_process_timepoints ); 
-System.out.println( "process_channel = " + process_channel_timelapse );
-System.out.println( "process_illumination = " + process_illumination );
-System.out.println( "process_angle = " + process_angle );
-System.out.println( "channel_1 = " + channel_1 );
-System.out.println( "channel_2 = " + channel_2 );
-	
+System.out.println( "process_illumination = " + reg_process_illumination );
+System.out.println( "process_angle = " + reg_process_angle );
+
 // Timelapse registration Parameter
 System.out.println("---------------------------------------------------------");
 System.out.println( "Timelapse Registration: " );
@@ -49,13 +46,11 @@ System.out.println( "reference_timepoint=" + reference_timepoint );
 
 type_of_registration_timelapse = System.getProperty( "type_of_registration_timelapse" );
 registration_algorithm = System.getProperty( "registration_algorithm" );
-reg_1_interest_points_channel = System.getProperty( "reg_1_interest_points_channel" );
-reg_2_interest_points_channel = System.getProperty( "reg_2_interest_points_channel" ); // Dual Channel 
+
 
 System.out.println( "type_of_registration = " + type_of_registration_timelapse );
 System.out.println( "registration_algorithm = " + registration_algorithm );
-System.out.println( "interest_points_channel_" + channel_1 + " = " + reg_1_interest_points_channel );
-System.out.println( "interest_points_channel_" + channel_2 + " = " + reg_2_interest_points_channel );
+
 
 transformation_model = System.getProperty( "transformation_model" );
 model_to_regularize_with = System.getProperty( "model_to_regularize_with" );
@@ -63,25 +58,120 @@ float lambda = Float.parseFloat( System.getProperty( "lambda" ) );
 int allowed_error_for_ransac = Integer.parseInt( System.getProperty( "allowed_error_for_ransac" ) );
 significance = System.getProperty( "significance" );
 
-System.out.println( "transformation = " + transformation );
+System.out.println( "transformation = " + transformation_model );
 System.out.println( "model_to_regularize_with = " + model_to_regularize_with );
 System.out.println( "lambda = " + lambda );
 System.out.println( "allowed_error_for_ransac = " + allowed_error_for_ransac );
 System.out.println( "significance = " + significance );
 
+// Timelapse registration Parameter
+System.out.println("---------------------------------------------------------");
+System.out.println( "Channel Settings: " );
+// Channel Setting Registration
+// parses channels and takes from there the number of channels
+// takes from reg_process_channel if it is Single Channel, Dual Channel or Dual Channel
+// were one Channel contains the beads
+// from this it decides which string to assemble
+
+reg_process_channel = System.getProperty( "reg_process_channel" );
+System.out.println( "process_channel = " + reg_process_channel );
+
+channels = System.getProperty( "channels" );
+System.out.println( "Channels = " + channels );
+
+reg_interest_points_channel = System.getProperty( "reg_interest_points_channel" );
+System.out.println( "reg_interest_points_channel = " + reg_interest_points_channel );
+
+// Splits up channels, reg_interest_points_channel
+String delims = "[,]";
+String[] channel_token = channels.split(delims);
+String[] interest_token = reg_interest_points_channel.split(delims);
+				
+String reg_single_channel_string = "";
+StringBuilder reg_multi_channel_string = new StringBuilder();
+
+if (channels.equalsIgnoreCase(""))
+{
+	System.out.println("Warning: There are no channels set");
+}
+
+// Assembles string for Single Channel registration
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length == 1 )	
+{	
+	reg_multi_channel_string.append( "" );
+	reg_single_channel_string = "interest_points_channel_" + channels + "=" + reg_interest_points_channel + " ";
+}
+	
+// Assembles string for Multi Channel registration
+else if (reg_process_channel.equalsIgnoreCase( "All channels" ) && channel_token.length > 1 ) 
+{
+	for (int channel=0; channel < channel_token.length; channel++ )
+
+		{	
+			String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
+			reg_multi_channel_string.append( channel_part );
+			reg_multi_channel_string.append(" ");
+		}
+}
+				
+// Returns error of Multi Channels one Channel contains the beads is selected but not enough settings in channels or reg_interest_points_channel
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && ( channel_token.length < 1 || interest_token.length < 1 ))
+{
+	System.out.println( "Error: Multi Channel one Channel contains beads selected but only one setting in channls or reg_interest_points_channel" );
+}
+			
+// Assembles string for Multi Channel Processing one Channel Contains the beads	
+else if (reg_process_channel.equalsIgnoreCase( "Single channel (Select from List)" ) && channel_token.length > 1 && interest_token.length > 1 )	
+{
+		for (int channel=0; channel < channel_token.length; channel++ )
+
+		{	
+			String channel_part = "interest_points_channel_" + channel_token[channel] + "=" + interest_token[channel] + " ";
+			reg_multi_channel_string.append( channel_part );
+			reg_multi_channel_string.append(" ");
+		}
+					
+}
+			
+System.out.println( "reg_single_channel_string = " + reg_single_channel_string );
+System.out.println( "reg_multi_channel_string = " + reg_multi_channel_string );
+
+
 System.out.println( "=======================================================" );
 System.out.println( "Starting Timelapse Registration" );
 
-try {
-IJ.run("Register Dataset based on Interest Points", 
-	"select_xml=" + xml_path + merged_xml + " " + 
-	"process_angle=[" + process_angle + "] " + 
-	"process_channel=[" + process_channel_timelapse + "] " +
-	"process_illumination=[" + process_illumination + "] " +  
+System.out.println( "Register Dataset based on Interest Points , select_xml=" + xml_path + merged_xml + " " +
+	"process_angle=[" + reg_process_angle + "] " + 
+	"process_channel=[" + reg_process_channel + "] " +
+	"process_illumination=[" + reg_process_illumination + "] " +  
 	"process_timepoint=[" + timelapse_process_timepoints + "] " +
 	"registration_algorithm=[" + registration_algorithm + "] " + 
 	"type_of_registration=[" + type_of_registration_timelapse + "] " +
-	"interest_points_channel_" + channel_1 + "=" + reg_1_interest_points_channel + " " +
+	reg_multi_channel_string +
+	reg_single_channel_string +
+//	"interest_points_channel_" + channel_1 + "=" + reg_1_interest_points_channel + " " +
+//	"interest_points_channel_" + channel_2 + "=" + reg_2_interest_points_channel + " " + // Dual Channel 
+	"reference=" + reference_timepoint + " " +
+	"consider_each_timepoint_as_rigid_unit " +
+	"transformation=" + transformation_model + " " +
+	"regularize_model " +
+	"model_to_regularize_with=" + model_to_regularize_with + " " +
+	"lamba=" + lambda + " " +
+	"allowed_error_for_ransac=" + allowed_error_for_ransac + " " +
+	"significance=" + significance + "");
+
+try {
+IJ.run("Register Dataset based on Interest Points", 
+	"select_xml=" + xml_path + merged_xml + " " +
+	"process_angle=[" + reg_process_angle + "] " + 
+	"process_channel=[" + reg_process_channel + "] " +
+	"process_illumination=[" + reg_process_illumination + "] " +  
+	"process_timepoint=[" + timelapse_process_timepoints + "] " +
+	"registration_algorithm=[" + registration_algorithm + "] " + 
+	"type_of_registration=[" + type_of_registration_timelapse + "] " +
+	reg_multi_channel_string +
+	reg_single_channel_string +
+//	"interest_points_channel_" + channel_1 + "=" + reg_1_interest_points_channel + " " +
 //	"interest_points_channel_" + channel_2 + "=" + reg_2_interest_points_channel + " " + // Dual Channel 
 	"reference=" + reference_timepoint + " " +
 	"consider_each_timepoint_as_rigid_unit " +
@@ -94,11 +184,10 @@ IJ.run("Register Dataset based on Interest Points",
 }
 catch ( e ) { 
 
-    print( "[deconvolution-GPU] caught exception: "+e );
+    print( "[registration::timelapse] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     
 }
-
 /* shutdown */
 runtime.exit(0);

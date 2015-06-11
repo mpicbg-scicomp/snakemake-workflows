@@ -26,25 +26,93 @@ System.out.println( "first_czi_path = " + image_file_directory + first_czi );
 
 // Dataset settings
 System.out.println("---------------------------------------------------------");
-System.out.println("Dataset:");
-angle_1 = System.getProperty( "angle_1" );
-angle_2 = System.getProperty( "angle_2" );
-angle_3 = System.getProperty( "angle_3" );
-angle_4 = System.getProperty( "angle_4" );
-angle_5 = System.getProperty( "angle_5" );
-channel_1 = System.getProperty( "channel_1" );
-channel_2 = System.getProperty( "channel_2" );
-illumination_1 = System.getProperty( "illumination_1" );
-rotation_around = System.getProperty( "rotation_around" );
+System.out.println("Angle Settings:");
 
-System.out.println( "angle_1 = " + angle_1 );
-System.out.println( "angle_2 = " + angle_2 );
-System.out.println( "angle_3 = " + angle_3 );
-System.out.println( "angle_4 = " + angle_4 );
-System.out.println( "angle_5 = " + angle_5 );
-System.out.println( "channel_1 = " + channel_1 );
-System.out.println( "channel_2 = " + channel_2 );
-System.out.println( "illumination_1 = " + illumination_1 );
+// Angle settings
+// Parses angles and determines the number of angles
+// uses tokens of string angles to assemble the string for angle_string
+// via StringBuilder
+angles = System.getProperty( "angles" );
+System.out.println( "Angles = " + angles );
+
+// Parses string angles
+String delims = "[,]";
+String[] angle_token = angles.split(delims);
+
+// Builds string using the number of tokens and inserts the tokens in the string
+StringBuilder angle_string = new StringBuilder();
+String angle_part;
+
+	for ( int angle = 0; angle < angle_token.length; angle++) {
+		int num_angles = angle + 1;
+		angle_part = "angle_" + num_angles + "=" + angle_token[angle];
+		angle_string.append(angle_part);
+		angle_string.append(" ");
+			
+		}
+
+System.out.println( angle_string );
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Channel Settings:");
+
+// Channel settings
+// This parses channels and determines the number of channels
+// then uses the tokens of channels to assemble the necessary string
+// for channel_string via StringBuilder
+channels = System.getProperty( "channels" );
+System.out.println( "Channel Names = " + channels );
+
+// Parses string channel_names
+String delims = "[,]";
+String[] channel_token = channels.split(delims);
+
+// Builds string using the number of tokens and inserts the tokens in the string
+StringBuilder channel_string = new StringBuilder();
+String channel_part;
+
+	for ( int channel = 0; channel < channel_token.length; channel++) {
+		int num_channel = channel + 1;
+		channel_part = "channel_" + num_channel + "=" + channel_token[channel];
+		channel_string.append(channel_part);
+		channel_string.append(" ");
+			
+		}
+			
+System.out.println( "Channel String = " + channel_string );
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Illumination Settings:");
+
+// Illuminatin settings
+// This parses illumination and determines the number of illuminations
+// then uses the tokens of illuminations to assemble the string for 
+// illum_string via StringBuilder
+illumination = System.getProperty( "illumination" );
+System.out.println( "Illumination = " + illumination );
+
+// Parses string illumination
+String delims = "[,]";
+String[] illum_token = illumination.split(delims);
+
+// Builds string using the number of tokens and inserts the tokens in the string
+StringBuilder illum_string = new StringBuilder();
+String illum_part;
+
+	for ( int illum= 0; illum< illum_token.length; illum++) {
+		int num_illum = illum + 1;
+		illum_part = "_______illumination_" + num_illum + "=" + illum_token[illum];
+		illum_string.append(illum_part);
+		illum_string.append(" ");
+			
+		}
+
+System.out.println( illum_string );
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Rotation setting:");
+
+rotation_around = System.getProperty( "rotation_around" );
 System.out.println( "rotation_around = " + rotation_around );
 
 // Calibaration
@@ -63,19 +131,13 @@ System.out.println( "pixel_unit = " + pixel_unit );
 // Executes Fiji plugin
 System.out.println("=========================================================");
 System.out.println("Start plugin:");
-IJ.run("Define Multi-View Dataset", 
-	"type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
+System.out.println("Define Multi-View Dataset type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
 	"xml_filename=" + first_xml_filename + ".xml " +
 	"browse=" + image_file_directory + first_czi + " " + 
 	"first_czi=" + image_file_directory + first_czi + " " + 
-	"angle_1=" + angle_1 + " " +
-	"angle_2=" + angle_2 + " " + 
-	"angle_3=" + angle_3 + " " +
-	"angle_4=" + angle_4 + " " + 
-	"angle_5=" + angle_5 + " " +
-	"channel_1=" + channel_1 + " " +
-//	"channel_2=" + channel_2 + " " + // for dual channel comment out if single channel
- 	"_______illumination_1=" + illumination_1 + " " +
+	angle_string +
+	channel_string + 
+ 	illum_string +
 	"modify_calibration " + 
 	"modify_rotation_axis " +
 	"pixel_distance_x=" + pixel_distance_x + " " + 
@@ -83,6 +145,30 @@ IJ.run("Define Multi-View Dataset",
 	"pixel_distance_z=" + pixel_distance_z + " " +
 	"pixel_unit=" + pixel_unit + " " +
 	"rotation_around=" + rotation_around + "");
-	
+
+try {
+IJ.run("Define Multi-View Dataset", 
+	"type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
+	"xml_filename=" + first_xml_filename + ".xml " +
+	"browse=" + image_file_directory + first_czi + " " + 
+	"first_czi=" + image_file_directory + first_czi + " " + 
+	angle_string +
+	channel_string + 
+	illum_string +
+	"modify_calibration " + 
+	"modify_rotation_axis " +
+	"pixel_distance_x=" + pixel_distance_x + " " + 
+	"pixel_distance_y=" + pixel_distance_y + " " + 
+	"pixel_distance_z=" + pixel_distance_z + " " +
+	"pixel_unit=" + pixel_unit + " " +
+	"rotation_around=" + rotation_around + "");
+}
+catch ( e ) { 
+
+    print( "[define_czi] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
 /* shutdown */
 runtime.exit(0);

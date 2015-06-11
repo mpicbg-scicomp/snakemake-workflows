@@ -1,3 +1,5 @@
+// is problematic needs to be adjusted for
+// multi channel and multi illumination datasets
 import ij.IJ;
 import ij.ImagePlus;
 import java.lang.Runtime;
@@ -11,13 +13,11 @@ System.out.println(runtime.availableProcessors() + " cores available for multi-t
 // Load Parameters form job file
 image_file_directory = System.getProperty( "image_file_directory" );
 merged_xml = System.getProperty( "merged_xml" );
-if ( ! merged_xml.endsWith(".xml") )
-    merged_xml = merged.xml + ".xml";
-    
 transform_angle = System.getProperty( "transform_angle" );
 transform_channel = System.getProperty( "transform_channel" );
 transform_illumination = System.getProperty( "transform_illumination" );
 transform_timepoint = System.getProperty( "transform_timepoint" );
+channel_setting = System.getProperty( "channel_setting" );
 transformation = System.getProperty( "transformation" );
 apply_transformation  = System.getProperty( "apply_transformation" );
 define_mode_transform = System.getProperty( "define_mode_transform" );
@@ -26,15 +26,16 @@ matrix_transform = System.getProperty( "matrix_transform" );
 // Print Parameters into output file
 
 System.out.println( "browse = " + image_file_directory );
-System.out.println( "select_xml = " + image_file_directory + merged_xml  );
+System.out.println( "select_xml = " + image_file_directory + merged_xml );
 System.out.println( "apply_to_angle = " + transform_angle );
 System.out.println( "apply_to_channel = " + transform_channel );
 System.out.println( "apply_to_illumination = " + transform_illumination );
 System.out.println( "apply_to_timepoint = " + transform_timepoint );
+System.out.println( "Channel_setting = " + channel_setting );
 System.out.println( "transformation = " + transformation );
 System.out.println( "apply = " + apply_transformation );
 System.out.println( "define = " + define_mode_transform );
-System.out.println( "all_timepoints_channel_0_illumination_0_all_angles = " + matrix_transform );
+System.out.println( "all_timepoints_channel_" + channel_setting + "_illumination_0_all_angles = " + matrix_transform );
 
 // Execute Fiji Plugin
 try {
@@ -50,12 +51,11 @@ IJ.run("Apply Transformations",
 	"define=" + define_mode_transform + " " + 
 	"same_transformation_for_all_timepoints " + 
 	"same_transformation_for_all_angles " +
-//	"all_timepoints_channel_0_illumination_0_all_angles=[0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0]");
-	"all_timepoints_channel_0_illumination_0_all_angles=[" + matrix_transform + "]");
+	"all_timepoints_channel_" + channel_setting + "_illumination_0_all_angles=[" + matrix_transform + "]");
 }
 catch ( e ) { 
 
-    print( "[transform] caught exception: "+e );
+    print( "[external transformation] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
     

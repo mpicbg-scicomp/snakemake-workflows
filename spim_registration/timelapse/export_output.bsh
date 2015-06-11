@@ -54,25 +54,21 @@ System.out.println( "setups_per_partition=" + setups_per_partition );
 System.out.println( "run_only_job_number=" + run_only_job_number );
 
 // Add a switch for choosing between 16 or 32 bit
-
-
 output_data_type = System.getProperty( "output_data_type" );
-
 System.out.println( "Output Datatype = " + output_data_type );
 
+convert_32bit = System.getProperty( "convert_32bit" );
 
-if ( output_data_type.equalsIgnoreCase( "16Bit" ) )
+if ( output_data_type.equalsIgnoreCase( "32Bit" ) )
 	{
-		data_string = "convert_32bit=convert_32bit";
+		data_string = "convert_32bit=" + convert_32bit;
 	}
-else if ( output_data_type.equalsIgnoreCase( "32Bit" ) )
+else if ( output_data_type.equalsIgnoreCase( "16Bit" ) )
 	{
 		data_string = "";
 	}
 
 System.out.println( "Data string = " + data_string );
-
-
 
 // Activate cluster processing
 System.out.println("=========================================================");
@@ -81,7 +77,7 @@ try{
 IJ.run("Toggle Cluster Processing", "display_cluster");
 }
 catch ( e ) { 
-	print( "[deconvolution-GPU] caught exception: "+e );
+	print( "[export_output::cluster setting] caught exception: "+e );
 	//important to fail the process if exception occurs
 	runtime.exit(1);
 }
@@ -105,11 +101,10 @@ IJ.run("As HDF5",
 	"run_only_job_number=" + run_only_job_number + " " +
 	"use_deflate_compression " +
 	"export_path=" + image_file_directory + hdf5_xml_filename + " " +
-	data_string +
-	);
+	data_string + "");
 }
 catch ( e ) { 
-	print( "[deconvolution-GPU] caught exception: "+e );
+	print( "[export_output::resaving] caught exception: "+e );
 	//important to fail the process if exception occurs
 	runtime.exit(1);
 }
