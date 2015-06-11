@@ -260,9 +260,9 @@ rule dublicate_transformations:
     log: "{xml_base}_dublicate_transformations.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} 
+        	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
-	-Dmerged_xml={merged_xml} \
+        -Dmerged_xml={merged_xml_file} \
 	-Dprocess_timepoint_timelapse={timelapse_process_timepoints} \
 	-Dprocess_illumination={reg_process_illumination} \
 	-Dprocess_angle={reg_process_angle} \
@@ -273,10 +273,9 @@ rule dublicate_transformations:
                                     config["common"],
                                     config["registration"],
                                     config["timelapse"],
-                                    config["dublicate_channel"],
-                                    path_bsh=config["common"]["bsh_directory"] + config["Dublicate_transformations"]["bsh_file"],
+                                    config["dublicate_transformations"],
+                                    path_bsh=config["common"]["bsh_directory"] + config["dublicate_transformations"]["bsh_file"],
                                     jdir=JOBDIR,
-                                    file_id_w="{wildcards.file_id}",
                                     merged_xml_file="{input.merged_xml}"
         )
         cmd_string += " > {log} 2>&1 && touch {output}"

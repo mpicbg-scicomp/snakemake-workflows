@@ -1,34 +1,34 @@
 common: {
   # directory that contains the bean shell scripts
   bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
-  directory_cuda: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/lib/",
+  directory_cuda: "/sw/users/schmied/packages/cuda/lib/",
   fiji-app: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/ImageJ-linux64",
   fiji-prefix: "/sw/bin/xvfb-run -a",
-  first_xml_filename: "test_unicore",
-  hdf5_xml_filename: '"hdf5_test_unicore"',
-  merged_xml: "hdf5_test_unicore_merge",
-  ntimepoints: 5,
+  first_xml_filename: "Dual_Channel",
+  hdf5_xml_filename: '"hdf5_Dual_Channel"',
+  merged_xml: "hdf5_Dual_Channel_merge",
+  ntimepoints: 2,
   angles: "0,72,144,216,288",
-  channels: "green",
+  channels: "green,red",
   illumination: "0",
-  pixel_distance_x: '0.28590106964',
-  pixel_distance_y: '0.28590106964',
+  pixel_distance_x: '0.28590',
+  pixel_distance_y: '0.28590',
   pixel_distance_z: '1.50000',
   pixel_unit: "um",
-  # transformation_switch: "timelapse_dublicate",
-  transformation_switch: "timelapse",
+  transformation_switch: "timelapse_dublicate",
+  # transformation_switch: "timelapse",
   # fusion_switch: "deconvolution"
   fusion_switch: "fusion"
   }
               
 define_xml_czi: {
-  first_czi: "2015-04-11_LZ2_Stock68_3.czi",
+  first_czi: "2015-02-20_LZ2_Stock48_Stock58.czi", # essential
   rotation_around: "X-Axis",
   bsh_file: "define_czi.bsh"
   }
           
 define_xml_tif: {
-  image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif',
+  image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif', # essential
   imglib_container: '"ArrayImg (faster)"',
   multiple_angles: '"YES (one file per angle)"',
   multiple_channels: '"NO (one channel)"',
@@ -39,29 +39,28 @@ define_xml_tif: {
   }
   
 resave_hdf5: {
-  hdf5_chunk_sizes: '"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}"',
+  hdf5_chunk_sizes: '"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}"', # data dependent
+  subsampling_factors: '"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}"',  # data dependent
   resave_angle: '"All angles"',
   resave_channel: '"All channels"',
   resave_illumination: '"All illuminations"',
   resave_timepoint: '"All Timepoints"',
   setups_per_partition: '0',
-  subsampling_factors: '"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}"',
   timepoints_per_partition: '1',
   bsh_file: "export.bsh"
   }
 
 registration: {
-  # "Single Channel" is not a valid choice for "Process_channel"
-  reg_process_channel: '"All channels"', 
-  reg_processing_channel: '"green"',
-  reg_interest_points_channel: '"beads"',
-  reg_radius_1: '2',
-  reg_radius_2: '3',
-  reg_threshold: '0.005',
-  initial_sigma: '1.8',
-  threshold_gaussian: '0.0080',
-  type_of_detection: '"Difference-of-Mean (Integral image based)"',
-  label_interest_points: '"beads"',
+  reg_process_channel: '"Single channel (Select from List)"', # essential '"All channels"'; '"Single channel (Select from List)"'
+  reg_processing_channel: '"red"',      # essential
+  reg_interest_points_channel: '"beads"', # essential
+  reg_radius_1: '2',           # essential
+  reg_radius_2: '3',            # essential
+  reg_threshold: '0.005',       # essential
+  initial_sigma: '1.8',         # essetial
+  threshold_gaussian: '0.0080',   # essential
+  type_of_detection: '"Difference-of-Mean (Integral image based)"', # switch
+  label_interest_points: '"beads"',               
   reg_process_timepoint: '"Single Timepoint (Select from List)"',
   reg_process_angle: '"All angles"',
   reg_process_illumination: '"All illuminations"',
@@ -85,44 +84,45 @@ xml_merge: {
   }
   
 timelapse: {
-  reference_timepoint: '0',
+  reference_timepoint: '0',   # essential
   type_of_registration_timelapse: '"Match against one reference timepoint (no global optimization)"',
   timelapse_process_timepoints: '"All Timepoints"',
   bsh_file: "timelapse_registration.bsh"
   }
   
-Dublicate_transformations: {
-  source_dublication: "red",
-  target_dublication: "green",
+dublicate_transformations: {
+  source_dublication: "red",  # essential for 1 usecase
+  target_dublication: "green", # essential for 1 usecase
   duplicate_which_transformations: '"Replace all transformations"',
-  bsh_file: "Dublicate_transformations.bsh"
+  bsh_file: "dublicate_transformations.bsh"
   }
   
 fusion: {
-  bsh_file: "fusion.bsh",
-  downsample: '4',
+  downsample: '1',  # essential
+  minimal_x: '220', # essential maybe automate
+  minimal_y: '40',  # essential maybe automate
+  minimal_z: '-290',  # essential maybe automate
+  maximal_x: '976',   # essential maybe automate
+  maximal_y: '1892',  # essential maybe automate  
+  maximal_z: '472',   # essential maybe automate
   fused_image: '"Append to current XML Project"',
   imglib2_container_fusion: '"ArrayImg"',
   imglib2_data_container: '"ArrayImg (faster)"',
   interpolation: '"Linear Interpolation"',
-  minimal_x: '190',
-  minimal_y: '-16',
-  minimal_z: '-348',
-  maximal_x: '1019',
-  maximal_y: '1941',
-  maximal_z: '486',
   pixel_type: '"16-bit unsigned integer"',
   process_angle: '"All angles"',
   process_channel: '"All channels"',
   process_illumination: '"All illuminations"',
   process_timepoint: '"Single Timepoint (Select from List)"',
   process_views_in_paralell: '"All"',
-  xml_output: '"Save every XML with user-provided unique id"'
+  xml_output: '"Save every XML with user-provided unique id"',
+  bsh_file: "fusion.bsh"
   }
 
 external_transform: {
+  # BUG
   # channel setting: '"all_channels"'
-  channel_setting: '"green"',
+  channel_setting: '"green,red"',
   transform_timepoint: '"All Timepoints"',
   transform_angle: '"All angles"',
   transform_channel: '"All channels"',
@@ -130,19 +130,19 @@ external_transform: {
   transform_illumination: '"All illuminations"',
   apply_transformation: '"Current view transformations (appends to current transforms)"',
   define_mode_transform: '"Matrix"',
-  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',
+  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',  # essential
   transformation: '"Rigid"',
   bsh_file: "transform.bsh"
   }
 
 deconvolution: {
-  iterations: '1',
-  minimal_x_deco: '190',
-  minimal_y_deco: '-16',
-  minimal_z_deco: '-348',
-  maximal_x_deco: '1019',
-  maximal_y_deco: '1941',
-  maximal_z_deco: '486',
+  iterations: '1', # essential
+  minimal_x_deco: '190', # essential maybe automate
+  minimal_y_deco: '-16', # essential maybe automate
+  minimal_z_deco: '-348', # essential maybe automate
+  maximal_x_deco: '1019', # essential maybe automate
+  maximal_y_deco: '1941', # essential maybe automate
+  maximal_z_deco: '486', # essential maybe automate
   detections_to_extract_psf_for_channel: '"beads"',
   process_timepoint: '"Single Timepoint (Select from List)"',
   process_angle: '"All angles"',
@@ -162,25 +162,26 @@ deconvolution: {
   }
   
 hdf5_output: {
-  output_image_file_pattern: 'TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif',
-  output_xml: '"fused_Single_Channel"',
-  output_hdf5_xml: '"hdf5_fused_Single_Channel"',
+  # Will be obsolete
+  output_image_file_pattern: 'TP{{t}}_Ch{{c}}_Ill0_Ang0,72,144,216,288.tif',
+  output_xml: '"fused_Dual_Channel"',
+  output_hdf5_xml: '"hdf5_fused_Dual_Channel"',
   output_multiple_channels: '"NO (one channel)"',
-  output_timepoints: '0-4',
-  output_pixel_distance_x: 0.5718,
-  output_pixel_distance_y: 0.5718,
-  output_pixel_distance_z: 0.5718,
+  output_timepoints: '0-1',
+  output_pixel_distance_x: 0.28590,
+  output_pixel_distance_y: 0.28590,
+  output_pixel_distance_z: 0.28590,
   output_pixel_unit: 'um',
-  output_channels: "green",
-  output_data_type: "32Bit",
+  output_channels: "green,red",
+  output_data_type: "16Bit",
   convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
   output_type_of_dataset: '"Image Stacks (ImageJ Opener)"',
   output_multiple_timepoints: '"YES (one file per time-point)"',
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
   output_imglib_container: '"ArrayImg (faster)"',
-  subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}}, {{4,4,4}}, {{8,8,8}} }}"',
-  chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}}, {{16,16,16}}, {{16,16,16}} }}"',
+  subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}}, {{4,4,4}}, {{8,8,8}} }}"', # data dependent
+  chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}}, {{16,16,16}}, {{16,16,16}} }}"', # data dependent
   # subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
   # chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
   bsh_file_define: "define_output.bsh",
