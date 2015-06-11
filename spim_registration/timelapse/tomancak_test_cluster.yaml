@@ -15,8 +15,10 @@ common: {
   pixel_distance_y: '0.28590106964',
   pixel_distance_z: '1.50000',
   pixel_unit: "um",
-  fusion_switch: "deconvolution"
-  # fusion_switch: "fusion"
+  # transformation_switch: "timelapse_dublicate",
+  transformation_switch: "timelapse",
+  # fusion_switch: "deconvolution"
+  fusion_switch: "fusion"
   }
               
 define_xml_czi: {
@@ -92,7 +94,8 @@ timelapse: {
 Dublicate_transformations: {
   source_dublication: "red",
   target_dublication: "green",
-  bsh_file: "dublicate_channel.bsh"
+  duplicate_which_transformations: '"Replace all transformations"',
+  bsh_file: "Dublicate_transformations.bsh"
   }
   
 fusion: {

@@ -253,9 +253,37 @@ rule timelapse:
                                     jdir=JOBDIR)
         cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
-        
+
+rule dublicate_transformations:
+    input: rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
+    output: rules.timelapse.output[0] + "_dublicate"
+    log: "{xml_base}_dublicate_transformations.log"
+    run:
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} 
+        -Dimage_file_directory={jdir} \
+	-Dmerged_xml={merged_xml} \
+	-Dprocess_timepoint_timelapse={timelapse_process_timepoints} \
+	-Dprocess_illumination={reg_process_illumination} \
+	-Dprocess_angle={reg_process_angle} \
+	-Dsource_dublication={source_dublication} \
+	-Dtarget_dublication={target_dublication} \
+	-Dduplicate_which_transformations={duplicate_which_transformations} \
+        -- --no-splash {path_bsh}""",     	
+                                    config["common"],
+                                    config["registration"],
+                                    config["timelapse"],
+                                    config["dublicate_channel"],
+                                    path_bsh=config["common"]["bsh_directory"] + config["Dublicate_transformations"]["bsh_file"],
+                                    jdir=JOBDIR,
+                                    file_id_w="{wildcards.file_id}",
+                                    merged_xml_file="{input.merged_xml}"
+        )
+        cmd_string += " > {log} 2>&1 && touch {output}"
+        shell(cmd_string)
+
 rule fusion:
-    input: rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
     output: "{xml_base}-{file_id,\d+}-00.h5_fusion"
     log: "{xml_base}-{file_id,\d+}-00-fusion.log"
     run:
@@ -327,7 +355,7 @@ rule external_transform:
         shell(cmd_string)
 
 rule deconvolution:
-    input: rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
+    input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
     output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
     log: "{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
