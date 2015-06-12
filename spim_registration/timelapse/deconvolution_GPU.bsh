@@ -78,12 +78,6 @@ System.out.println( "psf_estimation = " + psf_estimation );
 System.out.println( "number_of_iterations = " + iterations );
 System.out.println( "deco_output_file_directory = " + deco_output_file_directory );
 
-// Search for CUDA
-System.out.println( "-------------------------------------------------------" );
-System.out.println( "Loading CUDA directory: " );
-directory_cuda = System.getProperty( "directory_cuda" );
-System.out.println( "directory_cuda = " + directory_cuda );
-
 // PSF Parameters
 psf_size_x = System.getProperty( "psf_size_x" );
 psf_size_y = System.getProperty( "psf_size_y" );
@@ -126,6 +120,45 @@ for (int channel=0; channel < channel_token.length; channel++ )
 
 System.out.println( channel_string );
 
+// GPU/CPU setting
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "GPU/CPU setting: " );
+
+compute_on = System.getProperty( "compute_on = " + compute_on );
+directory_cuda = System.getProperty( "directory_cuda = " + directory_cuda );
+System.getProperty( "cudafourierconvolution = " + cudafourierconvolution );
+
+System.out.println( "compute_on = " + compute_on );
+System.out.println( "directory_cuda = " + directory_cuda  );
+System.out.println( "cudafourierconvolution = " + cudafourierconvolution );
+	
+String compute_string = "";
+String cuda_settings = "";
+		
+if (compute_on.equalsIgnoreCase( "GPU (Nvidia CUDA via JNA)" ) )
+{
+	System.out.println( "GPU deconvoultion selected" );
+	compute_string = "compute_on=[GPU (Nvidia CUDA via JNA)] ";
+	cuda_settings = "cuda_directory=" + directory_cuda + " " +
+			"select_native_library_for_cudafourierconvolution=" + cudafourierconvolution + " " + 
+			"gpu_1 ";
+}
+		
+else if (compute_on.equalsIgnoreCase( "CPU (Java)" ) ) 
+{
+	System.out.println( "CPU deconvoultion selected" );
+	compute_string = "compute_on=[" + compute_on + "] ";
+	cuda_settings  = "";
+}
+			
+else 
+{
+	System.out.println( "Deconvolution GPU/CPU selection bad" );
+}
+					
+System.out.println( "compute_string=" + compute_string );
+System.out.println( "cuda_settings=" + cuda_settings );
+
 // Execute Fiji Plugin
 System.out.println( "=======================================================" );
 System.out.println( "Starting Deconvolution" );
@@ -154,24 +187,21 @@ IJ.run("Fuse/Deconvolve Dataset",
 	"use_tikhonov_regularization " +
 	"tikhonov_parameter=" + Tikhonov_parameter + " " +
 	"compute=[" + compute + "] " +
-	"compute_on=[GPU (Nvidia CUDA via JNA)] " +
+	compute_string +
 	"psf_estimation=[" + psf_estimation + "] " +
 	"psf_display=[Do not show PSFs] " +
 	"output_file_directory=" + deco_output_file_directory + " " +
-	"cuda_directory=[" + directory_cuda + "] " +
-	"select_native_library_for_cudafourierconvolution=libFourierConvolutionCUDALib.so " + 
-	"gpu_1 " +
+	cuda_settings +
 	channel_string +
 	"psf_size_x=" + psf_size_x + " " +
 	"psf_size_y=" + psf_size_y + " " +
 	"psf_size_z=" + psf_size_z + "");
 }
-catch ( e ) { 
+catch ( e ) {
 
     print( "[deconvolution-GPU] caught exception: "+e );
     //important to fail the process if exception occurs
     runtime.exit(1);
-    
 }
 
 /* shutdown */

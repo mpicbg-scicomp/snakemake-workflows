@@ -54,12 +54,17 @@ registration: {
   reg_process_channel: '"Single channel (Select from List)"', # essential '"All channels"'; '"Single channel (Select from List)"'
   reg_processing_channel: '"red"',      # essential
   reg_interest_points_channel: '"beads"', # essential
+  type_of_detection: '"Difference-of-Mean (Integral image based)"', # Difference-of-Gaussian
   reg_radius_1: '2',           # essential
   reg_radius_2: '3',            # essential
   reg_threshold: '0.005',       # essential
   initial_sigma: '1.8',         # essetial
-  threshold_gaussian: '0.0080',   # essential
-  type_of_detection: '"Difference-of-Mean (Integral image based)"', # switch
+  threshold_gaussian: '0.0080',   # essential 
+  compute_on: '"GPU accurate (Nvidia CUDA via JNA)"',
+  separableconvolution: '"libSeparableConvolutionCUDALib.so"',
+  downsample_detection: "Yes",
+  downsample_xy: '"Match Z Resolution (less downsampling)"',
+  downsample_z: "1x",
   label_interest_points: '"beads"',               
   reg_process_timepoint: '"Single Timepoint (Select from List)"',
   reg_process_angle: '"All angles"',
@@ -151,6 +156,7 @@ deconvolution: {
   Tikhonov_parameter: '0.0006',
   compute: '"in 512x512x512 blocks"',
   compute_on: '"GPU (Nvidia CUDA via JNA)"',
+  cudafourierconvolution: "libFourierConvolutionCUDALib.so",
   imglib2_container: '"ArrayImg"',
   osem_acceleration: '"1 (balanced)"',
   psf_estimation: '"Extract from beads"',

@@ -181,7 +181,11 @@ rule registration:
         -Dreg_threshold={reg_threshold} \
         -Dinitial_sigma={initial_sigma} \
         -Dthreshold_gaussian={threshold_gaussian} \
-        -Dregistration_algorithm={algorithm} \
+        -Dcompute_on={compute_on} \
+	-Dseparableconvolution={separableconvolution} \
+	-Ddownsample_detectio={downsample_detection} \
+	-Ddownsample_z={downsample_z} \
+	-Dregistration_algorithm={algorithm} \
         -Dreg_interest_points_channel={reg_interest_points_channel} \
         -Dfix_tiles={fix_tiles} \
         -Dmap_back_tiles={map_back_tiles} \
@@ -380,7 +384,8 @@ rule deconvolution:
         -Dosem_acceleration={osem_acceleration} \
         -DTikhonov_parameter={Tikhonov_parameter} \
         -Dcompute={compute} \
-        -Dpsf_estimation={psf_estimation} \
+        -Dcudafourierconvolution={cudafourierconvolution} \
+	-Dpsf_estimation={psf_estimation} \
         -Ddirectory_cuda={directory_cuda} \
         -Ddetections_to_extract_psf_for_channel={detections_to_extract_psf_for_channel} \
         -Dpsf_size_x={psf_size_x} \
