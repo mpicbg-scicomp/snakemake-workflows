@@ -179,11 +179,13 @@ rule registration:
 	-Dreg_radius_1={reg_radius_1} \
 	-Dreg_radius_2={reg_radius_2} \
         -Dreg_threshold={reg_threshold} \
-        -Dinitial_sigma={initial_sigma} \
+        -Dsigma={sigma} \
         -Dthreshold_gaussian={threshold_gaussian} \
         -Dcompute_on={compute_on} \
+	-Ddirectory_cuda={directory_cuda} \
 	-Dseparableconvolution={separableconvolution} \
-	-Ddownsample_detectio={downsample_detection} \
+	-Ddownsample_detection={downsample_detection} \
+	-Ddownsample_xy={downsample_xy} \
 	-Ddownsample_z={downsample_z} \
 	-Dregistration_algorithm={algorithm} \
         -Dreg_interest_points_channel={reg_interest_points_channel} \

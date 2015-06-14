@@ -2,7 +2,8 @@ common: {
   # directory that contains the bean shell scripts
   bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
   directory_cuda: "/sw/users/schmied/packages/cuda/lib/",
-  fiji-app: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/ImageJ-linux64",
+  #fiji-app: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/ImageJ-linux64",
+  fiji-app: "/sw/users/schmied/packages/2015-05-29_Fiji_2.3.9_SNAP.app.cuda/ImageJ-linux64",
   fiji-prefix: "/sw/bin/xvfb-run -a",
   first_xml_filename: "Dual_Channel",
   hdf5_xml_filename: '"hdf5_Dual_Channel"',
@@ -17,8 +18,8 @@ common: {
   pixel_unit: "um",
   transformation_switch: "timelapse_dublicate",
   # transformation_switch: "timelapse",
-  # fusion_switch: "deconvolution"
-  fusion_switch: "fusion"
+  fusion_switch: "deconvolution"
+  # fusion_switch: "fusion"
   }
               
 define_xml_czi: {
@@ -58,11 +59,11 @@ registration: {
   reg_radius_1: '2',           # essential
   reg_radius_2: '3',            # essential
   reg_threshold: '0.005',       # essential
-  initial_sigma: '1.8',         # essetial
+  sigma: '1.8',         # essetial
   threshold_gaussian: '0.0080',   # essential 
   compute_on: '"GPU accurate (Nvidia CUDA via JNA)"',
   separableconvolution: '"libSeparableConvolutionCUDALib.so"',
-  downsample_detection: "Yes",
+  downsample_detection: "No",
   downsample_xy: '"Match Z Resolution (less downsampling)"',
   downsample_z: "1x",
   label_interest_points: '"beads"',               
