@@ -1,72 +1,107 @@
 common: {
-  # directory that contains the bean shell scripts
-  bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
-  directory_cuda: "/sw/users/schmied/cuda/",
+  # directory that contains the bean shell scripts and Snakefile
+  bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/", 
+  # Directory that contains the cuda libraries
+  directory_cuda: "/sw/users/schmied/cuda/",                                                          
+  # Directory that contains the current working Fiji
   #fiji-app: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/ImageJ-linux64",
-  fiji-app: "/sw/users/schmied/packages/2015-05-29_Fiji_2.3.9_SNAP.app.cuda/ImageJ-linux64",
-  fiji-prefix: "/sw/bin/xvfb-run -a",
-  first_xml_filename: "Dual_Channel",
-  hdf5_xml_filename: '"hdf5_Dual_Channel"',
-  merged_xml: "hdf5_Dual_Channel_merge",
-  ntimepoints: 2,
-  angles: "0,72,144,216,288",
-  channels: "green,red",
-  illumination: "0",
-  pixel_distance_x: '0.28590',
-  pixel_distance_y: '0.28590',
-  pixel_distance_z: '1.50000',
-  pixel_unit: "um",
-  transformation_switch: "timelapse_dublicate",
-  # transformation_switch: "timelapse",
+  fiji-app: "/sw/users/schmied/packages/2015-05-29_Fiji_2.3.9_SNAP.app.cuda/ImageJ-linux64",          
+  fiji-prefix: "/sw/bin/xvfb-run -a",       # calls xvfb for Fiji headless mode
+  # xml file names without .xml suffix
+  first_xml_filename: "Dual_Channel",       # Name of the xml file for the .czi or .tif files
+  hdf5_xml_filename: '"hdf5_Dual_Channel"', # Name of .xml file for the hdf5 data after resave_hdf5
+  merged_xml: "hdf5_Dual_Channel_merge",    # Name of .xml file after merge
+  # Describe the dataset
+  ntimepoints: 2,               # number of timepoints of dataset
+  angles: "0,72,144,216,288",   # angles          
+  channels: "green,red",        # channels
+  illumination: "0",            # illuminations
+  pixel_distance_x: '0.28590',  # Manual calibration x
+  pixel_distance_y: '0.28590',  # Manual calibration y
+  pixel_distance_z: '1.50000',  # Manual calibration z
+  pixel_unit: "um",             # unit of manual calibration
+  # Use switches to decide which processing steps you need:
+  # transformation_switch: "timelapse" standard processing
+  # after timelapse registration directly goes into fusion, timelapse_dublicate
+  # "timelapse_dublicate" for dual channel processing one channel contains the beads
+  # dublicates transformations
+  transformation_switch: "timelapse_dublicate", 
+  # Switches between content based fusion and deconvoltion
+  # "deconvolution" > for deconvolution
+  # "fusion" > for content based fusion
   fusion_switch: "deconvolution"
-  # fusion_switch: "fusion"
   }
               
 define_xml_czi: {
-  first_czi: "2015-02-20_LZ2_Stock48_Stock58.czi", # essential
-  rotation_around: "X-Axis",
-  bsh_file: "define_czi.bsh"
+  first_czi: "2015-02-20_LZ2_Stock48_Stock58.czi", # master .czi file
+  rotation_around: "X-Axis",                       # axis of acquistion
+  bsh_file: "define_czi.bsh"                       # .bsh script for defining .czi file
   }
           
 define_xml_tif: {
-  image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif', # essential
-  imglib_container: '"ArrayImg (faster)"',
-  multiple_angles: '"YES (one file per angle)"',
-  multiple_channels: '"NO (one channel)"',
-  multiple_illumination_directions: '"NO (one illumination direction)"',
-  multiple_timepoints: '"YES (one file per time-point)"',
+  # file pattern of .tif files
+  # for multi channel give spim_TL{tt}_Angle{a}_Channel{c}.tif
+  # # SPIM file pattern: for padded zeros use tt 
+  image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif', 
+  # Settings for ImageJ Opener
   type_of_dataset: '"Image Stacks (ImageJ Opener)"',
-  bsh_file: "define_tif_zip.bsh"
+  multiple_timepoints: '"YES (one file per time-point)"', # or NO (one time-point)
+  multiple_angles: '"YES (one file per angle)"',          # or NO (one angle)
+  multiple_channels: '"NO (one channel)"',                # or "\"NO (one channel)\""
+  multiple_illumination_directions: '"NO (one illumination direction)"', # or YES (one file per illumination direction)
+  imglib_container: '"ArrayImg (faster)"',        # '"ArrayImg (faster)"'
+  bsh_file: "define_tif_zip.bsh"  
   }
   
 resave_hdf5: {
-  hdf5_chunk_sizes: '"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}"', # data dependent
-  subsampling_factors: '"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}"',  # data dependent
+  # Subsampling and resolution settings for hdf5: data dependent
+  hdf5_chunk_sizes: '"{{ {{32,32,4}}, {{32,32,4}}, {{16,16,16}}, {{16,16,16}} }}"', 
+  subsampling_factors: '"{{ {{1,1,1}}, {{2,2,1}}, {{4,4,1}}, {{8,8,1}} }}"',  
+  # Standard settings for cluster processing
+  setups_per_partition: '0',
+  timepoints_per_partition: '1',
+  resave_timepoint: '"All Timepoints"',  
   resave_angle: '"All angles"',
   resave_channel: '"All channels"',
   resave_illumination: '"All illuminations"',
-  resave_timepoint: '"All Timepoints"',
-  setups_per_partition: '0',
-  timepoints_per_partition: '1',
   bsh_file: "export.bsh"
   }
 
 registration: {
-  reg_process_channel: '"Single channel (Select from List)"', # essential '"All channels"'; '"Single channel (Select from List)"'
-  reg_processing_channel: '"red"',      # essential
-  reg_interest_points_channel: '"beads"', # essential
-  type_of_detection: '"Difference-of-Mean (Integral image based)"', # Difference-of-Gaussian
-  reg_radius_1: '2',           # essential
-  reg_radius_2: '3',            # essential
-  reg_threshold: '0.005',       # essential
-  sigma: '1.8',         # essetial
-  threshold_gaussian: '0.0080',   # essential 
+  # reg_process_channel:
+  # # Single Channel:  '"All channels"'
+  # Dual Channel: '"All channels"'
+  # Dual Channel one Channel contains beads: '"Single channel (Select from List)"'
+  reg_process_channel: '"Single channel (Select from List)"',
+  # reg_processing_channel:
+  # Dual Channel setting for 1 Channel contains the beads
+  reg_processing_channel: '"red"',      
+  # reg_interest_points_channel:
+  # Single Channel: '"beads"'
+  # Dual Channel: '"beads,beads"'
+  # Dual Channel: Channel does not contain the beads '"[DO NOT register this channel],beads"'
+  reg_interest_points_channel: '"beads"',
+  # type of detection: '"Difference-of-Mean (Integral image based)"' or '"Difference-of-Gaussian"'
+  type_of_detection: '"Difference-of-Mean (Integral image based)"',  
+  # Settings for Difference-of-Mean
+  # For multiple channels 'value1,value2' delimiter is ,
+  reg_radius_1: '2',          
+  reg_radius_2: '3',            
+  reg_threshold: '0.005',
+  # Settings for Difference-of-Gaussian
+  # For multiple channels 'value1,value2' delimiter is ,
+  sigma: '1.8',         
+  threshold_gaussian: '0.0080',   
+  # Processing setting for Difference-of-Gaussian detection
+  # compute_on:
   compute_on: '"GPU accurate (Nvidia CUDA via JNA)"',
   separableconvolution: '"libSeparableConvolutionCUDALib.so"',
-  downsample_detection: "No",
+  # Downsampling settings
+  downsample_detection: "No", # "No" or "Yes"
   downsample_xy: '"Match Z Resolution (less downsampling)"',
   downsample_z: "1x",
-  label_interest_points: '"beads"',               
+  # Standard Settings for bead based registration
+  label_interest_points: '"beads"',              
   reg_process_timepoint: '"Single Timepoint (Select from List)"',
   reg_process_angle: '"All angles"',
   reg_process_illumination: '"All illuminations"',
@@ -82,7 +117,7 @@ registration: {
   model_to_regularize_with: "Rigid",
   lambda: '0.10',
   imglib_container: '"ArrayImg (faster)"',
-  bsh_file: "registration.bsh"
+  bsh_file: "registration.bsh"  # .bsh script for registration
   }
 
 xml_merge: {
@@ -90,108 +125,135 @@ xml_merge: {
   }
   
 timelapse: {
-  reference_timepoint: '0',   # essential
+  reference_timepoint: '0',   # Reference timepoint
+  # Standard settings for timelapse registration
   type_of_registration_timelapse: '"Match against one reference timepoint (no global optimization)"',
   timelapse_process_timepoints: '"All Timepoints"',
   bsh_file: "timelapse_registration.bsh"
   }
   
 dublicate_transformations: {
-  source_dublication: "red",  # essential for 1 usecase
-  target_dublication: "green", # essential for 1 usecase
-  duplicate_which_transformations: '"Replace all transformations"',
-  bsh_file: "dublicate_transformations.bsh"
+  # If dual channel processing and only one channel contains beads
+  # this allows you to dublicate the transformation for the 
+  # channel that does not contain beas
+  source_dublication: "red",  # source channel
+  target_dublication: "green", # target channel
+  duplicate_which_transformations: '"Replace all transformations"', # mode of dublication
+  bsh_file: "dublicate_transformations.bsh" # .bsh script for dublication
   }
   
 fusion: {
-  downsample: '1',  # essential
-  minimal_x: '220', # essential maybe automate
-  minimal_y: '40',  # essential maybe automate
-  minimal_z: '-290',  # essential maybe automate
-  maximal_x: '976',   # essential maybe automate
-  maximal_y: '1892',  # essential maybe automate  
-  maximal_z: '472',   # essential maybe automate
-  fused_image: '"Append to current XML Project"',
-  imglib2_container_fusion: '"ArrayImg"',
-  imglib2_data_container: '"ArrayImg (faster)"',
-  interpolation: '"Linear Interpolation"',
-  pixel_type: '"16-bit unsigned integer"',
+  # content based multiview fusion
+  # supports multi channel without new settings
+  downsample: '1',  # set downsampling
+  # Cropping parameters of full resolution
+  minimal_x: '220', 
+  minimal_y: '40',  
+  minimal_z: '-290',  
+  maximal_x: '976',   
+  maximal_y: '1892',    
+  maximal_z: '472',   
+  # fused_image: '"Append to current XML Project"', does not work yet
+  process_timepoint: '"Single Timepoint (Select from List)"',
   process_angle: '"All angles"',
   process_channel: '"All channels"',
   process_illumination: '"All illuminations"',
-  process_timepoint: '"Single Timepoint (Select from List)"',
+  imglib2_container_fusion: '"ArrayImg"',
+  interpolation: '"Linear Interpolation"',
+  pixel_type: '"16-bit unsigned integer"',
+  imglib2_data_container: '"ArrayImg (faster)"',
   process_views_in_paralell: '"All"',
   xml_output: '"Save every XML with user-provided unique id"',
   bsh_file: "fusion.bsh"
   }
 
 external_transform: {
-  # BUG
+  # Downsamples for deconvolution
+  # BUG: external transformation breaks .xml file
   # channel setting: '"all_channels"'
   channel_setting: '"green,red"',
   transform_timepoint: '"All Timepoints"',
   transform_angle: '"All angles"',
   transform_channel: '"All channels"',
-  # illumination setting only one illumination side
   transform_illumination: '"All illuminations"',
   apply_transformation: '"Current view transformations (appends to current transforms)"',
   define_mode_transform: '"Matrix"',
-  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',  # essential
+  # Matrix for downsampling
+  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"', 
   transformation: '"Rigid"',
   bsh_file: "transform.bsh"
   }
 
 deconvolution: {
-  iterations: '1', # essential
-  minimal_x_deco: '190', # essential maybe automate
-  minimal_y_deco: '-16', # essential maybe automate
-  minimal_z_deco: '-348', # essential maybe automate
-  maximal_x_deco: '1019', # essential maybe automate
-  maximal_y_deco: '1941', # essential maybe automate
-  maximal_z_deco: '486', # essential maybe automate
-  detections_to_extract_psf_for_channel: '"beads,beads"',
+  iterations: '1', # number of iterations
+  # Cropping parameters: take downsampling into account
+  minimal_x_deco: '190', 
+  minimal_y_deco: '-16', 
+  minimal_z_deco: '-348', 
+  maximal_x_deco: '1019', 
+  maximal_y_deco: '1941', 
+  maximal_z_deco: '486', 
+  # Channel settings for deconvolution
+  # Single Channel: '"beads"'
+  # Dual Channel: '"beads,beads"'
+  # Dual Channel one channel contains beads: '"[Same PSF as channel red],beads"'
+  detections_to_extract_psf_for_channel: '"[Same PSF as channel red],beads"',
+  # Settings for GPU or CPU processing 
+  # '"CPU (Java)"' or '"GPU (Nvidia CUDA via JNA)"'
+  compute_on: '"GPU (Nvidia CUDA via JNA)"',
+  cudafourierconvolution: "libFourierConvolutionCUDALib.so", # GPU processing name of cuda library
+  # Standard settings for deconvolution
   process_timepoint: '"Single Timepoint (Select from List)"',
   process_angle: '"All angles"',
   process_channel: '"All channels"',
   process_illumination: '"All illuminations"',
+  type_of_iteration: '"Efficient Bayesian - Optimization I (fast, precise)"',
   Tikhonov_parameter: '0.0006',
   compute: '"in 512x512x512 blocks"',
-  compute_on: '"GPU (Nvidia CUDA via JNA)"',
-  cudafourierconvolution: "libFourierConvolutionCUDALib.so",
-  imglib2_container: '"ArrayImg"',
   osem_acceleration: '"1 (balanced)"',
   psf_estimation: '"Extract from beads"',
   psf_size_x: '19',
   psf_size_y: '19',
   psf_size_z: '25',
-  type_of_iteration: '"Efficient Bayesian - Optimization I (fast, precise)"',
+  imglib2_container: '"ArrayImg"',
   bsh_file: "deconvolution.bsh"
   }
   
 hdf5_output: {
-  # Will be obsolete
+  # writes new hdf5 dataset for fusion output: will be obsolete
+  # Naming pattern of output
+  # Single Channel: TP{t}_Chgreen_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
+  # Dual Channel: TP{t}_Ch{0}_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
   output_image_file_pattern: 'TP{{t}}_Ch{{c}}_Ill0_Ang0,72,144,216,288.tif',
+  # channel setting
+  output_multiple_channels: '"YES (one file per channel)"', # '"YES (one file per channel)"' or  '"NO (one channel)"'
+  output_channels: "green,red",
+  # .xml file names
   output_xml: '"fused_Dual_Channel"',
   output_hdf5_xml: '"hdf5_fused_Dual_Channel"',
-  output_multiple_channels: '"YES (one file per channel)"', # "\"YES (one file per channel)\"" or  "\"NO (one channel)\""
-  output_timepoints: '0-1',
-  output_pixel_distance_x: 0.28590,
+  output_timepoints: '0-1', # Timepoints format: '1-2'
+  # pixel size of output: take downsampling into account!
+  output_pixel_distance_x: 0.28590, 
   output_pixel_distance_y: 0.28590,
   output_pixel_distance_z: 0.28590,
   output_pixel_unit: 'um',
-  output_channels: "green,red",
-  output_data_type: "16Bit",
+  # give if 16Bit data or 32Bit data 
+  # output of fusion is 16Bit, of deconvolution it is 32Bit
+  output_data_type: "16Bit", # "32Bit" or "16Bit"
+  # if data is 32Bit then the data is converted into 16Bit data
   convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
+  # subsampling and chunk size settings: dataset dependent
+  subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}}, {{4,4,4}}, {{8,8,8}} }}"', # data dependent
+  chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}}, {{16,16,16}}, {{16,16,16}} }}"', # data dependent
+  # subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
+  # chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
+  # Standard settings for hdf5_output
   output_type_of_dataset: '"Image Stacks (ImageJ Opener)"',
   output_multiple_timepoints: '"YES (one file per time-point)"',
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
   output_imglib_container: '"ArrayImg (faster)"',
-  subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}}, {{4,4,4}}, {{8,8,8}} }}"', # data dependent
-  chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}}, {{16,16,16}}, {{16,16,16}} }}"', # data dependent
-  # subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
-  # chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
-  bsh_file_define: "define_output.bsh",
-  bsh_file_hdf5: "export_output.bsh"
+  bsh_file_define: "define_output.bsh", # .bsh script for defining the dataset
+  bsh_file_hdf5: "export_output.bsh"    # .bsh script for resaving into hdf5
   }
 
