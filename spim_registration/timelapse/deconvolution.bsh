@@ -122,9 +122,9 @@ System.out.println( channel_string );
 System.out.println( "-------------------------------------------------------" );
 System.out.println( "GPU/CPU setting: " );
 
-compute_on = System.getProperty( "compute_on = " + compute_on );
-directory_cuda = System.getProperty( "directory_cuda = " + directory_cuda );
-System.getProperty( "cudafourierconvolution = " + cudafourierconvolution );
+compute_on = System.getProperty( "compute_on" );
+directory_cuda = System.getProperty( "directory_cuda" );
+cudafourierconvolution = System.getProperty( "cudafourierconvolution" );
 
 System.out.println( "compute_on = " + compute_on );
 System.out.println( "directory_cuda = " + directory_cuda  );

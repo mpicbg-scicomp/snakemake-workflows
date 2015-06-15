@@ -386,6 +386,7 @@ rule deconvolution:
         -Dosem_acceleration={osem_acceleration} \
         -DTikhonov_parameter={Tikhonov_parameter} \
         -Dcompute={compute} \
+        -Dcompute_on={compute_on} \
         -Dcudafourierconvolution={cudafourierconvolution} \
 	-Dpsf_estimation={psf_estimation} \
         -Ddirectory_cuda={directory_cuda} \

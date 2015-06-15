@@ -1,7 +1,7 @@
 common: {
   # directory that contains the bean shell scripts
   bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
-  directory_cuda: "/sw/users/schmied/packages/cuda/lib/",
+  directory_cuda: "/sw/users/schmied/cuda/",
   #fiji-app: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/ImageJ-linux64",
   fiji-app: "/sw/users/schmied/packages/2015-05-29_Fiji_2.3.9_SNAP.app.cuda/ImageJ-linux64",
   fiji-prefix: "/sw/bin/xvfb-run -a",
