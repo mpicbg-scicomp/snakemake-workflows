@@ -149,7 +149,7 @@ deconvolution: {
   maximal_x_deco: '1019', # essential maybe automate
   maximal_y_deco: '1941', # essential maybe automate
   maximal_z_deco: '486', # essential maybe automate
-  detections_to_extract_psf_for_channel: '"beads"',
+  detections_to_extract_psf_for_channel: '"beads,beads"',
   process_timepoint: '"Single Timepoint (Select from List)"',
   process_angle: '"All angles"',
   process_channel: '"All channels"',
@@ -165,7 +165,7 @@ deconvolution: {
   psf_size_y: '19',
   psf_size_z: '25',
   type_of_iteration: '"Efficient Bayesian - Optimization I (fast, precise)"',
-  bsh_file: "deconvolution_GPU.bsh"
+  bsh_file: "deconvolution.bsh"
   }
   
 hdf5_output: {
