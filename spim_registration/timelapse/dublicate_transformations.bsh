@@ -1,0 +1,66 @@
+import ij.IJ;
+import ij.Prefs; 
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+ 
+runtime = Runtime.getRuntime();
+System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
+
+Prefs.setThreads(1); 	// defines the number of threads allowed 
+print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+
+System.out.println("---------------------------------------------------------");
+System.out.println("Xml file:");
+
+xml_path = System.getProperty( "image_file_directory" );
+merged_xml = System.getProperty( "merged_xml" );
+
+System.out.println( "selected_xml = " + xml_path + merged_xml + " ");
+
+// General Registration Parameters and Channel Settings
+System.out.println("---------------------------------------------------------");
+System.out.println( "General parameters: " );
+
+process_timepoint_timelapse = System.getProperty( "process_timepoint_timelapse" );
+process_illumination = System.getProperty( "process_illumination" );
+process_angle = System.getProperty( "process_angle" );
+
+System.out.println( "process_timepoints = " + process_timepoint_timelapse );
+System.out.println( "process_illumination = " + process_illumination );
+System.out.println( "process_angle = " + process_angle );
+
+System.out.println("---------------------------------------------------------");
+System.out.println( "Dublication Parameters: " );
+source_dublication = System.getProperty( "source_dublication" );
+target_dublication = System.getProperty( "target_dublication" );
+
+System.out.println( "source = " + source_dublication );
+System.out.println( "processing_channel = " + target_dublication );
+	
+
+System.out.println("=========================================================");
+System.out.println( "Start Dublication : " );
+
+try {
+IJ.run("Duplicate Transformations", 
+"apply=[One channel to other channels] " +
+"select_xml=" + xml_path + merged_xml + " " +
+"apply_to_angle=[" + process_angle + "] " +
+"apply_to_illumination=[" + process_illumination + "] " +
+"apply_to_timepoint=[" + process_timepoint_timelapse + "] " +
+"source=" + source_dublication + " " +
+"target=[Single Channel (Select from List)] " +
+"processing_channel=" + target_dublication + " " +
+"duplicate_which_transformations=[Replace all transformations]");
+}
+catch ( e ) { 
+
+    print( "[dublicate_transformations] caught exception: "+e );
+    //important to fail the process if exception occurs
+    runtime.exit(1);
+    
+}
+/* shutdown */
+runtime.exit(0);
