@@ -1,3 +1,25 @@
+Datasets
+========================
+The scripts are now supporting multiple angles, multiple channels and multiple illumination direction without adjusting the .bsh or creat-jobs.sh scripts.
+
+Based on SPIM registration version 3.3.8
+
+Supported datasets are in the following format:
+
+ImageJ Opener (resave to .tif):
+
+    Multiple timepoints: YES (one file per timepoint)
+    Multiple channels: YES (one file per channel)
+    Multiple illumination directions: YES (one file per illumination direction) => not tested yet
+    Multiple angles: YES one file per angle
+
+Zeiss Lightsheet Z.1 Dataset (LOCI)
+
+    Multiple timepoints: Supports multiple time points per file
+    Multiple channels: Supports multiple channels per file
+    Multiple illumination directions: YES (one file per illumination direction)
+    Multiple angles: YES (one file per angle)
+
 Timelapse based workflow
 ========================
 
