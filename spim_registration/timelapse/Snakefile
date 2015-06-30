@@ -6,8 +6,12 @@ JOBDIR=os.path.abspath(os.path.curdir)
 if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a slash
    JOBDIR+="/"
 
-#data specific config file, expected to be inside JOBDIR
-# configfile: "tomancak_test_cluster.json"
+# Test config file single Channel:
+# configfile: single_test.yaml
+# Test config file dual channel one channel contains beads:
+# configfile: dual_OneChannel.yaml
+
+# data specific config file, expected to be inside JOBDIR
 configfile: "tomancak_test_cluster.yaml"
 
 
@@ -260,7 +264,7 @@ rule timelapse:
         cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
-rule dublicate_transformations:
+rule duplicate_transformations:
     input: rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
     output: rules.timelapse.output[0] + "_dublicate"
     log: "{xml_base}_dublicate_transformations.log"
