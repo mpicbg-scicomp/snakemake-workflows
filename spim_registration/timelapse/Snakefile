@@ -7,12 +7,12 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
    JOBDIR+="/"
 
 # Test config file single Channel:
-# configfile: single_test.yaml
+configfile: "single_test.yaml"
 # Test config file dual channel one channel contains beads:
-# configfile: dual_OneChannel.yaml
+# configfile: "dual_OneChannel.yaml"
 
 # data specific config file, expected to be inside JOBDIR
-configfile: "tomancak_test_cluster.yaml"
+# configfile: "tomancak_test_cluster.yaml"
 
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
@@ -306,7 +306,6 @@ rule fusion:
     	-Dprocess_illumination={process_illumination} \
     	-Dprocess_angle={process_angle} \
     	-Dxml_output={xml_output} \
-    	-Dfused_image={fused_image} \
     	-Dminimal_x={minimal_x} \
     	-Dminimal_y={minimal_y} \
     	-Dminimal_z={minimal_z} \

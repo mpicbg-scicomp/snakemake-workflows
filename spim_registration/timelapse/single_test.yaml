@@ -4,13 +4,12 @@ common: {
   # Directory that contains the cuda libraries
   directory_cuda: "/sw/users/schmied/cuda/",                                                          
   # Directory that contains the current working Fiji
-  #fiji-app: "/sw/users/schmied/packages/2015-06-08_Fiji.app.cuda/ImageJ-linux64",
-  fiji-app: "/sw/users/schmied/packages/2015-05-29_Fiji_2.3.9_SNAP.app.cuda/ImageJ-linux64",          
-  fiji-prefix: "/sw/bin/xvfb-run -a",       # calls xvfb for Fiji headless mode
+  fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",        
+  fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
   # xml file names without .xml suffix
-  first_xml_filename: "single",       # Name of the xml file for the .czi or .tif files
+  first_xml_filename: '"single"',       # Name of the xml file for the .czi or .tif files
   hdf5_xml_filename: '"hdf5_single"', # Name of .xml file for the hdf5 data after resave_hdf5
-  merged_xml: "hdf5_single_merge",    # Name of .xml file after merge
+  merged_xml: '"hdf5_single_merge"',    # Name of .xml file after merge
   # Describe the dataset
   ntimepoints: 2,               # number of timepoints of dataset
   angles: "0,72,144,216,288",   # angles          
@@ -29,11 +28,11 @@ common: {
   # Switches between content based fusion and deconvoltion
   # "deconvolution" > for deconvolution
   # "fusion" > for content based fusion
-  fusion_switch: "deconvolution"
+  fusion_switch: "fusion"
   }
 
 define_xml_czi: {
-  first_czi: "2015-04-11_LZ2_Stock68_3.czi", # master .czi file
+  first_czi: "2015-02-21_LZ1_Stock68_3.czi", # master .czi file
   rotation_around: "X-Axis",                       # axis of acquistion
   bsh_file: "define_czi.bsh"                       # .bsh script for defining .czi file
   }
@@ -146,7 +145,7 @@ dublicate_transformations: {
 fusion: {
   # content based multiview fusion
   # supports multi channel without new settings
-  downsample: '1',  # set downsampling
+  downsample: '2',  # set downsampling
   # Cropping parameters of full resolution
   minimal_x: '190', 
   minimal_y: '-16',  
@@ -223,9 +222,9 @@ deconvolution: {
 hdf5_output: {
   # writes new hdf5 dataset for fusion output: will be obsolete
   # Naming pattern of output
-  # Single Channel: TP{t}_Chgreen_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  # Dual Channel: TP{t}_Ch{0}_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  output_image_file_pattern: 'TP{t}_Chgreen_Ill0_Ang0,72,144,216,288.tif',
+  # Single Channel: TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
+  # Dual Channel: TP{{t}}_Ch{{0}}_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
+  output_image_file_pattern: '"TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif"',
   # channel setting
   output_multiple_channels: '"NO (one channel)"', # '"YES (one file per channel)"' or  '"NO (one channel)"'
   output_channels: "green",
@@ -240,7 +239,7 @@ hdf5_output: {
   output_pixel_unit: 'um',
   # give if 16Bit data or 32Bit data 
   # output of fusion is 16Bit, of deconvolution it is 32Bit
-  output_data_type: "32Bit", # "32Bit" or "16Bit"
+  output_data_type: "16Bit", # "32Bit" or "16Bit"
   # if data is 32Bit then the data is converted into 16Bit data
   convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
   # subsampling and chunk size settings: dataset dependent

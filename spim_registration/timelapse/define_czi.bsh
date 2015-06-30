@@ -48,7 +48,6 @@ String angle_part;
 		angle_part = "angle_" + num_angles + "=" + angle_token[angle];
 		angle_string.append(angle_part);
 		angle_string.append(" ");
-			
 		}
 
 System.out.println( angle_string );
@@ -76,9 +75,7 @@ String channel_part;
 		channel_part = "channel_" + num_channel + "=" + channel_token[channel];
 		channel_string.append(channel_part);
 		channel_string.append(" ");
-			
 		}
-			
 System.out.println( "Channel String = " + channel_string );
 
 System.out.println("---------------------------------------------------------");
@@ -104,7 +101,6 @@ String illum_part;
 		illum_part = "_______illumination_" + num_illum + "=" + illum_token[illum];
 		illum_string.append(illum_part);
 		illum_string.append(" ");
-			
 		}
 
 System.out.println( illum_string );
