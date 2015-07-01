@@ -7,9 +7,9 @@ common: {
   fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",        
   fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
   # xml file names without .xml suffix
-  first_xml_filename: '"single"',       # Name of the xml file for the .czi or .tif files
+  first_xml_filename: 'single',       # Name of the xml file for the .czi or .tif files
   hdf5_xml_filename: '"hdf5_single"', # Name of .xml file for the hdf5 data after resave_hdf5
-  merged_xml: '"hdf5_single_merge"',    # Name of .xml file after merge
+  merged_xml: 'hdf5_single_merge',    # Name of .xml file after merge
   # Describe the dataset
   ntimepoints: 2,               # number of timepoints of dataset
   angles: "0,72,144,216,288",   # angles          
