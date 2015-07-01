@@ -29,7 +29,7 @@ common: {
   # Switches between content based fusion and deconvoltion
   # "deconvolution" > for deconvolution
   # "fusion" > for content based fusion
-  fusion_switch: "deconvolution"
+  fusion_switch: "fusion"
   }
 
 define_xml_czi: {

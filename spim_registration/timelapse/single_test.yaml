@@ -229,8 +229,8 @@ hdf5_output: {
   output_multiple_channels: '"NO (one channel)"', # '"YES (one file per channel)"' or  '"NO (one channel)"'
   output_channels: "green",
   # .xml file names
-  output_xml: '"fused_Dual_Channel"',
-  output_hdf5_xml: '"hdf5_fused_Dual_Channel"',
+  output_xml: '"fused_Single"',
+  output_hdf5_xml: '"hdf5_fused_Single"',
   output_timepoints: '0-1', # Timepoints format: '1-2'
   # pixel size of output: take downsampling into account!
   output_pixel_distance_x: 0.28590106964, 
