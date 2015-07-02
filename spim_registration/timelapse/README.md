@@ -26,22 +26,28 @@ Timelapse based workflow
 Expected setup
 --------------
 
+```bash
+/path/to/repo
+├── deconvolution_CPU.bsh
+├── deconvolution_GPU.bsh
+├── transform.bsh	 		
+├── registration.bsh 		
+└── xml_merge.bsh	 		
+```
+
 * a data directory e.g. looks like this
+
 ```bash
 /path/to/data
-├── deconvolution_CPU.bsh	# copied/symlinked from this repo
-├── deconvolution_GPU.bsh	# copied/symlinked from this repo
 ├── hdf5_test_unicore-00-00.h5
 ├── hdf5_test_unicore-01-00.h5
 ├── hdf5_test_unicore.h5
 ├── hdf5_test_unicore.xml
-├── registration.bsh 		# copied/symlinked from this repo
-├── tomancak.json	 		# copied/symlinked from this repo
-├── transform.bsh	 		# copied/symlinked from this repo
-└── xml_merge.bsh	 		# copied/symlinked from this repo
+└── tomancak.yaml	 		# copied/symlinked from this repo
 ```
 
-* `tomancak.json` contains the parameters that configure the beanshell scripts found in the data directory
+
+* `tomancak.yaml` contains the parameters that configure the beanshell scripts found in the data directory
 * `Snakefile` from this directory
 * `cluster.json` that resides in the same directory as the `Snakefile`
 * cluster runs LSF
