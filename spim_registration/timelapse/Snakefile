@@ -468,7 +468,7 @@ rule hdf5_xml_output:
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"])
 
-        part_string += " > {log} 2>&1"
+        part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
 
 rule resave_hdf5_output:
