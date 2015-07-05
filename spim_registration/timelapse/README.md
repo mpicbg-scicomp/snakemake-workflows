@@ -111,3 +111,7 @@ Log files and supervision of the pipeline
 
 The log files are written into a new directory in the data directory called "logs".
 The log files are ordered according to their position in the workflow. Multiple or alternative steps in the pipeline are indicated by numbers. 
+
+force certain rules:
+use the -R flag to rerun a particular rule and everything downstream
+-R <name of rule>
