@@ -30,7 +30,7 @@ Clone the repository:
 The repository contains the example configuration scripts for single and dual channel datasets, the Snakefile which defines the workflow, the beanshell scripts which drive the processing via Fiji and a cluster.json file which contains information for the cluster queuing system. 
 
 ```bash
-/path/to/repo
+/path/to/repo/timelapse
 ├── single_test.yaml
 ├── dual_OneChannel.yaml
 ├── Snakefile
@@ -64,6 +64,32 @@ It contains the .yaml file for the specific dataset. You can either copy it if y
 * `cluster.json` that resides in the same directory as the `Snakefile`
 * cluster runs LSF
 
+Tools: 
+
+The tool directory contains scripts for common file format pre-processing.
+Some datasets are currently only usable when resaving them into .tif:
+* discontinous .czi datasets
+* .czi dataset with multiple groups
+
+The master_preprocesing.sh file is the configuration script that contains the information about the dataset that needs to be resaved or split. rename-zeiss-file.sh is renaming the .czi files into the .tif naming convention for SPIM processing: SPIM_TL{t}_Angle{a}.tif. The different resaving steps are then carried out by creating the jobs and submitting them to the cluster.
+
+```bash
+/path/to/repo/tools
+├── master_preprocessing.sh
+├── rename-zeiss-file.sh
+├── compress
+    ├── create-compress-jobs.sh
+    ├── for_czi.bsh
+    └── submit-jobs
+├── czi_resave
+    ├── create-resaving-jobs.sh
+    ├── resaving.bsh
+    └── submit-jobs
+└──  split_channels
+    ├── create-split-jobs.sh
+    ├── split.bsh
+    └── submit.jobs
+```
 
 Submitting Jobs
 ---------------
