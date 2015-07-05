@@ -1,8 +1,8 @@
 Datasets
 ========================
-The scripts are now supporting multiple angles, multiple channels and multiple illumination direction without adjusting the .bsh or creat-jobs.sh scripts.
+The scripts are now supporting multiple angles, multiple channels and multiple illumination direction without adjusting the Snakefile or .bsh scripts.
 
-Based on SPIM registration version 3.3.8
+Based on SPIM registration version 3.3.9
 
 Supported datasets are in the following format:
 
@@ -25,25 +25,38 @@ Timelapse based workflow
 
 Expected setup
 --------------
+Clone the repository:
+
+The repository contains the example configuration scripts for single and dual channel datasets, the Snakefile which defines the workflow, the beanshell scripts which drive the processing via Fiji and a cluster.json file which contains information for the cluster queuing system. 
 
 ```bash
 /path/to/repo
-├── deconvolution_CPU.bsh
-├── deconvolution_GPU.bsh
+├── single_test.yaml
+├── dual_OneChannel.yaml
+├── Snakefile
+
+├── cluster.json
+├── define_tif_zip.bsh
+├── define_czi.bsh
+├── registration.bsh
+├── deconvolution.bsh
 ├── transform.bsh	 		
 ├── registration.bsh 		
 └── xml_merge.bsh	 		
 ```
 
-* a data directory e.g. looks like this
+A data directory e.g. looks like this:
+
+It contains the .yaml file for the specific dataset. You can either copy it if you want to keep it together with the dataset or make a symlink from the processing repository. 
 
 ```bash
 /path/to/data
-├── hdf5_test_unicore-00-00.h5
-├── hdf5_test_unicore-01-00.h5
-├── hdf5_test_unicore.h5
-├── hdf5_test_unicore.xml
-└── tomancak.yaml	 		# copied/symlinked from this repo
+├── dataset.czi
+├── dataset(1).czi
+├── dataset(2).czi
+├── dataset(3).czi
+├── dataset(4).czi
+└── dataset.yaml	 		# copied/symlinked from this repo
 ```
 
 
