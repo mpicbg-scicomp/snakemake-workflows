@@ -34,7 +34,6 @@ The repository contains the example configuration scripts for single and dual ch
 ├── single_test.yaml
 ├── dual_OneChannel.yaml
 ├── Snakefile
-
 ├── cluster.json
 ├── define_tif_zip.bsh
 ├── define_czi.bsh
