@@ -65,6 +65,7 @@ It contains the .yaml file for the specific dataset. You can either copy it if y
 * cluster runs LSF
 
 Tools: 
+--------------
 
 The tool directory contains scripts for common file format pre-processing.
 Some datasets are currently only usable when resaving them into .tif:
