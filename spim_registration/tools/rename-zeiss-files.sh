@@ -1,6 +1,6 @@
 #!/bin/bash
 # path of master file
-source ../master_3.3.sh
+source ../master_preprocessing.sh
 
 # path of source and target files
 source_pattern=${image_file_directory}${source_pattern}

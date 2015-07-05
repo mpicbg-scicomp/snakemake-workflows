@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#source ../../master_3.3.sh
+source ../../master_preprocessing.sh
 
 timepoint=`seq 0 391`
 dir=/projects/pilot_spim/Christopher/2014-10-23_H2A_gsb_G3/
