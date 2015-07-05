@@ -106,7 +106,7 @@ If not:
 ```bash
 snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra}"
 ```
-Submitting Jobs
+Log files and supervision of the pipeline
 ---------------
 
 The log files are written into a new directory in the data directory called "logs".
