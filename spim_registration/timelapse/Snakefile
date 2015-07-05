@@ -7,9 +7,9 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
    JOBDIR+="/"
 
 # Test config file single Channel:
-# configfile: "single_test.yaml"
+configfile: "single_test.yaml"
 # Test config file dual channel one channel contains beads:
-configfile: "dual_OneChannel.yaml"
+# configfile: "dual_OneChannel.yaml"
 
 # data specific config file, expected to be inside JOBDIR
 # configfile: "tomancak_test_cluster.yaml"
@@ -32,7 +32,7 @@ rule resave_prepared:
 
 # defining xml for czi dataset
 rule define_xml_czi:
-    input:glob.glob('*.czi'), config["define_xml_czi"]["first_czi"]
+    input:glob.glob('*.czi'), config["common"]["first_czi"]
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "define_xml_czi.log"
     run: 
@@ -60,7 +60,7 @@ rule define_xml_czi:
         
 # defining xml for tif dataset
 rule define_xml_tif:
-    input: glob.glob(re.sub("{{.}}","*",config["define_xml_tif"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
+    input: glob.glob(re.sub("{{.}}","*",config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "define_xml_tif.log"
     run:
@@ -119,7 +119,6 @@ rule hdf5_xml:
                 -Drun_only_job_number=0 \
                 -- --no-splash {path_bsh}""", 
            config["common"],
-           config["define_xml_czi"],
            config["resave_hdf5"],
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
@@ -150,7 +149,6 @@ rule resave_hdf5:
         -Drun_only_job_number={job_number} \
         -- --no-splash {path_bsh}""", # the & submits everyting at once
            config["common"],
-           config["define_xml_czi"],
            config["resave_hdf5"],
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
@@ -411,7 +409,7 @@ rule deconvolution:
 
 rule define_output:
     input: [ item + "_" + config["common"]["fusion_switch"] for item in datasets ], glob.glob('TP*')
-    output: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
+    output: config["common"]["output_xml"].strip('\"') + ".xml"
     log: "define_output.log"
     run:
         cmd_string = produce_string(
@@ -442,7 +440,7 @@ rule define_output:
 
 # create mother .xml/.h5
 rule hdf5_xml_output:
-    input: config["hdf5_output"]["output_xml"].strip('\"') + ".xml"
+    input: config["common"]["output_xml"].strip('\"') + ".xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
     	    [ item+"_output" for item in datasets ] 
     log: "output_hdf5_xml.log"
@@ -470,7 +468,7 @@ rule hdf5_xml_output:
            jdir=JOBDIR,
            path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"])
 
-        part_string += " > {log} 2>&1 && touch {output}"
+        part_string += " > {log} 2>&1"
         shell(part_string)
 
 rule resave_hdf5_output:
