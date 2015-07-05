@@ -445,7 +445,7 @@ rule define_output:
 # create mother .xml/.h5
 rule hdf5_xml_output:
     input: config["common"]["output_xml"].strip('\"') + ".xml"
-    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
     	    [ item+"_output" for item in datasets ] 
     log: "logs/f2_output_hdf5_xml.log"
     run:
