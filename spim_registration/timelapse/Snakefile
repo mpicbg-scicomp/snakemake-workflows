@@ -14,7 +14,6 @@ configfile: "single_test.yaml"
 # data specific config file, expected to be inside JOBDIR
 # configfile: "tomancak_test_cluster.yaml"
 
-
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
 
@@ -30,7 +29,9 @@ rule done:
 localrules: define_xml_czi, define_xml_tif, hdf5_xml, xml_merge, timelapse, 
 	    duplicate_transformations, external_transform, define_output,
 	    hdf5_xml_output
-    
+	    
+	    
+	    
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
 
