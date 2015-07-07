@@ -1,5 +1,5 @@
 import os, glob, sys, re
-from timelaps_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id
+from timelapse_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id, glob_and_escape
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
@@ -32,7 +32,7 @@ rule resave_prepared:
 
 # defining xml for czi dataset
 rule define_xml_czi:
-    input:glob.glob('*.czi'), config["define_xml_czi"]["first_czi"]
+    input: glob_and_escape("*.czi"), config["define_xml_czi"]["first_czi"]
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "define_xml_czi.log"
     run: 
