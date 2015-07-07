@@ -139,7 +139,7 @@ rule resave_hdf5:
     log: "logs/b2_resave_hdf5-{file_id}.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} sysconfcpus -n 2 {fiji-app} \
         	-Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={first_xml_filename} \
                 -Dhdf5_xml_filename={input_xml_base} \
@@ -168,7 +168,7 @@ rule registration:
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
-           """{fiji-prefix} {fiji-app} \
+           """{fiji-prefix} sysconfcpus -n 2 {fiji-app} \
         -Dparallel_timepoints={file_id_w} \
         -Dimage_file_directory={jdir} \
         -Dxml_filename={input_xml} \
@@ -300,7 +300,7 @@ rule fusion:
     log: "logs/e1_{xml_base}-{file_id,\d+}-00-fusion.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} sysconfcpus -n 6 {fiji-app} \
         -Dimage_file_directory={jdir} \
     	-Dparallel_timepoints={file_id_w} \
     	-Dmerged_xml={merged_xml_file} \
@@ -371,7 +371,7 @@ rule deconvolution:
     log: "logs/e2_{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} sysconfcpus -n 2 {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Ddeco_output_file_directory={jdir} \
         -Dmerged_xml={merged_xml_file} \
@@ -482,7 +482,7 @@ rule resave_hdf5_output:
     log: "logs/f3_resave_output-{file_id}.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} sysconfcpus -n 2 {fiji-app} \
                 -Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={output_xml} \
                 -Dhdf5_xml_filename={output_hdf5_xml} \
