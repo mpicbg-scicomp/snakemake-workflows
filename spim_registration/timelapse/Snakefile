@@ -1,5 +1,5 @@
 import os, glob, sys, re
-from timelaps_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id
+from timelapse_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id, glob_and_escape
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
@@ -8,6 +8,7 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 
 # Test config file single Channel:
 configfile: "single_test.yaml"
+
 # Test config file dual channel one channel contains beads:
 # configfile: "dual_OneChannel.yaml"
 
@@ -24,8 +25,7 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
     input: [ ds + "_output_hdf5" for ds in datasets ]
-    #input: [ ds + "_fusion" for ds in datasets ]
-    
+
 localrules: define_xml_czi, define_xml_tif, hdf5_xml, xml_merge, timelapse, 
 	    duplicate_transformations, external_transform, define_output,
 	    hdf5_xml_output
@@ -37,7 +37,7 @@ rule resave_prepared:
 
 # defining xml for czi dataset
 rule define_xml_czi:
-    input:glob.glob('*.czi'), config["common"]["first_czi"]
+    input: glob_and_escape("*.czi"), config["common"]["first_czi"]
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "logs/a1_define_xml_czi.log"
     run: 
@@ -514,3 +514,11 @@ rule distclean:
    
     message : os.path.abspath(os.path.curdir) + ": rm -rf {params}"
     shell : "rm -rf {params}"
+
+    
+# NOTE! The following enables mailing, which will send out a mail once an entire workflow is done (the below does not include anything in the message body, redirect from /dev/null)
+# onsuccess:
+#     shell("mail -s \"[SUCCESS] our_cluster:{jdir} finished \" xxx@mpi-cbg.de < /dev/null".format(jdir=JOBDIR))
+
+# onerror:
+#     shell("mail -s \"[ERROR] out_cluster:{jdir}\" xxx@mpi-cbg.de < /dev/null".format(jdir=JOBDIR))

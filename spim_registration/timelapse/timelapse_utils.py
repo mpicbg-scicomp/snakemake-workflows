@@ -1,6 +1,7 @@
 import re
 import os
 import math
+import glob
 
 def produce_xml_merge_job_files(_datasets):
    fre = re.compile(r'(?P<xml_base>\w+)-(?P<file_id>\d+)-00.h5')
@@ -31,3 +32,18 @@ def padding_of_file_id(_n_timepoints):
       return 2
    else:
       return value
+
+def glob_and_escape(_glob_string):
+   """ escaping all brackets in filenames """
+   
+   value = glob.glob(_glob_string)
+   translate_table = {
+      '(' : '\(',
+      ')' : '\)'
+   }
+
+   for index in range(len(value)):
+      for (k,v) in translate_table.items():
+         value[index] = value[index].replace(k,v)
+
+   return value
