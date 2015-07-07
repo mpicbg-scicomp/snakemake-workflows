@@ -108,10 +108,12 @@ snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub 
 ```
 
 For error and output of the cluser add -o test.out -e test.err e.g.:
+
 DRMAA
 ```bash
 snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
 ```
+
 LSF
 ```bash
 snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
