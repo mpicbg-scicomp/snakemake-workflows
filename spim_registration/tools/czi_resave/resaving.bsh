@@ -1,0 +1,45 @@
+// Loads Fiji dependencies
+import ij.IJ;
+import ij.ImagePlus;
+import java.lang.Runtime;
+import java.io.File;
+import java.io.FilenameFilter;
+
+runtime = Runtime.getRuntime();
+
+// Loads parameters form job file
+System.out.println( "=======================================================" );
+System.out.println( "Load Parameters" ) ;
+
+dir = System.getProperty( "dir" );
+int timepoint = Integer.parseInt( System.getProperty( "timepoint" ) );
+angle = System.getProperty( "angle" );
+int pad = Integer.parseInt( System.getProperty( "pad" ) );
+
+// Prints Parameters into output file
+System.out.println( "directory = " + dir );
+System.out.println( "timepoint = " + timepoint );
+System.out.println( "angle = " + angle );
+System.out.println( "pad = " + pad );
+
+// Executes Fiji Plugin "Bioformats Importer" to open .czi file
+System.out.println( "=======================================================" );
+System.out.println( "Opening Image" ) ;
+IJ.run("Bio-Formats Importer", 
+	"open=" + dir + "spim_TL" + IJ.pad( timepoint, pad ) + "_Angle" + angle + ".czi" + " " +
+	"autoscale " +
+	"color_mode=Default " +
+	"specify_range " +
+	"view=[Standard ImageJ] " +
+	"stack_order=Default " +
+	"t_begin=1000 " +
+	"t_end=1000 " +
+	"t_step=1");
+
+// Resaves .czi files as .tif file
+System.out.println( "Save as  .tif" ) ;
+IJ.saveAs("Tiff ", dir + "spim_TL" + IJ.pad( timepoint, pad ) + "_Angle" + angle + ".tif");
+
+/* shutdown */
+runtime.exit(0);
+
