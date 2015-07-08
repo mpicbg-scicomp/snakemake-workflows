@@ -26,7 +26,7 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 rule done:
     input: [ ds + "_output_hdf5" for ds in datasets ]
 
-localrules: define_xml_czi, define_xml_tif, hdf5_xml, xml_merge, timelapse, 
+localrules: define_xml_czi, define_xml_tif, xml_merge, timelapse, 
 	    duplicate_transformations, external_transform, define_output,
 	    hdf5_xml_output
 	    
@@ -109,7 +109,7 @@ rule hdf5_xml:
     log: "logs/b1_hdf5_xml.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_hdf5_xml} {fiji-app} \
                 -Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={first_xml_filename} \
                 -Dhdf5_xml_filename={hdf5_xml_filename} \
@@ -139,7 +139,7 @@ rule resave_hdf5:
     log: "logs/b2_resave_hdf5-{file_id}.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_resave_hdf5} {fiji-app} \
         	-Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={first_xml_filename} \
                 -Dhdf5_xml_filename={input_xml_base} \
@@ -168,7 +168,7 @@ rule registration:
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
-           """{fiji-prefix} {fiji-app} \
+           """{fiji-prefix} {sysconfcpus} {num_cores_reg} {fiji-app} \
         -Dparallel_timepoints={file_id_w} \
         -Dimage_file_directory={jdir} \
         -Dxml_filename={input_xml} \
@@ -300,7 +300,7 @@ rule fusion:
     log: "logs/e1_{xml_base}-{file_id,\d+}-00-fusion.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_fusion} {fiji-app} \
         -Dimage_file_directory={jdir} \
     	-Dparallel_timepoints={file_id_w} \
     	-Dmerged_xml={merged_xml_file} \
@@ -371,7 +371,7 @@ rule deconvolution:
     log: "logs/e2_{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_deco} {fiji-app} \
         -Dimage_file_directory={jdir} \
         -Ddeco_output_file_directory={jdir} \
         -Dmerged_xml={merged_xml_file} \
@@ -451,7 +451,7 @@ rule hdf5_xml_output:
     log: "logs/f2_output_hdf5_xml.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_hdf5_xml_output} {fiji-app} \
                 -Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={output_xml} \
                 -Dhdf5_xml_filename={output_hdf5_xml} \
@@ -482,7 +482,7 @@ rule resave_hdf5_output:
     log: "logs/f3_resave_output-{file_id}.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_resave_hdf5_output} {fiji-app} \
                 -Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={output_xml} \
                 -Dhdf5_xml_filename={output_hdf5_xml} \
