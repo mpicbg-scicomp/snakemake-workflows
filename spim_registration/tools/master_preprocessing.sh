@@ -31,10 +31,10 @@ job_directory="/projects/pilot_spim/Christopher/snakemake-workflows/spim_registr
 # Important: For renaming and resaving .czi files the first .czi file has to
 # carry the index (0)
 #-------------------------------------------------------------------------------
-
-pad="2"		# for padded zeros
+timepoints="`seq 0 1`" # number of time points format: "`seq 0 1`"
 angle_prep="1 2 3 4 5" # angles format: "1 2 3"
-
+pad="2"		# for padded zeros
+num_angles="5"
 #--- Renaming ------------------------------------------------------------------
 
 first_index="0"		# First index of czi files
@@ -48,8 +48,9 @@ target_pattern=spim_TL\{timepoint\}_Angle\{angle\}.czi	# The output pattern of r
 #-------------------------------------------------------------------------------
 # Fiji settings
 #-------------------------------------------------------------------------------
-XVFB_RUN="/sw/bin/xvfb-run" # virtual frame buffer
-
+XVFB_RUN="/sw/bin/xvfb-run -a" # virtual frame buffer
+sysconfcpus="sysconfcpus -n 2"
+Fiji: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64"
 Fiji_resave="/sw/users/schmied/packages/2014-06-02_Fiji.app_lifeline/ImageJ-linux64" # Fiji that works for resaving
 #-------------------------------------------------------------------------------
 # Pre-processing

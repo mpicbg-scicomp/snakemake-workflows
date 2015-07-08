@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../../master_preprocessing.sh
+source ../master_preprocessing.sh
 
 mkdir -p ${jobs_split}
 
@@ -13,7 +13,7 @@ for i in $parallel_timepoints
 				job="$jobs_split/split-$i-$a.job"
 				echo $job
 				echo "#!/bin/bash" > "$job"
-				echo "$XVFB_RUN -a $Fiji \
+				echo "$XVFB_RUN $sysconfcpus $Fiji \
 				-Dimage_file_directory=$image_file_directory \
 				-Dparallel_timepoints=$i \
 				-Dangle_prep=$a \
