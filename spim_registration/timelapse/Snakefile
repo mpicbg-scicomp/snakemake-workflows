@@ -13,7 +13,7 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 # configfile: "dual_OneChannel.yaml"
 
 # data specific config file, expected to be inside JOBDIR
-configfile: "*.yaml"
+configfile: "2015-05-18_LZ2_Stock46.yaml"
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
