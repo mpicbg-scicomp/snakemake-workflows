@@ -163,8 +163,8 @@ rule resave_hdf5:
         shell(part_string) 
        	       	
 rule registration:
-    input:  "{xml_base}-{file_id}-00.h5" 
-    output: temp("{xml_base}.job_{file_id,\d+}.xml")#, "{xml_base}-{file_id,\d+}-00.h5_registered", 
+    input:  "{xml_base}-{file_id}-00.h5", expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])
+    output: temp("{xml_base}.job_{file_id,\d+}.xml")  #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
