@@ -179,6 +179,9 @@ common: {
   # File type
   output_data_type: "16Bit" # "32Bit" or "16Bit"
   }
+  # ============================================================================
+  # Advanced settings
+  # ============================================================================
   
 define_xml_czi: {
   rotation_around: "X-Axis",       # axis of acquistion

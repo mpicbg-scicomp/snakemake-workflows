@@ -38,7 +38,7 @@ rule resave_prepared:
 # defining xml for czi dataset
 rule define_xml_czi:
     input: glob_and_escape("*.czi"), config["common"]["first_czi"]
-    output: config["common"]["first_xml_filename"] + ".xml"
+    output: temp (config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a1_define_xml_czi.log"
     run: 
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
@@ -66,7 +66,7 @@ rule define_xml_czi:
 # defining xml for tif dataset
 rule define_xml_tif:
     input: glob.glob(re.sub("{{.}}","*",config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
-    output: config["common"]["first_xml_filename"] + ".xml"
+    output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a2_define_xml_tif.log"
     run:
         cmd_string = produce_string(
@@ -134,7 +134,7 @@ rule hdf5_xml:
 
 # resave  .czi/.tif dataset as hdf5	
 rule resave_hdf5:
-    input: rules.hdf5_xml.output # "{xml_base}-{file_id,\d+}-00.h5_xml"
+    input: rules.hdf5_xml.output, config["common"]["first_xml_filename"] + ".xml" # "{xml_base}-{file_id,\d+}-00.h5_xml"
     output: "{xml_base}-{file_id,\d+}-00.h5", temp("{xml_base}-{file_id,\d+}-00.h5_hdf5")
     log: "logs/b2_resave_hdf5-{file_id}.log"
     run:
@@ -447,7 +447,7 @@ rule define_output:
 rule hdf5_xml_output:
     input: config["common"]["output_xml"].strip('\"') + ".xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
-    	    temp([ item+"_output" for item in datasets ])
+    	    temp([ item+"_output" for item in datasets ]), 
     log: "logs/f2_output_hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -477,7 +477,7 @@ rule hdf5_xml_output:
         shell(part_string)
 
 rule resave_hdf5_output:
-    input: rules.hdf5_xml_output.output
+    input: rules.hdf5_xml_output.output, rules.define_output.output
     output: temp("{xml_base}-{file_id,\d+}-00.h5_output_hdf5")
     log: "logs/f3_resave_output-{file_id}.log"
     run:
