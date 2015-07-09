@@ -7,13 +7,13 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
    JOBDIR+="/"
 
 # Test config file single Channel:
-configfile: "single_test.yaml"
+# configfile: "single_test.yaml"
 
 # Test config file dual channel one channel contains beads:
 # configfile: "dual_OneChannel.yaml"
 
 # data specific config file, expected to be inside JOBDIR
-# configfile: "tomancak_test_cluster.yaml"
+configfile: "2015-05-18_LZ2_Stock46.yaml"
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
@@ -38,7 +38,7 @@ rule resave_prepared:
 # defining xml for czi dataset
 rule define_xml_czi:
     input: glob_and_escape("*.czi"), config["common"]["first_czi"]
-    output: temp (config["common"]["first_xml_filename"] + ".xml")
+    output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a1_define_xml_czi.log"
     run: 
         cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
@@ -66,7 +66,7 @@ rule define_xml_czi:
 # defining xml for tif dataset
 rule define_xml_tif:
     input: glob.glob(re.sub("{{.}}","*",config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
-    output: temp(config["common"]["first_xml_filename"] + ".xml")
+    output: config["common"]["first_xml_filename"] + ".xml"
     log: "logs/a2_define_xml_tif.log"
     run:
         cmd_string = produce_string(
@@ -105,7 +105,7 @@ ruleorder: define_xml_czi > define_xml_tif
 rule hdf5_xml:
     input: config["common"]["first_xml_filename"] + ".xml" 
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-            temp([ item+"_xml" for item in datasets ])
+            [ item+"_xml" for item in datasets ]
     log: "logs/b1_hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -134,7 +134,7 @@ rule hdf5_xml:
 
 # resave  .czi/.tif dataset as hdf5	
 rule resave_hdf5:
-    input: rules.hdf5_xml.output, config["common"]["first_xml_filename"] + ".xml" # "{xml_base}-{file_id,\d+}-00.h5_xml"
+    input: rules.hdf5_xml.output, config["common"]["first_xml_filename"] + ".xml"
     output: "{xml_base}-{file_id,\d+}-00.h5", temp("{xml_base}-{file_id,\d+}-00.h5_hdf5")
     log: "logs/b2_resave_hdf5-{file_id}.log"
     run:
@@ -163,8 +163,8 @@ rule resave_hdf5:
         shell(part_string) 
        	       	
 rule registration:
-    input:  "{xml_base}-{file_id}-00.h5" 
-    output: temp("{xml_base}.job_{file_id,\d+}.xml")#, "{xml_base}-{file_id,\d+}-00.h5_registered", 
+    input:  "{xml_base}-{file_id}-00.h5", expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])
+    output: "{xml_base}.job_{file_id,\d+}.xml"  #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
@@ -236,7 +236,7 @@ rule xml_merge:
 
 rule timelapse:
     input: rules.xml_merge.output
-    output: temp(rules.xml_merge.output[0] + "_timelapse")
+    output: rules.xml_merge.output[0] + "_timelapse"
     log: "logs/d2_{xml_base}_timelapse.log"
     run:
         cmd_string = produce_string(
@@ -296,7 +296,7 @@ rule duplicate_transformations:
 
 rule fusion:
     input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: temp("{xml_base}-{file_id,\d+}-00.h5_fusion")
+    output: "{xml_base}-{file_id,\d+}-00.h5_fusion"
     log: "logs/e1_{xml_base}-{file_id,\d+}-00-fusion.log"
     run:
         cmd_string = produce_string(
@@ -367,7 +367,7 @@ rule external_transform:
 
 rule deconvolution:
     input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: temp("{xml_base}-{file_id,\d+}-00.h5_deconvolution")
+    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
     log: "logs/e2_{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(
@@ -447,7 +447,7 @@ rule define_output:
 rule hdf5_xml_output:
     input: config["common"]["output_xml"].strip('\"') + ".xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
-    	    temp([ item+"_output" for item in datasets ]), 
+    	    temp([ item+"_output" for item in datasets ])
     log: "logs/f2_output_hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -477,7 +477,7 @@ rule hdf5_xml_output:
         shell(part_string)
 
 rule resave_hdf5_output:
-    input: rules.hdf5_xml_output.output, rules.define_output.output
+    input: rules.hdf5_xml_output.output
     output: temp("{xml_base}-{file_id,\d+}-00.h5_output_hdf5")
     log: "logs/f3_resave_output-{file_id}.log"
     run:
@@ -520,5 +520,5 @@ rule distclean:
 # onsuccess:
 #    shell("mail -s \"[SUCCESS] our_cluster:{jdir} finished \" schmied@mpi-cbg.de < /dev/null".format(jdir=JOBDIR))
 
-onerror:
-    shell("mail -s \"[ERROR] out_cluster:{jdir}\" schmied@mpi-cbg.de < /dev/null".format(jdir=JOBDIR))
+#onerror:
+#   shell("mail -s \"[ERROR] out_cluster:{jdir}\" schmied@mpi-cbg.de < /dev/null".format(jdir=JOBDIR))
