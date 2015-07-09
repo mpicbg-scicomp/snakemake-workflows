@@ -37,7 +37,7 @@ rule resave_prepared:
 
 # defining xml for czi dataset
 rule define_xml_czi:
-    input: glob_and_escape("*.czi"), config["common"]["first_czi"]
+    input: config["common"]["first_czi"]
     output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a1_define_xml_czi.log"
     run: 
@@ -164,7 +164,7 @@ rule resave_hdf5:
        	       	
 rule registration:
     input:  "{xml_base}-{file_id}-00.h5", expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])
-    output: "{xml_base}.job_{file_id,\d+}.xml"  #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
+    output: temp("{xml_base}.job_{file_id,\d+}.xml") #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
@@ -477,7 +477,7 @@ rule hdf5_xml_output:
         shell(part_string)
 
 rule resave_hdf5_output:
-    input: rules.hdf5_xml_output.output
+    input: rules.hdf5_xml_output.output, config["common"]["output_xml"].strip('\"') + ".xml"
     output: temp("{xml_base}-{file_id,\d+}-00.h5_output_hdf5")
     log: "logs/f3_resave_output-{file_id}.log"
     run:
