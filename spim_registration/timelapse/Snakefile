@@ -1,5 +1,5 @@
 import os, glob, sys, re
-from timelapse_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id, glob_and_escape
+from timelapse_utils import produce_xml_merge_job_files, produce_string, padding_of_file_id
 
 #where are we (can be configured through -d/--directory flag)
 JOBDIR=os.path.abspath(os.path.curdir)
@@ -37,7 +37,7 @@ rule resave_prepared:
 
 # defining xml for czi dataset
 rule define_xml_czi:
-    input: glob_and_escape("*.czi"), config["common"]["first_czi"]
+    input: config["common"]["first_czi"] 
     output: config["common"]["first_xml_filename"] + ".xml"
     log: "logs/a1_define_xml_czi.log"
     run: 
@@ -510,7 +510,7 @@ rule resave_hdf5_output:
        	       
 
 rule distclean:
-    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), glob.glob("*_output_hdf5"), glob.glob("*_output")# xml_merge_in, 
+    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_hdf5"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), glob.glob("*_output_hdf5"), glob.glob("*_output"), glob.glob("*.h5"), glob.glob("*.xml")
    
     message : os.path.abspath(os.path.curdir) + ": rm -rf {params}"
     shell : "rm -rf {params}"
