@@ -26,11 +26,8 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 rule done:
     input: [ ds + "_output_hdf5" for ds in datasets ]
 
-localrules: define_xml_czi, define_xml_tif, hdf5_xml, xml_merge, timelapse, 
-	    duplicate_transformations, external_transform, define_output,
-	    hdf5_xml_output
-	    
-	    
+localrules: define_xml_tif, xml_merge, timelapse, 
+	    duplicate_transformations, external_transform, define_output
 	    
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
@@ -47,10 +44,11 @@ rule define_xml_czi:
            -Dangles={angles} \
            -Dchannels={channels} \
            -Dillumination={illumination} \
-           -Dpixel_distance_x={pixel_distance_x} \
-           -Dpixel_distance_y={pixel_distance_y} \
-           -Dpixel_distance_z={pixel_distance_z} \
-           -Dpixel_unit={pixel_unit} \
+           -Dmanual_calibration_czi={manual_calibration_czi} \
+           -Dczi_pixel_distance_x={czi_pixel_distance_x} \
+           -Dczi_pixel_distance_y={czi_pixel_distance_y} \
+           -Dczi_pixel_distance_z={czi_pixel_distance_z} \
+           -Dczi_pixel_unit={czi_pixel_unit} \
            -Dfirst_xml_filename={first_xml_filename} \
            -Drotation_around={rotation_around} \
            -- --no-splash {path_bsh}""",
@@ -66,7 +64,7 @@ rule define_xml_czi:
 # defining xml for tif dataset
 rule define_xml_tif:
     input: glob.glob(re.sub("{{.}}","*",config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
-    output: config["common"]["first_xml_filename"] + ".xml"
+    output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a2_define_xml_tif.log"
     run:
         cmd_string = produce_string(
@@ -105,7 +103,7 @@ ruleorder: define_xml_czi > define_xml_tif
 rule hdf5_xml:
     input: config["common"]["first_xml_filename"] + ".xml" 
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-            [ item+"_xml" for item in datasets ]
+            temp([ item+"_xml" for item in datasets ])
     log: "logs/b1_hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -236,7 +234,7 @@ rule xml_merge:
 
 rule timelapse:
     input: rules.xml_merge.output
-    output: rules.xml_merge.output[0] + "_timelapse"
+    output: temp(rules.xml_merge.output[0] + "_timelapse")
     log: "logs/d2_{xml_base}_timelapse.log"
     run:
         cmd_string = produce_string(
@@ -269,7 +267,7 @@ rule timelapse:
 
 rule duplicate_transformations:
     input: rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
-    output: rules.timelapse.output[0] + "_duplicate"
+    output: temp(rules.timelapse.output[0] + "_duplicate")
     log: "logs/d3_{xml_base}_duplicate_transformations.log"
     run:
         cmd_string = produce_string(
@@ -296,7 +294,7 @@ rule duplicate_transformations:
 
 rule fusion:
     input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: "{xml_base}-{file_id,\d+}-00.h5_fusion"
+    output: temp("{xml_base}-{file_id,\d+}-00.h5_fusion")
     log: "logs/e1_{xml_base}-{file_id,\d+}-00-fusion.log"
     run:
         cmd_string = produce_string(
@@ -339,7 +337,7 @@ rule fusion:
 
 rule external_transform:
     input: rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
-    output: rules.timelapse.output[0] + "_external_trafo"
+    output: temp(rules.timelapse.output[0] + "_external_trafo")
     log: "logs/e2_external_transform.log"
     run:
         cmd_string = produce_string(
@@ -367,7 +365,7 @@ rule external_transform:
 
 rule deconvolution:
     input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
+    output: temp("{xml_base}-{file_id,\d+}-00.h5_deconvolution")
     log: "logs/e2_{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(

@@ -9,8 +9,8 @@ import java.io.FilenameFilter;
 runtime = Runtime.getRuntime();
 System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
 
-//Prefs.setThreads(2); 	// defines the number of threads allowed
-//print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+Prefs.setThreads(1); 	// defines the number of threads allowed
+print("Threads: "+Prefs.getThreads()); // prints thread setting in output
 
 System.out.println("Start loading parameters");
 
@@ -114,15 +114,37 @@ System.out.println( "rotation_around = " + rotation_around );
 // Calibaration
 System.out.println("=========================================================");
 System.out.println("Calibration:");
-float pixel_distance_x = Float.parseFloat( System.getProperty( "pixel_distance_x" ) );
-float pixel_distance_y = Float.parseFloat( System.getProperty( "pixel_distance_y" ) );
-float pixel_distance_z = Float.parseFloat( System.getProperty( "pixel_distance_z" ) );
-pixel_unit = System.getProperty( "pixel_unit" );
+manual_calibration_czi = System.getProperty( "manual_calibration_czi" );
+float czi_pixel_distance_x = Float.parseFloat( System.getProperty( "czi_pixel_distance_x" ) );
+float czi_pixel_distance_y = Float.parseFloat( System.getProperty( "czi_pixel_distance_y" ) );
+float czi_pixel_distance_z = Float.parseFloat( System.getProperty( "czi_pixel_distance_z" ) );
+czi_pixel_unit = System.getProperty( "czi_pixel_unit" );
 
-System.out.println( "pixel_distance_x = " + pixel_distance_x );
-System.out.println( "pixel_distance_y = " + pixel_distance_y );
-System.out.println( "pixel_distance_z = " + pixel_distance_z );
-System.out.println( "pixel_unit = " + pixel_unit );
+// builds string for calibration override
+if (manual_calibration_czi.equalsIgnoreCase( "No" ) )
+{
+	modify_calibration = "";
+	manual_calibration_string = "";
+	System.out.println( "Calibration set to automatic" );
+}
+
+else if (manual_calibration_czi.equalsIgnoreCase( "Yes" ) )
+{
+	
+	modify_calibration = "modify_calibration ";
+	manual_calibration_string = "pixel_distance_x=" + czi_pixel_distance_x + " " +
+				    "pixel_distance_y=" + czi_pixel_distance_y + " " +
+				    "pixel_distance_z=" + czi_pixel_distance_z + " " +
+				    "pixel_unit=" + czi_pixel_unit + " ";
+	System.out.println( "Calibration set to manual" );
+	System.out.println( "modify_calibration:" + modify_calibration );
+	System.out.println( "manual_calibration_string:" + manual_calibration_string );
+}
+
+else
+{
+	System.out.println( "Manual calibration setting bad" );
+}
 
 // Executes Fiji plugin
 System.out.println("=========================================================");
@@ -134,13 +156,11 @@ System.out.println("Define Multi-View Dataset type_of_dataset=[Zeiss Lightsheet 
 	angle_string +
 	channel_string + 
  	illum_string +
-	"modify_calibration " + 
+	modify_calibration +
 	"modify_rotation_axis " +
-	"pixel_distance_x=" + pixel_distance_x + " " + 
-	"pixel_distance_y=" + pixel_distance_y + " " + 
-	"pixel_distance_z=" + pixel_distance_z + " " +
-	"pixel_unit=" + pixel_unit + " " +
-	"rotation_around=" + rotation_around + "");
+	manual_calibration_string +
+	"rotation_around=" + rotation_around + 
+	"");
 
 try {
 IJ.run("Define Multi-View Dataset", 
@@ -151,12 +171,13 @@ IJ.run("Define Multi-View Dataset",
 	angle_string +
 	channel_string + 
 	illum_string +
-	"modify_calibration " + 
+	modify_calibration + 
 	"modify_rotation_axis " +
-	"pixel_distance_x=" + pixel_distance_x + " " + 
-	"pixel_distance_y=" + pixel_distance_y + " " + 
-	"pixel_distance_z=" + pixel_distance_z + " " +
-	"pixel_unit=" + pixel_unit + " " +
+	manual_calibration_string + 
+	//"pixel_distance_x=" + pixel_distance_x + " " + 
+	//"pixel_distance_y=" + pixel_distance_y + " " + 
+	//"pixel_distance_z=" + pixel_distance_z + " " +
+	//"pixel_unit=" + pixel_unit + " " +
 	"rotation_around=" + rotation_around + "");
 }
 catch ( e ) { 
