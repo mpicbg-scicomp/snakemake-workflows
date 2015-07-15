@@ -77,6 +77,7 @@ rule define_xml_tif:
         -Dchannels={channels} \
         -Dillumination={illumination} \
         -Dimage_file_pattern={image_file_pattern} \
+        -Dmanual_calibration_tif={manual_calibration_tif} \
         -Dpixel_distance_x={pixel_distance_x} \
         -Dpixel_distance_y={pixel_distance_y} \
         -Dpixel_distance_z={pixel_distance_z} \

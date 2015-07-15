@@ -174,10 +174,6 @@ IJ.run("Define Multi-View Dataset",
 	modify_calibration + 
 	"modify_rotation_axis " +
 	manual_calibration_string + 
-	//"pixel_distance_x=" + pixel_distance_x + " " + 
-	//"pixel_distance_y=" + pixel_distance_y + " " + 
-	//"pixel_distance_z=" + pixel_distance_z + " " +
-	//"pixel_unit=" + pixel_unit + " " +
 	"rotation_around=" + rotation_around + "");
 }
 catch ( e ) { 
