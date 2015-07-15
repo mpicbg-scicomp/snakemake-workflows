@@ -19,7 +19,7 @@
 #	channels are 0,1 etc
 # 
 #===============================================================================
-image_file_directory="/projects/pilot_spim/Christopher/cluster_test_HisYFP/2013-11-14_His-YFP_2/"
+image_file_directory="/projects/pilot_spim/Christopher/test_pipeline/dual_channel/tif_onefile/"
 
 # --- jobs directory -----------------------------------------------------------
 job_directory="/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/tools/"
@@ -29,10 +29,10 @@ job_directory="/projects/pilot_spim/Christopher/snakemake-workflows/spim_registr
 # Important: For renaming and resaving .czi files the first .czi file has to
 # carry the index (0)
 #-------------------------------------------------------------------------------
-first_czi_name="2013-11-14_His-YFP_2.czi"
-timepoints="`seq 1 2`" # number of time points format: "`seq 0 1`"
+first_czi_name="2015-02-20_LZ2_Stock48_Stock58.czi"
+timepoints="`seq 0 1`" # number of time points format: "`seq 0 1`"
 angles="1 2 3 4 5" # angles format: "1 2 3"
-pad="2"		# for padded zeros
+pad="1"		# for padded zeros
 first_timepoint="0"	# Starts with 0
 #-------------------------------------------------------------------------------
 # Fiji settings

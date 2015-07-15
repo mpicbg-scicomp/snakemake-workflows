@@ -13,7 +13,7 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 # configfile: "dual_OneChannel.yaml"
 
 # data specific config file, expected to be inside JOBDIR
-configfile: "single.yaml"
+configfile: "config.yaml"
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
@@ -26,9 +26,9 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 rule done:
     input: [ ds + "_output_hdf5" for ds in datasets ]
 
-<<<<<<< HEAD
-localrules: define_xml_tif, xml_merge, timelapse, 
-	    duplicate_transformations, external_transform, define_output
+# local rules are running the specified rules on the head node
+#localrules: define_xml_tif, xml_merge, timelapse, 
+#	    duplicate_transformations, external_transform, define_output
 	    
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
