@@ -106,6 +106,21 @@ If not:
 ```bash
 snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra}"
 ```
+
+For error and output of the cluser add -o test.out -e test.err e.g.:
+
+DRMAA
+```bash
+snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
+```
+
+LSF
+```bash
+snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
+```
+
+Note: with this all the error and output files of one job would be written into these files. 
+
 Log files and supervision of the pipeline
 ---------------
 
@@ -115,3 +130,5 @@ The log files are ordered according to their position in the workflow. Multiple 
 force certain rules:
 use the -R flag to rerun a particular rule and everything downstream
 -R <name of rule>
+
+

@@ -140,6 +140,7 @@ if (compute_on.equalsIgnoreCase( "GPU (Nvidia CUDA via JNA)" ) )
 	cuda_settings = "cuda_directory=" + directory_cuda + " " +
 			"select_native_library_for_cudafourierconvolution=" + cudafourierconvolution + " " +
 			"gpu_1 ";
+        System.out.println( "cuda_settings=" + cuda_settings );
 }
 
 else if (compute_on.equalsIgnoreCase( "CPU (Java)" ) )
@@ -155,11 +156,43 @@ else
 }
 					
 System.out.println( "compute_string=" + compute_string );
-System.out.println( "cuda_settings=" + cuda_settings );
 
 // Execute Fiji Plugin
 System.out.println( "=======================================================" );
 System.out.println( "Starting Deconvolution" );
+System.out.println("Fuse/Deconvolve Dataset select_xml=" + image_file_directory + merged_xml + " " + 
+	"process_angle=[All angles] " +
+	"process_channel=[All channels] " + 
+	"process_illumination=[All illuminations] " +
+	"process_timepoint=[" + process_timepoint + "] " +
+	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " +
+	"type_of_image_fusion=[Multi-view deconvolution] " +
+	"bounding_box=[Define manually] " +
+	"fused_image=[Save as TIFF stack] " +
+	"minimal_x=" + minimal_x_deco + " " +
+	"minimal_y=" + minimal_y_deco + " " +
+	"minimal_z=" + minimal_z_deco + " " +
+	"maximal_x=" + maximal_x_deco + " " +
+	"maximal_y=" + maximal_y_deco + " " +
+	"maximal_z=" + maximal_z_deco + " " +
+	"imglib2_container=" + imglib2_container_deco + " " +
+	"type_of_iteration=[" + type_of_iteration + "] " +
+	"osem_acceleration=[" + osem_acceleration + "] " +
+	"number_of_iterations=" + iterations + " " +
+//	"adjust_blending_parameters " +
+	"use_tikhonov_regularization " +
+	"tikhonov_parameter=" + Tikhonov_parameter + " " +
+	"compute=[" + compute + "] " +
+	compute_string +
+	"psf_estimation=[" + psf_estimation + "] " +
+	"psf_display=[Do not show PSFs] " +
+	"output_file_directory=" + deco_output_file_directory + " " +
+	cuda_settings +
+	channel_string +
+	"psf_size_x=" + psf_size_x + " " +
+	"psf_size_y=" + psf_size_y + " " +
+	"psf_size_z=" + psf_size_z + "");
+
 try {
 IJ.run("Fuse/Deconvolve Dataset", 
 	"select_xml=" + image_file_directory + merged_xml + " " + 

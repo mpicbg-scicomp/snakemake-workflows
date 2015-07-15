@@ -9,8 +9,8 @@ import java.io.FilenameFilter;
 runtime = Runtime.getRuntime();
 System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
 
-Prefs.setThreads(1); 	// defines the number of threads allowed 
-print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+//Prefs.setThreads(1); 	// defines the number of threads allowed 
+//print("Threads: "+Prefs.getThreads()); // prints thread setting in output
 
 System.out.println("Start loading parameters");
 
