@@ -39,13 +39,10 @@ common: {
   # 
   # xml file names without .xml suffix
   # ============================================================================
-  first_xml_filename: 'Dpse_Dip3_VK33',       # Name of the xml file for the .czi or .tif files
   #
-  ########### simplyfy! ########################################################
+  first_xml_filename: 'Dpse_Dip3_VK33',              # Name of the xml file for the .czi or .tif files
   hdf5_xml_filename: '"hdf5_Dpse_Dip3_VK33"', # Name of .xml file for the hdf5 data after resave_hdf5
-  #merged_xml: 'hdf5_Dpse_Dip3_VK33_merge',    # Name of .xml file after merge
-  #
-  # .xml file names
+  # .xml file names for output
   output_xml: '"fused_Dpse_Dip3_VK33"',
   output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
   #
