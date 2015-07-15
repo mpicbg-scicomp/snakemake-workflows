@@ -35,29 +35,29 @@ rule resave_prepared:
 
 # defining xml for czi dataset
 rule define_xml_czi:
-
     input: config["common"]["first_czi"]
     output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a1_define_xml_czi.log"
     run: 
-        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
-           -Dfirst_czi={first_czi} \
-           -Dangles={angles} \
-           -Dchannels={channels} \
-           -Dillumination={illumination} \
-           -Dmanual_calibration_czi={manual_calibration_czi} \
-           -Dczi_pixel_distance_x={czi_pixel_distance_x} \
-           -Dczi_pixel_distance_y={czi_pixel_distance_y} \
-           -Dczi_pixel_distance_z={czi_pixel_distance_z} \
-           -Dczi_pixel_unit={czi_pixel_unit} \
-           -Dfirst_xml_filename={first_xml_filename} \
-           -Drotation_around={rotation_around} \
-           -- --no-splash {path_bsh}""",
-                                       config["common"],
-                                       config["define_xml_czi"],
-                                       jdir=JOBDIR,
-                                       path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
+        -Dfirst_czi={first_czi} \
+        -Dangles={angles} \
+        -Dchannels={channels} \
+        -Dillumination={illumination} \
+        -Dmanual_calibration_czi={manual_calibration_czi} \
+        -Dczi_pixel_distance_x={czi_pixel_distance_x} \
+        -Dczi_pixel_distance_y={czi_pixel_distance_y} \
+        -Dczi_pixel_distance_z={czi_pixel_distance_z} \
+        -Dczi_pixel_unit={czi_pixel_unit} \
+        -Dfirst_xml_filename={first_xml_filename} \
+        -Drotation_around={rotation_around} \
+        -- --no-splash {path_bsh}""",
+	   config["common"],
+	   config["define_xml_czi"],
+	   jdir=JOBDIR,
+	   path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
         cmd_string += " > {log} 2>&1"
         shell(cmd_string)
 

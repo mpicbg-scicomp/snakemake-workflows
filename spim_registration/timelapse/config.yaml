@@ -15,6 +15,7 @@ common: {
   # Directory that contains the current working Fiji
   fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",
   fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
+  sysconfcpus: "sysconfcpus -n",
   # ============================================================================
   #   Processing switches
   # Description: Use switches to decide which processing steps you need:
@@ -50,8 +51,8 @@ common: {
   #          illuminations
   #          pixel size
   # ============================================================================
-  ntimepoints: 72,               # number of timepoints of dataset
-  angles: "0,72,144,216,288",   # angles
+  ntimepoints: 2,               # number of timepoints of dataset
+  angles: "1,2,3,4,5",   # angles "0,72,144,216,288"
   channels: "green",        # channels, for tif numeric!
   illumination: "0",            # illuminations
   # ----------------------------------------------------------------------------
@@ -219,6 +220,8 @@ resave_hdf5: {
   resave_angle: '"All angles"',
   resave_channel: '"All channels"',
   resave_illumination: '"All illuminations"',
+  num_cores_hdf5_xml: 2,
+  num_cores_resave_hdf5: 2,
   bsh_file: "export.bsh"
   }
 
@@ -248,6 +251,7 @@ registration: {
   model_to_regularize_with: "Rigid",
   lambda: '0.10',
   imglib_container: '"ArrayImg (faster)"',
+  num_cores_reg: 2,
   bsh_file: "registration.bsh"  # .bsh script for registration
   }
 
@@ -284,6 +288,7 @@ fusion: {
   imglib2_data_container: '"ArrayImg (faster)"',
   process_views_in_paralell: '"All"',
   xml_output: '"Save every XML with user-provided unique id"',
+  num_cores_fusion: 6,
   bsh_file: "fusion.bsh"
   }
 
@@ -323,6 +328,7 @@ deconvolution: {
   psf_size_y: '19',
   psf_size_z: '25',
   imglib2_container: '"ArrayImg"',
+  num_cores_deco: 7,
   bsh_file: "deconvolution.bsh"
   }
   
@@ -340,6 +346,7 @@ hdf5_output: {
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
   output_imglib_container: '"ArrayImg (faster)"',
+  num_cores_hdf5_xml_output: 2,
   bsh_file_define: "define_output.bsh", # .bsh script for defining the dataset
   bsh_file_hdf5: "export_output.bsh"    # .bsh script for resaving into hdf5
   }
