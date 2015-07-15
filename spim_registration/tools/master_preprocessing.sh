@@ -21,7 +21,7 @@
 #		c=0,1 etc
 #		spim_TL{tt}_Angle{a}_Channel{c}.tif
 #===============================================================================
-image_file_directory="/projects/pilot_spim/Christopher/Test_pipeline_3.0/czi/"
+image_file_directory="/projects/pilot_spim/Christopher/test_pipeline/single_channel/resave_test/"
 
 # --- jobs directory -----------------------------------------------------------
 job_directory="/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/tools/"
@@ -31,26 +31,27 @@ job_directory="/projects/pilot_spim/Christopher/snakemake-workflows/spim_registr
 # Important: For renaming and resaving .czi files the first .czi file has to
 # carry the index (0)
 #-------------------------------------------------------------------------------
-
-pad="3"		# for padded zeros
-angle_prep="1" # angles format: "1 2 3"
-
+timepoints="`seq 0 1`" # number of time points format: "`seq 0 1`"
+angle_prep="1 2 3 4 5" # angles format: "1 2 3"
+pad="2"		# for padded zeros
+num_angles="5"
 #--- Renaming ------------------------------------------------------------------
 
 first_index="0"		# First index of czi files
-last_index="391"		# Last index of czi files
+last_index="9"	# Last index of czi files
 first_timepoint="0"	# Starts with 0
 angles_renaming=(1 2 3 4 5)	# Angles format: (1 2 3)
 
-source_pattern=2014-10-23_H2A_gsb_G3\(\{index\}\).czi # Name of .czi files
+source_pattern=2015-02-21_LZ1_Stock68_3\(\{index\}\).czi # Name of .czi files
 target_pattern=spim_TL\{timepoint\}_Angle\{angle\}.czi	# The output pattern of renaming
 
 #-------------------------------------------------------------------------------
 # Fiji settings
 #-------------------------------------------------------------------------------
-XVFB_RUN="/sw/bin/xvfb-run" # virtual frame buffer
-
-Fiji_resave="/sw/users/schmied/lifeline/Fiji.app.lifeline2/ImageJ-linux64" # Fiji that works for resaving
+XVFB_RUN="/sw/bin/xvfb-run -a" # virtual frame buffer
+sysconfcpus="sysconfcpus -n 2"
+Fiji: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64"
+Fiji_resave="/sw/users/schmied/packages/2014-06-02_Fiji.app_lifeline/ImageJ-linux64" # Fiji that works for resaving
 #-------------------------------------------------------------------------------
 # Pre-processing
 #-------------------------------------------------------------------------------
