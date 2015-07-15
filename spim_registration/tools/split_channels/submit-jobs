@@ -1,6 +1,0 @@
-#!/bin/bash
-
-for file in `ls ${1} | grep ".job$"`
-do
-	bsub -q short -n 3  -R span[hosts=1] -o "out.%J" -e "err.%J" ${1}/$file
-done

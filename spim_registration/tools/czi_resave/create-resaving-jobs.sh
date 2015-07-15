@@ -22,7 +22,6 @@ do
 			-Dfirst_czi_name=${first_czi_name} \
 			-Dtimepoint=${timepoint} \
 			-Dangle=${angle} \
-			-Dstack_size=${stack_size} \
 			-Dpad=${pad} \
 			-Dtif_timepoint=${tif_timepoint} \
 			-- --no-splash ${resaving}" >> "${job}"

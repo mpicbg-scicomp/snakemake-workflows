@@ -39,15 +39,11 @@ System.out.println( "=======================================================" );
 System.out.println( "Opening Image" ) ;
 IJ.run("Bio-Formats Importer", 
 	"open=" + dir + first_czi_name + " " + 
-	"autoscale " +
 	"color_mode=Default " +
 	"specify_range " +
 	"view=[Standard ImageJ] " +
 	"stack_order=XYCZT " +
 	"series_" + angle + " " +
-	"z_begin_" + angle + "=1 " +
-	"z_end_" + angle + "=" + stack_size + " " +
-	"z_step_" + angle + "=1 " +
 	"t_begin_" + angle + "=" + timepoint + " " +
 	"t_end_" + angle + "=" + timepoint + " " +
 	"t_step_" + angle + "=1");
