@@ -110,7 +110,6 @@ if (illumination.equalsIgnoreCase(""))
 System.out.println( "Illuminations = " + illum_string );
 
 // Calibaration
-// Calibaration
 System.out.println("=========================================================");
 System.out.println("Calibration:");
 manual_calibration_tif = System.getProperty( "manual_calibration_tif" );

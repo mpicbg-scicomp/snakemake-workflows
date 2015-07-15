@@ -65,7 +65,7 @@ rule define_xml_czi:
         
 # defining xml for tif dataset
 rule define_xml_tif:
-    input: glob.glob(re.sub("{{.}}","*",config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
+    input: glob.glob(re.sub("{{.}}","*", config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
     output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a2_define_xml_tif.log"
     run:
@@ -164,7 +164,7 @@ rule resave_hdf5:
         shell(part_string) 
        	       	
 rule registration:
-    input:  "{xml_base}-{file_id}-00.h5", expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])
+    input:  rules.resave_hdf5.output, expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]) # "{xml_base}-{file_id}-00.h5"
     output: temp("{xml_base}.job_{file_id,\d+}.xml") #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
@@ -414,7 +414,7 @@ rule deconvolution:
         shell(cmd_string)
 
 rule define_output:
-    input: [ item + "_" + config["common"]["fusion_switch"] for item in datasets ], glob.glob('TP*')
+    input: glob.glob('TP*'), [ item + "_" + config["common"]["fusion_switch"] for item in datasets ]
     output: temp(config["common"]["output_xml"].strip('\"') + ".xml")
     log: "logs/f1_define_output.log"
     run:
@@ -424,6 +424,7 @@ rule define_output:
         -Dtimepoints={output_timepoints} \
         -Dchannels={output_channels} \
         -Dimage_file_pattern={output_image_file_pattern} \
+        -Dmanual_calibration_output={manual_calibration_output} \
         -Dpixel_distance_x={output_pixel_distance_x} \
         -Dpixel_distance_y={output_pixel_distance_y} \
         -Dpixel_distance_z={output_pixel_distance_z} \
@@ -465,7 +466,7 @@ rule hdf5_xml_output:
                 -Dtimepoints_per_partition={timepoints_per_partition} \
                 -Dsetups_per_partition={setups_per_partition} \
                 -Drun_only_job_number=0 \
-                -Doutput_data_type={output_data_type} \
+                -Dfusion_switch={fusion_switch} \
                 -Dconvert_32bit={convert_32bit}\
                 -- --no-splash {path_bsh}""", 
            config["common"],
@@ -496,7 +497,7 @@ rule resave_hdf5_output:
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
-        -Doutput_data_type={output_data_type} \
+        -Dfusion_switch={fusion_switch} \
         -Dconvert_32bit={convert_32bit}\
         -- --no-splash {path_bsh}""", 
            config["common"],

@@ -83,6 +83,42 @@ else {
 
 }
 
+// Calibaration
+System.out.println("=========================================================");
+System.out.println("Calibration:");
+manual_calibration_output = System.getProperty( "manual_calibration_output" );
+float pixel_distance_x = Float.parseFloat( System.getProperty( "pixel_distance_x" ) );
+float pixel_distance_y = Float.parseFloat( System.getProperty( "pixel_distance_y" ) );
+float pixel_distance_z = Float.parseFloat( System.getProperty( "pixel_distance_z" ) );
+pixel_unit = System.getProperty( "pixel_unit" );
+
+// builds string for calibration override
+if (manual_calibration_output.equalsIgnoreCase( "No" ) )
+{
+	modify_calibration = "calibration_definition=[Load voxel-size(s) from file(s)] ";
+	manual_calibration_string = "";
+	System.out.println( modify_calibration );
+}
+
+else if (manual_calibration_output.equalsIgnoreCase( "Yes" ) )
+{
+	
+	modify_calibration = "calibration_definition=[User define voxel-size(s)] ";
+	manual_calibration_string = " pixel_distance_x=" + pixel_distance_x + " " +
+				    "pixel_distance_y=" + pixel_distance_y + " " +
+				    "pixel_distance_z=" + pixel_distance_z + " " +
+				    "pixel_unit=" + pixel_unit + " ";
+	System.out.println( "Calibration set to manual" );
+	System.out.println( modify_calibration );
+	System.out.println( "manual_calibration_string:" + manual_calibration_string );
+}
+
+else
+{
+	System.out.println( "Manual calibration setting bad" );
+}
+
+
 System.out.println( "channels = " + channels );
 
 System.out.println("Define Multi-View Dataset , type_of_dataset=[" + type_of_dataset + "] " +
@@ -95,12 +131,11 @@ System.out.println("Define Multi-View Dataset , type_of_dataset=[" + type_of_dat
 	"image_file_pattern=" + image_file_pattern + " " + 
 	"timepoints_=" + timepoints + " " +
 	channels +
-	"calibration_type=[Same voxel-size for all views] calibration_definition=[User define voxel-size(s)]" + " " + 
+	"calibration_type=[Same voxel-size for all views] " +
+	modify_calibration + 
 	"imglib2_data_container=[" + imglib_container + "] " + 
-	"pixel_distance_x=" + pixel_distance_x + " " + 
-	"pixel_distance_y=" + pixel_distance_y + " " + 
-	"pixel_distance_z=" + pixel_distance_z + " " +
-	"pixel_unit=" + pixel_unit + "");
+	manual_calibration_string +
+	"");
 
 // Executes Fiji plugin
 System.out.println("=========================================================");
@@ -117,12 +152,11 @@ IJ.run("Define Multi-View Dataset",
 	"image_file_pattern=" + image_file_pattern + " " + 
 	"timepoints_=" + timepoints + " " +
 	channels +
-	"calibration_type=[Same voxel-size for all views] calibration_definition=[User define voxel-size(s)]" + " " + 
+	"calibration_type=[Same voxel-size for all views] " +
+	modify_calibration + 
 	"imglib2_data_container=[" + imglib_container + "] " + 
-	"pixel_distance_x=" + pixel_distance_x + " " + 
-	"pixel_distance_y=" + pixel_distance_y + " " + 
-	"pixel_distance_z=" + pixel_distance_z + " " +
-	"pixel_unit=" + pixel_unit + "");
+	manual_calibration_string +
+	"");
 }
 catch ( e ) { 
 
