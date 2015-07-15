@@ -43,7 +43,7 @@ common: {
   #
   ########### simplyfy! ########################################################
   hdf5_xml_filename: '"hdf5_Dpse_Dip3_VK33"', # Name of .xml file for the hdf5 data after resave_hdf5
-  merged_xml: 'hdf5_Dpse_Dip3_VK33_merge',    # Name of .xml file after merge
+  #merged_xml: 'hdf5_Dpse_Dip3_VK33_merge',    # Name of .xml file after merge
   #
   # .xml file names
   output_xml: '"fused_Dpse_Dip3_VK33"',
