@@ -24,16 +24,13 @@ System.out.println( "xml_filename = " + xml_filename );
 // Dataset settings
 System.out.println("=========================================================");
 System.out.println("Dataset:");
-timepoints = System.getProperty( "timepoints" );
-image_file_pattern = System.getProperty( "image_file_pattern" );
+
 type_of_dataset = System.getProperty( "type_of_dataset" );
 multiple_timepoints = System.getProperty( "multiple_timepoints" );
 multiple_illumination_directions = System.getProperty( "multiple_illumination_directions" );
 multiple_angles = System.getProperty( "multiple_angles" );
 imglib_container = System.getProperty( "imglib_container" );
 
-System.out.println( "timepoints = " + timepoints );
-System.out.println( "image_file_pattern = " + image_file_pattern );
 System.out.println( "type_of_dataset = " + type_of_dataset );
 System.out.println( "multiple_timepoints = " + multiple_timepoints );
 System.out.println( "multiple_illumination_directions = " + multiple_illumination_directions );
@@ -56,25 +53,28 @@ System.out.println( "pixel_unit = " + pixel_unit );
 // Channel switch
 System.out.println("=========================================================");
 System.out.println("Channel Switch:");
-multiple_channels = System.getProperty( "multiple_channels" );
-System.out.println( "multiple_channels = " + multiple_channels );
-
+//multiple_channels = System.getProperty( "multiple_channels" );
 channels = System.getProperty( "channels" ); 
+// Parses string
+String delims = "[,]";
+String[] channel_token = channels.split(delims);
 
-if ( multiple_channels.equalsIgnoreCase( "NO (one channel)" ) )
+
+if ( channel_token.length ==1 )
 
 { 
 
-	channels="";
-
+	channels = "";
+	multiple_channels = "NO (one channel)";
 }
 
-else if ( multiple_channels.equalsIgnoreCase( "YES (one file per channel)" ) )
+else if ( channel_token.length > 1 )
 
 {
 
 	channels = "channels_=" + channels + " ";
-
+	multiple_channels = "YES (one file per channel)";
+	System.out.println( "channels = " + channels );
 }
 
 else {
@@ -82,6 +82,8 @@ else {
 	System.out.println( "Channel switch setting gibberish" );
 
 }
+
+System.out.println( "multiple_channels = " + multiple_channels );
 
 // Calibaration
 System.out.println("=========================================================");
@@ -118,9 +120,73 @@ else
 	System.out.println( "Manual calibration setting bad" );
 }
 
+// Assembles Image file pattern
+System.out.println("=========================================================");
+System.out.println("image_file_pattern:");
+illumination = System.getProperty( "illumination" );
+angles = System.getProperty( "angles" );
 
-System.out.println( "channels = " + channels );
+System.out.println( "illumination = " + illumination );
+System.out.println( "angles = " + angles );
 
+// Parses string illumination
+String[] illumination_token = illumination.split(delims);
+
+String string_part_1 = null;
+String string_part_2 = null;
+String image_file_pattern = null;
+
+// Decides based on the numbers of channels in parameter channels which
+// channel string is necessary
+if (channel_token.length == 1)
+{
+        string_part_1 = "TP{t}_Ch0_";
+}
+
+else if (channel_token.length > 1)
+{
+        string_part_1 = "TP{t}_Ch{c}_";
+}
+
+else
+{
+        System.out.println( "Channel Setting bad" );
+}
+
+// Decides based on the numbers of illuminations in parameter illumination which
+// illumination string is necessary
+if (illumination_token.length == 1)
+{
+        string_part_2 = "Ill0_";
+}
+
+else if (illumination_token.length > 1)
+{
+        string_part_2 = "Ill{i}_";
+}
+
+else
+{
+        System.out.println( "Illumination Setting bad" );
+}
+
+// Puts together the string for image_file_pattern
+image_file_pattern = string_part_1 + string_part_2 + "Ang" + angles +".tif";
+
+System.out.println( image_file_pattern );
+
+System.out.println("=========================================================");
+System.out.println("time points setting:");
+
+int ntimepoints = Integer.parseInt(System.getProperty("ntimepoints" ) );
+
+int last_timepoint = ntimepoints - 1;
+String timepoints = "0-" + last_timepoint;
+
+System.out.println( "timepoints = " + timepoints );
+
+System.out.println("=========================================================");
+System.out.println("Start plugin:");
 System.out.println("Define Multi-View Dataset , type_of_dataset=[" + type_of_dataset + "] " +
 	"xml_filename=[" + xml_filename + ".xml] " +
 	"multiple_timepoints=[" + multiple_timepoints + "] " +
@@ -138,8 +204,6 @@ System.out.println("Define Multi-View Dataset , type_of_dataset=[" + type_of_dat
 	"");
 
 // Executes Fiji plugin
-System.out.println("=========================================================");
-System.out.println("Start plugin:");
 try {
 IJ.run("Define Multi-View Dataset", 
 	"type_of_dataset=[" + type_of_dataset + "] " +
