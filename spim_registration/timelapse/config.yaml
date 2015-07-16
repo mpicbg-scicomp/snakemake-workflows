@@ -15,6 +15,7 @@ common: {
   # Directory that contains the current working Fiji
   fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",
   fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
+  sysconfcpus: "sysconfcpus -n",
   # ============================================================================
   #   Processing switches
   # Description: Use switches to decide which processing steps you need:
@@ -38,9 +39,13 @@ common: {
   # 
   # xml file names without .xml suffix
   # ============================================================================
-  first_xml_filename: 'Dpse_Dip3_VK33',       # Name of the xml file for the .czi or .tif files
+  #
+  first_xml_filename: 'Dpse_Dip3_VK33',              # Name of the xml file for the .czi or .tif files
   hdf5_xml_filename: '"hdf5_Dpse_Dip3_VK33"', # Name of .xml file for the hdf5 data after resave_hdf5
-  merged_xml: 'hdf5_Dpse_Dip3_VK33_merge',    # Name of .xml file after merge
+  # .xml file names for output
+  output_xml: '"fused_Dpse_Dip3_VK33"',
+  output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
+  #
   # ============================================================================
   # Describe the dataset
   #
@@ -50,9 +55,9 @@ common: {
   #          illuminations
   #          pixel size
   # ============================================================================
-  ntimepoints: 72,               # number of timepoints of dataset
-  angles: "0,72,144,216,288",   # angles
-  channels: "green",        # channels
+  ntimepoints: 2,               # number of timepoints of dataset
+  angles: "1,2,3,4,5",   # angles "0,72,144,216,288"
+  channels: "green",        # channels, for tif numeric!
   illumination: "0",            # illuminations
   # ----------------------------------------------------------------------------
   # For .czi datasets
@@ -61,14 +66,10 @@ common: {
   # ----------------------------------------------------------------------------
   # For .tif datasets
   # file pattern of .tif files:
-  # for multi channel give spim_TL{tt}_Angle{a}_Channel{c}.tif
+  # for multi channel with one file per channel give spim_TL{tt}_Angle{a}_Channel{c}.tif
   # for padded zeros use tt 
-  # specify calibration
   image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif',
-  pixel_distance_x: '0.285901069641113',  # Manual calibration x
-  pixel_distance_y: '0.285901069641113',  # Manual calibration y
-  pixel_distance_z: '1.500000000000000',  # Manual calibration z
-  pixel_unit: "um",             # unit of manual calibration
+  multiple_channels: '"NO (one channel)"',         # '"YES (all channels in one file)"' or '"YES (one file per channel)"' or '"NO (one channel)"'
   # ============================================================================
   # Detection and registration
   #
@@ -156,38 +157,32 @@ common: {
   #          Image type (16Bit from content-based fusion, 32Bit from deconvolution)
   # ============================================================================
   # Number of timepoints
-  output_timepoints: '0-71',   # Timepoints format: '1-2'
+  output_timepoints: '0-1',   # Timepoints format: '1-2'
   #
   # Naming pattern:
   # Single Channel: TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
   # Dual Channel: TP{{t}}_Ch{{0}}_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  output_image_file_pattern: '"TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif"',
+  output_image_file_pattern: '"TP{{t}}_Ch0_Ill0_Ang1,2,3,4,5.tif"',
   #
   # channel setting:
   # Single channel: '"NO (one channel)"'
   # Dual channel: '"YES (one file per channel)"'
   output_multiple_channels: '"NO (one channel)"',
   output_channels: "green",
-  #
-  # .xml file names
-  output_xml: '"fused_Dpse_Dip3_VK33"',
-  output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
-  #
+  # Calibration
+  manual_calibration_output: "Yes", # calibration override: No or Yes
   # pixel size of output: take downsampling into account!
   output_pixel_distance_x: 0.285901069641113, 
   output_pixel_distance_y: 0.285901069641113,
   output_pixel_distance_z: 0.285901069641113,
-  output_pixel_unit: 'um',
-  #
-  # File type
-  output_data_type: "16Bit" # "32Bit" or "16Bit"
+  output_pixel_unit: 'um'
   }
   # ============================================================================
   # Advanced settings
   # ============================================================================
   
 define_xml_czi: {
-  manual_calibration_czi: "Yes", # calibration override: No or Yes
+  manual_calibration_czi: "No", # calibration override: No or Yes
   czi_pixel_distance_x: '0.285901069641113',  # Manual calibration x
   czi_pixel_distance_y: '0.285901069641113',  # Manual calibration y
   czi_pixel_distance_z: '1.500000000000000',  # Manual calibration z
@@ -198,10 +193,14 @@ define_xml_czi: {
   
 define_xml_tif: {
   # Settings for ImageJ Opener
-  type_of_dataset: '"Image Stacks (ImageJ Opener)"',
+  manual_calibration_tif: "No", # calibration override: No or Yes
+  pixel_distance_x: '0.285901069641113',  # Manual calibration x
+  pixel_distance_y: '0.285901069641113',  # Manual calibration y
+  pixel_distance_z: '1.500000000000000',  # Manual calibration z
+  pixel_unit: "um",             # unit of manual calibration
+  type_of_dataset: '"Image Stacks (LOCI Bioformats)"', # '"Image Stacks (ImageJ Opener)"' or '"Image Stacks (LOCI Bioformats)"'
   multiple_timepoints: '"YES (one file per time-point)"', # or NO (one time-point)
   multiple_angles: '"YES (one file per angle)"',          # or NO (one angle)
-  multiple_channels: '"NO (one channel)"',                # or "\"NO (one channel)\""
   multiple_illumination_directions: '"NO (one illumination direction)"', # or YES (one file per illumination direction)
   imglib_container: '"ArrayImg (faster)"',        # '"ArrayImg (faster)"'
   bsh_file: "define_tif_zip.bsh"
@@ -219,6 +218,8 @@ resave_hdf5: {
   resave_angle: '"All angles"',
   resave_channel: '"All channels"',
   resave_illumination: '"All illuminations"',
+  num_cores_hdf5_xml: 2,
+  num_cores_resave_hdf5: 2,
   bsh_file: "export.bsh"
   }
 
@@ -248,6 +249,7 @@ registration: {
   model_to_regularize_with: "Rigid",
   lambda: '0.10',
   imglib_container: '"ArrayImg (faster)"',
+  num_cores_reg: 2,
   bsh_file: "registration.bsh"  # .bsh script for registration
   }
 
@@ -284,6 +286,7 @@ fusion: {
   imglib2_data_container: '"ArrayImg (faster)"',
   process_views_in_paralell: '"All"',
   xml_output: '"Save every XML with user-provided unique id"',
+  num_cores_fusion: 6,
   bsh_file: "fusion.bsh"
   }
 
@@ -323,6 +326,7 @@ deconvolution: {
   psf_size_y: '19',
   psf_size_z: '25',
   imglib2_container: '"ArrayImg"',
+  num_cores_deco: 7,
   bsh_file: "deconvolution.bsh"
   }
   
@@ -335,11 +339,13 @@ hdf5_output: {
   # subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
   # chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
   # Standard settings for hdf5_output
-  output_type_of_dataset: '"Image Stacks (ImageJ Opener)"',
+  output_type_of_dataset: '"Image Stacks (LOCI Bioformats)"', # '"Image Stacks (ImageJ Opener)"' or '"Image Stacks (LOCI Bioformats)"'
   output_multiple_timepoints: '"YES (one file per time-point)"',
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
   output_imglib_container: '"ArrayImg (faster)"',
+  num_cores_hdf5_xml_output: 2,
+  num_cores_resave_hdf5_output: 2,
   bsh_file_define: "define_output.bsh", # .bsh script for defining the dataset
   bsh_file_hdf5: "export_output.bsh"    # .bsh script for resaving into hdf5
   }

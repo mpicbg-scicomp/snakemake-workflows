@@ -13,7 +13,7 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 # configfile: "dual_OneChannel.yaml"
 
 # data specific config file, expected to be inside JOBDIR
-configfile: "single.yaml"
+configfile: "config.yaml"
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
@@ -26,38 +26,38 @@ xml_merge_in = produce_xml_merge_job_files(datasets)
 rule done:
     input: [ ds + "_output_hdf5" for ds in datasets ]
 
-<<<<<<< HEAD
-localrules: define_xml_tif, xml_merge, timelapse, 
-	    duplicate_transformations, external_transform, define_output
+# local rules are running the specified rules on the head node
+#localrules: define_xml_tif, xml_merge, timelapse, 
+#	    duplicate_transformations, external_transform, define_output
 	    
 rule resave_prepared:
     input: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"] ], suffix=["xml","h5"])
 
 # defining xml for czi dataset
 rule define_xml_czi:
-
     input: config["common"]["first_czi"]
     output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a1_define_xml_czi.log"
     run: 
-        cmd_string = produce_string("""{fiji-prefix} {fiji-app} \
+        cmd_string = produce_string(
+        	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
-           -Dfirst_czi={first_czi} \
-           -Dangles={angles} \
-           -Dchannels={channels} \
-           -Dillumination={illumination} \
-           -Dmanual_calibration_czi={manual_calibration_czi} \
-           -Dczi_pixel_distance_x={czi_pixel_distance_x} \
-           -Dczi_pixel_distance_y={czi_pixel_distance_y} \
-           -Dczi_pixel_distance_z={czi_pixel_distance_z} \
-           -Dczi_pixel_unit={czi_pixel_unit} \
-           -Dfirst_xml_filename={first_xml_filename} \
-           -Drotation_around={rotation_around} \
-           -- --no-splash {path_bsh}""",
-                                       config["common"],
-                                       config["define_xml_czi"],
-                                       jdir=JOBDIR,
-                                       path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
+        -Dfirst_czi={first_czi} \
+        -Dangles={angles} \
+        -Dchannels={channels} \
+        -Dillumination={illumination} \
+        -Dmanual_calibration_czi={manual_calibration_czi} \
+        -Dczi_pixel_distance_x={czi_pixel_distance_x} \
+        -Dczi_pixel_distance_y={czi_pixel_distance_y} \
+        -Dczi_pixel_distance_z={czi_pixel_distance_z} \
+        -Dczi_pixel_unit={czi_pixel_unit} \
+        -Dfirst_xml_filename={first_xml_filename} \
+        -Drotation_around={rotation_around} \
+        -- --no-splash {path_bsh}""",
+	   config["common"],
+	   config["define_xml_czi"],
+	   jdir=JOBDIR,
+	   path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
         cmd_string += " > {log} 2>&1"
         shell(cmd_string)
 
@@ -65,7 +65,7 @@ rule define_xml_czi:
         
 # defining xml for tif dataset
 rule define_xml_tif:
-    input: glob.glob(re.sub("{{.}}","*",config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
+    input: glob.glob(re.sub("{{.}}","*", config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
     output: temp(config["common"]["first_xml_filename"] + ".xml")
     log: "logs/a2_define_xml_tif.log"
     run:
@@ -77,6 +77,7 @@ rule define_xml_tif:
         -Dchannels={channels} \
         -Dillumination={illumination} \
         -Dimage_file_pattern={image_file_pattern} \
+        -Dmanual_calibration_tif={manual_calibration_tif} \
         -Dpixel_distance_x={pixel_distance_x} \
         -Dpixel_distance_y={pixel_distance_y} \
         -Dpixel_distance_z={pixel_distance_z} \
@@ -163,7 +164,7 @@ rule resave_hdf5:
         shell(part_string) 
        	       	
 rule registration:
-    input:  "{xml_base}-{file_id}-00.h5", expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"])
+    input:  rules.resave_hdf5.output, expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]) # "{xml_base}-{file_id}-00.h5"
     output: temp("{xml_base}.job_{file_id,\d+}.xml") #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
@@ -413,7 +414,7 @@ rule deconvolution:
         shell(cmd_string)
 
 rule define_output:
-    input: [ item + "_" + config["common"]["fusion_switch"] for item in datasets ], glob.glob('TP*')
+    input: glob.glob('TP*'), [ item + "_" + config["common"]["fusion_switch"] for item in datasets ]
     output: temp(config["common"]["output_xml"].strip('\"') + ".xml")
     log: "logs/f1_define_output.log"
     run:
@@ -423,6 +424,7 @@ rule define_output:
         -Dtimepoints={output_timepoints} \
         -Dchannels={output_channels} \
         -Dimage_file_pattern={output_image_file_pattern} \
+        -Dmanual_calibration_output={manual_calibration_output} \
         -Dpixel_distance_x={output_pixel_distance_x} \
         -Dpixel_distance_y={output_pixel_distance_y} \
         -Dpixel_distance_z={output_pixel_distance_z} \
@@ -464,7 +466,7 @@ rule hdf5_xml_output:
                 -Dtimepoints_per_partition={timepoints_per_partition} \
                 -Dsetups_per_partition={setups_per_partition} \
                 -Drun_only_job_number=0 \
-                -Doutput_data_type={output_data_type} \
+                -Dfusion_switch={fusion_switch} \
                 -Dconvert_32bit={convert_32bit}\
                 -- --no-splash {path_bsh}""", 
            config["common"],
@@ -495,7 +497,7 @@ rule resave_hdf5_output:
         -Dtimepoints_per_partition={timepoints_per_partition} \
         -Dsetups_per_partition={setups_per_partition} \
         -Drun_only_job_number={job_number} \
-        -Doutput_data_type={output_data_type} \
+        -Dfusion_switch={fusion_switch} \
         -Dconvert_32bit={convert_32bit}\
         -- --no-splash {path_bsh}""", 
            config["common"],
