@@ -155,19 +155,6 @@ common: {
   #          Pixel size > isotropic resolution
   #          Image type (16Bit from content-based fusion, 32Bit from deconvolution)
   # ============================================================================
-  # Number of timepoints
-  #output_timepoints: '0-1',   # Timepoints format: '1-2'
-  #
-  # Naming pattern:
-  # Single Channel: TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  # Dual Channel: TP{{t}}_Ch{{0}}_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  #output_image_file_pattern: '"TP{{t}}_Ch0_Ill0_Ang1,2,3,4,5.tif"',
-  #
-  # channel setting:
-  # Single channel: '"NO (one channel)"'
-  # Dual channel: '"YES (one file per channel)"'
-  #output_multiple_channels: '"NO (one channel)"',
-  # output_channels: "green",
   # Calibration
   manual_calibration_output: "Yes", # calibration override: No or Yes
   # pixel size of output: take downsampling into account!
