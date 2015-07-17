@@ -123,11 +123,14 @@ else
 // Assembles Image file pattern
 System.out.println("=========================================================");
 System.out.println("image_file_pattern:");
-illumination = System.getProperty( "illumination" );
+channel_name = System.getProperty( "channels" ); 
 angles = System.getProperty( "angles" );
+illumination = System.getProperty( "illumination" );
 
-System.out.println( "illumination = " + illumination );
+System.out.println( "channel_name =" + channel_name );
 System.out.println( "angles = " + angles );
+System.out.println( "illumination = " + illumination );
+
 
 // Parses string illumination
 String[] illumination_token = illumination.split(delims);
@@ -140,7 +143,7 @@ String image_file_pattern = null;
 // channel string is necessary
 if (channel_token.length == 1)
 {
-        string_part_1 = "TP{t}_Ch" + channels + "_";
+        string_part_1 = "TP{t}_Ch" + channel_name + "_";
 }
 
 else if (channel_token.length > 1)
