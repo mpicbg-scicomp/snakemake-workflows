@@ -140,7 +140,7 @@ String image_file_pattern = null;
 // channel string is necessary
 if (channel_token.length == 1)
 {
-        string_part_1 = "TP{t}_Ch0_";
+        string_part_1 = "TP{t}_Ch" + channels + "_";
 }
 
 else if (channel_token.length > 1)

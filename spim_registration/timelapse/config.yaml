@@ -39,7 +39,7 @@ common: {
   # 
   # xml file name without .xml suffix
   # ============================================================================
-  hdf5_xml_filename: '"Dpse_Dip3_VK33"', # Name of .xml file for the hdf5 data after resave_hdf5
+  hdf5_xml_filename: '"single"', # Name of .xml file for the hdf5 data after resave_hdf5
   # .xml file names for output
   #output_xml: '"fused_Dpse_Dip3_VK33"',
   #output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
@@ -54,13 +54,13 @@ common: {
   #          pixel size
   # ============================================================================
   ntimepoints: 2,        # number of timepoints of dataset
-  angles: "1,2,3,4,5",   # angles "0,72,144,216,288"
+  angles: "0,72,144,216,288",   # angles "0,72,144,216,288"
   channels: "green",     # channels, for tif numeric!
   illumination: "0",     # illuminations
   # ----------------------------------------------------------------------------
   # For .czi datasets
   # master .czi file
-  first_czi: "2015-04-01_LZ2_Stock46.czi", 
+  first_czi: "2015-02-21_LZ1_Stock68_3.czi", 
   # ----------------------------------------------------------------------------
   # For .tif datasets
   # file pattern of .tif files:
@@ -83,8 +83,8 @@ common: {
   #
   # Dual channel 1 Channel contains the beads: which channel contains the beads?
   # Ignore if Single Channel or Dual Channel both channels contain beads
-  reg_processing_channel: '"green"',
-  #
+  source_channel: "red", # channel that contains the beads
+  target_channel: "green", # channel without beads
   # reg_interest_points_channel:
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
@@ -116,13 +116,13 @@ common: {
   # Options: downsampling
   #          Cropping parameters based on full resolution
   # ============================================================================
-  downsample: '1',    # set downsampling
-  minimal_x: '237',   # Cropping parameters of full resolution
+  downsample: '2',    # set downsampling
+  minimal_x: '190',   # Cropping parameters of full resolution
   minimal_y: '-16',
-  minimal_z: '-292',
-  maximal_x: '1041',
-  maximal_y: '1853',
-  maximal_z: '509',
+  minimal_z: '-348',
+  maximal_x: '1019',
+  maximal_y: '1941',
+  maximal_z: '486',
   # ============================================================================
   # Multiview deconvolution
   #
@@ -132,12 +132,12 @@ common: {
   #          Channel settings for deconvolution
   # ============================================================================
   iterations: '1',        # number of iterations
-  minimal_x_deco: '237',  # Cropping parameters: take downsampling into account
+  minimal_x_deco: '190',  # Cropping parameters: take downsampling into account
   minimal_y_deco: '-16',
-  minimal_z_deco: '-292',
-  maximal_x_deco: '1041',
-  maximal_y_deco: '1853',
-  maximal_z_deco: '509',
+  minimal_z_deco: '-348',
+  maximal_x_deco: '1019',
+  maximal_y_deco: '1941',
+  maximal_z_deco: '486',
   #
   # Channel settings for deconvolution
   # Single Channel: '"beads"'
@@ -254,8 +254,6 @@ dublicate_transformations: {
   # If dual channel processing and only one channel contains beads
   # this allows you to dublicate the transformation for the 
   # channel that does not contain beas
-  source_dublication: "red",  # source channel
-  target_dublication: "green", # target channel
   duplicate_which_transformations: '"Replace all transformations"', # mode of dublication
   bsh_file: "dublicate_transformations.bsh" # .bsh script for dublication
   }

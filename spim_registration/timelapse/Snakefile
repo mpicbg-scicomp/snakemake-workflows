@@ -182,7 +182,7 @@ rule registration:
 	-Dreg_process_illumination={reg_process_illumination} \
 	-Dreg_process_angle={reg_process_angle} \
 	-Dchannels={channels} \
-	-Dreg_processing_channel={reg_processing_channel} \
+	-Dreg_processing_channel={source_channel} \
         -Dlabel_interest_points={label_interest_points} \
         -Dtype_of_registration={type_of_registration} \
         -Dtype_of_detection={type_of_detection} \
@@ -284,8 +284,8 @@ rule duplicate_transformations:
 	-Dprocess_timepoint_timelapse={timelapse_process_timepoints} \
 	-Dprocess_illumination={reg_process_illumination} \
 	-Dprocess_angle={reg_process_angle} \
-	-Dsource_dublication={source_dublication} \
-	-Dtarget_dublication={target_dublication} \
+	-Dsource_dublication={source_channel} \
+	-Dtarget_dublication={target_channel} \
 	-Dduplicate_which_transformations={duplicate_which_transformations} \
         -- --no-splash {path_bsh}""",     	
                                     config["common"],
