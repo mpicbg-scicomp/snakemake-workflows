@@ -418,7 +418,7 @@ rule deconvolution:
         shell(cmd_string)
 
 rule define_output:
-    input: glob.glob('TP*')#, [ item + "_" + config["common"]["fusion_switch"] for item in datasets ]
+    input: glob.glob('TP*'), [ item + "_" + config["common"]["fusion_switch"] for item in datasets ]
     output: temp(config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml")
     log: "logs/f1_define_output.log"
     run:
