@@ -36,7 +36,7 @@ rule resave_prepared:
 # defining xml for czi dataset
 rule define_xml_czi:
     input: config["common"]["first_czi"]
-    output: temp(config["common"]["first_xml_filename"] + ".xml")
+    output: temp(config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml")
     log: "logs/a1_define_xml_czi.log"
     run: 
         cmd_string = produce_string(
@@ -57,6 +57,7 @@ rule define_xml_czi:
 	   config["common"],
 	   config["define_xml_czi"],
 	   jdir=JOBDIR,
+	   first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
 	   path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
         cmd_string += " > {log} 2>&1"
         shell(cmd_string)
@@ -66,7 +67,7 @@ rule define_xml_czi:
 # defining xml for tif dataset
 rule define_xml_tif:
     input: glob.glob(re.sub("{{.}}","*", config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
-    output: temp(config["common"]["first_xml_filename"] + ".xml")
+    output: temp(config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml")
     log: "logs/a2_define_xml_tif.log"
     run:
         cmd_string = produce_string(
@@ -93,6 +94,7 @@ rule define_xml_tif:
 	   config["common"],
 	   config["define_xml_tif"],
 	   jdir=JOBDIR,
+	   first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
 	   path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"],
            timepoints="0-"+str(int(config["common"]["ntimepoints"])-1)
         )
@@ -104,9 +106,8 @@ ruleorder: define_xml_czi > define_xml_tif
 
 # create mother .xml/.h5
 rule hdf5_xml:
-    input: config["common"]["first_xml_filename"] + ".xml" 
-    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-            temp([ item+"_xml" for item in datasets ])
+    input: config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml" 
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), temp([ item+"_xml" for item in datasets ])
     log: "logs/b1_hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -127,6 +128,7 @@ rule hdf5_xml:
            config["common"],
            config["resave_hdf5"],
            jdir=JOBDIR,
+           first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
 
         part_string += " > {log} 2>&1 && touch {output}"
@@ -135,7 +137,7 @@ rule hdf5_xml:
 
 # resave  .czi/.tif dataset as hdf5	
 rule resave_hdf5:
-    input: rules.hdf5_xml.output, config["common"]["first_xml_filename"] + ".xml"
+    input: "{xml_base}-{file_id,\d+}-00.h5_xml", config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml"
     output: "{xml_base}-{file_id,\d+}-00.h5", temp("{xml_base}-{file_id,\d+}-00.h5_hdf5")
     log: "logs/b2_resave_hdf5-{file_id}.log"
     run:
@@ -157,6 +159,7 @@ rule resave_hdf5:
            config["common"],
            config["resave_hdf5"],
            jdir=JOBDIR,
+           first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
            path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
            input_xml_base="{wildcards.xml_base}",
            job_number=int(wildcards.file_id)+1) 
@@ -164,7 +167,7 @@ rule resave_hdf5:
         shell(part_string) 
        	       	
 rule registration:
-    input:  rules.resave_hdf5.output, expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]) # "{xml_base}-{file_id}-00.h5"
+    input: rules.resave_hdf5.output, [ item+"_hdf5" for item in datasets ], expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]) 
     output: temp("{xml_base}.job_{file_id,\d+}.xml") #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
@@ -178,7 +181,7 @@ rule registration:
 	-Dreg_process_illumination={reg_process_illumination} \
 	-Dreg_process_angle={reg_process_angle} \
 	-Dchannels={channels} \
-	-Dreg_processing_channel={reg_processing_channel} \
+	-Dreg_processing_channel={source_channel} \
         -Dlabel_interest_points={label_interest_points} \
         -Dtype_of_registration={type_of_registration} \
         -Dtype_of_detection={type_of_detection} \
@@ -280,8 +283,8 @@ rule duplicate_transformations:
 	-Dprocess_timepoint_timelapse={timelapse_process_timepoints} \
 	-Dprocess_illumination={reg_process_illumination} \
 	-Dprocess_angle={reg_process_angle} \
-	-Dsource_dublication={source_dublication} \
-	-Dtarget_dublication={target_dublication} \
+	-Dsource_dublication={source_channel} \
+	-Dtarget_dublication={target_channel} \
 	-Dduplicate_which_transformations={duplicate_which_transformations} \
         -- --no-splash {path_bsh}""",     	
                                     config["common"],
@@ -415,15 +418,16 @@ rule deconvolution:
 
 rule define_output:
     input: glob.glob('TP*'), [ item + "_" + config["common"]["fusion_switch"] for item in datasets ]
-    output: temp(config["common"]["output_xml"].strip('\"') + ".xml")
+    output: temp(config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml")
     log: "logs/f1_define_output.log"
     run:
         cmd_string = produce_string(
         	"""{fiji-prefix} {fiji-app} \
         -Dimage_file_directory={jdir} \
-        -Dtimepoints={output_timepoints} \
-        -Dchannels={output_channels} \
-        -Dimage_file_pattern={output_image_file_pattern} \
+        -Dntimepoints={ntimepoints} \
+        -Dangles={angles} \
+        -Dchannels={channels} \
+        -Dillumination={illumination} \
         -Dmanual_calibration_output={manual_calibration_output} \
         -Dpixel_distance_x={output_pixel_distance_x} \
         -Dpixel_distance_y={output_pixel_distance_y} \
@@ -432,7 +436,6 @@ rule define_output:
        	-Dxml_filename={output_xml} \
         -Dtype_of_dataset={output_type_of_dataset} \
         -Dmultiple_timepoints={output_multiple_timepoints} \
-        -Dmultiple_channels={output_multiple_channels} \
         -Dmultiple_illumination_directions={output_illumination_directions} \
         -Dmultiple_angles={output_multiple_angles} \
         -Dimglib_container={output_imglib_container} \
@@ -440,6 +443,7 @@ rule define_output:
 	config["common"],
 	config["hdf5_output"],
 	jdir=JOBDIR,
+	output_xml=config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define",
 	path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_define"])
 	
 	cmd_string +=" > {log} 2>&1"
@@ -447,8 +451,8 @@ rule define_output:
 
 # create mother .xml/.h5
 rule hdf5_xml_output:
-    input: config["common"]["output_xml"].strip('\"') + ".xml"
-    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["output_hdf5_xml"].strip('\"')], suffix=["xml","h5"]),
+    input: config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml"
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["fusion_switch"].strip('\"') + "_" + config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
     	    temp([ item+"_output" for item in datasets ])
     log: "logs/f2_output_hdf5_xml.log"
     run:
@@ -473,13 +477,15 @@ rule hdf5_xml_output:
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
+           output_xml=config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define",
+           output_hdf5_xml=config["common"]["fusion_switch"].strip('\"') + "_" + config["common"]["hdf5_xml_filename"].strip('\"'),
            path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"])
 
         part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
 
 rule resave_hdf5_output:
-    input: rules.hdf5_xml_output.output, config["common"]["output_xml"].strip('\"') + ".xml"
+    input: "{xml_base}-{file_id,\d+}-00.h5_output", config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml"
     output: temp("{xml_base}-{file_id,\d+}-00.h5_output_hdf5")
     log: "logs/f3_resave_output-{file_id}.log"
     run:
@@ -504,6 +510,8 @@ rule resave_hdf5_output:
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
+           output_xml=config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define",
+           output_hdf5_xml=config["common"]["fusion_switch"].strip('\"') + "_" + config["common"]["hdf5_xml_filename"].strip('\"'),
            path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"],
            input_xml_base="{wildcards.xml_base}",
            job_number=int(wildcards.file_id)+1) 
@@ -512,7 +520,7 @@ rule resave_hdf5_output:
        	       
 
 rule distclean:
-    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob(config["common"]["first_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_hdf5"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), glob.glob("*_output_hdf5"), glob.glob("*_output"), glob.glob("*.h5"), glob.glob("*.xml")
+    params : glob.glob(config["common"]["hdf5_xml_filename"].strip('\"')+"*"), glob.glob("*registered"), glob.glob("*_fusion"), glob.glob("*_timelapse"), glob.glob("*log"), glob.glob("*_hdf5"), glob.glob("*_deconvolved"), glob.glob("*.xml~*"),"interestpoints", glob.glob("*empty"), expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), glob.glob("*_output_hdf5"), glob.glob("*_output"), glob.glob("*.h5"), glob.glob("*.xml")
    
     message : os.path.abspath(os.path.curdir) + ": rm -rf {params}"
     shell : "rm -rf {params}"

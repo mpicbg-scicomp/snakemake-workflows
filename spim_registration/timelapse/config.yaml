@@ -35,16 +35,14 @@ common: {
   # Fusion switch:
   fusion_switch: "fusion",
   # ============================================================================
-  # xml file names
+  # xml file name
   # 
-  # xml file names without .xml suffix
+  # xml file name without .xml suffix
   # ============================================================================
-  #
-  first_xml_filename: 'Dpse_Dip3_VK33',              # Name of the xml file for the .czi or .tif files
-  hdf5_xml_filename: '"hdf5_Dpse_Dip3_VK33"', # Name of .xml file for the hdf5 data after resave_hdf5
+  hdf5_xml_filename: '"single"', # Name of .xml file for the hdf5 data after resave_hdf5
   # .xml file names for output
-  output_xml: '"fused_Dpse_Dip3_VK33"',
-  output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
+  #output_xml: '"fused_Dpse_Dip3_VK33"',
+  #output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
   #
   # ============================================================================
   # Describe the dataset
@@ -55,14 +53,14 @@ common: {
   #          illuminations
   #          pixel size
   # ============================================================================
-  ntimepoints: 2,               # number of timepoints of dataset
-  angles: "1,2,3,4,5",   # angles "0,72,144,216,288"
-  channels: "green",        # channels, for tif numeric!
-  illumination: "0",            # illuminations
+  ntimepoints: 2,        # number of timepoints of dataset
+  angles: "0,72,144,216,288",   # angles "0,72,144,216,288"
+  channels: "green",     # channels, for tif numeric!
+  illumination: "0",     # illuminations
   # ----------------------------------------------------------------------------
   # For .czi datasets
   # master .czi file
-  first_czi: "2015-04-01_LZ2_Stock46.czi", 
+  first_czi: "2015-02-21_LZ1_Stock68_3.czi", 
   # ----------------------------------------------------------------------------
   # For .tif datasets
   # file pattern of .tif files:
@@ -84,8 +82,9 @@ common: {
   reg_process_channel: '"All channels"',
   #
   # Dual channel 1 Channel contains the beads: which channel contains the beads?
-  reg_processing_channel: '"green"',
-  #
+  # Ignore if Single Channel or Dual Channel both channels contain beads
+  source_channel: "red", # channel that contains the beads
+  target_channel: "green", # channel without beads
   # reg_interest_points_channel:
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
@@ -109,7 +108,7 @@ common: {
   # Description: settings for timelapse registration
   # Options: reference timepoint
   # ============================================================================
-  reference_timepoint: '40',   # Reference timepoint
+  reference_timepoint: '1',   # Reference timepoint
   # ============================================================================
   # Content-based multiview fusion
   #
@@ -117,13 +116,13 @@ common: {
   # Options: downsampling
   #          Cropping parameters based on full resolution
   # ============================================================================
-  downsample: '1',    # set downsampling
-  minimal_x: '237',   # Cropping parameters of full resolution
+  downsample: '2',    # set downsampling
+  minimal_x: '190',   # Cropping parameters of full resolution
   minimal_y: '-16',
-  minimal_z: '-292',
-  maximal_x: '1041',
-  maximal_y: '1853',
-  maximal_z: '509',
+  minimal_z: '-348',
+  maximal_x: '1019',
+  maximal_y: '1941',
+  maximal_z: '486',
   # ============================================================================
   # Multiview deconvolution
   #
@@ -133,12 +132,12 @@ common: {
   #          Channel settings for deconvolution
   # ============================================================================
   iterations: '1',        # number of iterations
-  minimal_x_deco: '237',  # Cropping parameters: take downsampling into account
+  minimal_x_deco: '190',  # Cropping parameters: take downsampling into account
   minimal_y_deco: '-16',
-  minimal_z_deco: '-292',
-  maximal_x_deco: '1041',
-  maximal_y_deco: '1853',
-  maximal_z_deco: '509',
+  minimal_z_deco: '-348',
+  maximal_x_deco: '1019',
+  maximal_y_deco: '1941',
+  maximal_z_deco: '486',
   #
   # Channel settings for deconvolution
   # Single Channel: '"beads"'
@@ -156,19 +155,6 @@ common: {
   #          Pixel size > isotropic resolution
   #          Image type (16Bit from content-based fusion, 32Bit from deconvolution)
   # ============================================================================
-  # Number of timepoints
-  output_timepoints: '0-1',   # Timepoints format: '1-2'
-  #
-  # Naming pattern:
-  # Single Channel: TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  # Dual Channel: TP{{t}}_Ch{{0}}_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  output_image_file_pattern: '"TP{{t}}_Ch0_Ill0_Ang1,2,3,4,5.tif"',
-  #
-  # channel setting:
-  # Single channel: '"NO (one channel)"'
-  # Dual channel: '"YES (one file per channel)"'
-  output_multiple_channels: '"NO (one channel)"',
-  output_channels: "green",
   # Calibration
   manual_calibration_output: "Yes", # calibration override: No or Yes
   # pixel size of output: take downsampling into account!
@@ -268,8 +254,6 @@ dublicate_transformations: {
   # If dual channel processing and only one channel contains beads
   # this allows you to dublicate the transformation for the 
   # channel that does not contain beas
-  source_dublication: "red",  # source channel
-  target_dublication: "green", # target channel
   duplicate_which_transformations: '"Replace all transformations"', # mode of dublication
   bsh_file: "dublicate_transformations.bsh" # .bsh script for dublication
   }
