@@ -4,8 +4,6 @@ common: {
   # yaml example file for single channel processing
   #
   # General settings for processing
-  # 2015-04-01_LZ2_Stock46
-  # Dpse_Dip3_VK33
   #
   # ============================================================================
   # directory that contains the bean shell scripts and Snakefile
@@ -17,33 +15,32 @@ common: {
   fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
   sysconfcpus: "sysconfcpus -n",
   # ============================================================================
-  #   Processing switches
+  # Processing switches
   # Description: Use switches to decide which processing steps you need:
   #
   # Options:
-  # transformation_switch: "timelapse" standard processing
-  # after timelapse registration directly goes into fusion, timelapse_duplicate
-  # "timelapse_duplicate" for dual channel processing one channel contains the beads
+  #           transformation_switch: "timelapse",
+  #           goes directly into fusion after timelapse registration
   #
-  # Switches between content based fusion and deconvoltion
-  # "deconvolution" > for deconvolution
-  # "fusion" > for content based fusion
+  #           transformation_switch: "timelapse_duplicate",
+  #           for dual channel processing one channel contains the beads
+  #           dublicates the transformation from the source channel to the 
+  #           target channel
+  #
+  #           Switches between content based fusion and deconvoltion
+  #           fusion_switch: "deconvolution", > for deconvolution
+  #           fusion_switch: "fusion", > for content based fusion
   # ============================================================================
-  #
   # Transformation switch:
-  transformation_switch: "timelapse", 
+  transformation_switch: "timelapse",
   # Fusion switch:
-  fusion_switch: "fusion",
+  fusion_switch: "deconvolution",
   # ============================================================================
   # xml file name
   # 
-  # xml file name without .xml suffix
+  # Description: xml file name without .xml suffix
   # ============================================================================
-  hdf5_xml_filename: '"single"', # Name of .xml file for the hdf5 data after resave_hdf5
-  # .xml file names for output
-  #output_xml: '"fused_Dpse_Dip3_VK33"',
-  #output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
-  #
+  hdf5_xml_filename: '"single"', 
   # ============================================================================
   # Describe the dataset
   #
@@ -51,21 +48,22 @@ common: {
   #          angles
   #          channels
   #          illuminations
-  #          pixel size
+  #          Settings for .czi or .tif files
   # ============================================================================
   ntimepoints: 2,        # number of timepoints of dataset
-  angles: "0,72,144,216,288",   # angles "0,72,144,216,288"
-  channels: "green",     # channels, for tif numeric!
-  illumination: "0",     # illuminations
+  angles: "0,72,144,216,288",   # format e.g.: "0,72,144,216,288",
+  channels: "green",     # format e.g.: "green,red", IMPORTANT: for tif numeric!
+  illumination: "0",     # format e.g.: "0,1",
   # ----------------------------------------------------------------------------
-  # For .czi datasets
-  # master .czi file
+  # Settings for .czi files
   first_czi: "2015-02-21_LZ1_Stock68_3.czi", 
   # ----------------------------------------------------------------------------
-  # For .tif datasets
-  # file pattern of .tif files:
-  # for multi channel with one file per channel give spim_TL{tt}_Angle{a}_Channel{c}.tif
-  # for padded zeros use tt 
+  # Settings for .tif datasets
+  # Options: 
+  #          file pattern of .tif files:
+  #          multi channel with one file per channel: 
+  #          spim_TL{tt}_Angle{a}_Channel{c}.tif
+  #          for padded zeros use tt 
   image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif',
   multiple_channels: '"NO (one channel)"',         # '"YES (all channels in one file)"' or '"YES (one file per channel)"' or '"NO (one channel)"'
   # ============================================================================
@@ -73,6 +71,8 @@ common: {
   #
   # Description: settings for interest point detection and registration
   # Options: Single channel and dual channel processing
+  #          Source and traget for dual channel one channel contains the beads
+  #          Interestpoints label
   #          Difference-of-mean or difference-of-gaussian detection
   # ============================================================================
   # reg_process_channel:
@@ -124,21 +124,39 @@ common: {
   maximal_y: '1941',
   maximal_z: '486',
   # ============================================================================
+  # External transformation switch
+  #
+  # Description: Allows downsampling prior deconvolution
+  # Options: no downsampling 
+  #          external_trafo_switch: "_transform",
+  #
+  #          downsampling
+  #          external_trafo_switch: "external_trafo",
+  #          IMPORTANT: boundingbox needs to reflect this downsampling. 
+  #
+  #          Matrix for downsampling
+  # ============================================================================
+  # External transformation switch:
+  external_trafo_switch: "_transform",
+  #
+  # Matrix for downsampling
+  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',
+  # ============================================================================
   # Multiview deconvolution
   #
   # Description: settings for multiview deconvolution
-  # Options: number of iterations
-  #          Cropping parameters taking downsampling into account
+  # Options: 
+  #          number of iterations
+  #          Cropping parameters taking downsampling into account!
   #          Channel settings for deconvolution
   # ============================================================================
-  iterations: '1',        # number of iterations
-  minimal_x_deco: '190',  # Cropping parameters: take downsampling into account
-  minimal_y_deco: '-16',
-  minimal_z_deco: '-348',
-  maximal_x_deco: '1019',
-  maximal_y_deco: '1941',
-  maximal_z_deco: '486',
-  #
+  iterations: '2',        # number of iterations
+  minimal_x_deco: '95',  # Cropping parameters: take downsampling into account
+  minimal_y_deco: '-8',
+  minimal_z_deco: '-174',
+  maximal_x_deco: '509',
+  maximal_y_deco: '970',
+  maximal_z_deco: '243',
   # Channel settings for deconvolution
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
@@ -158,9 +176,9 @@ common: {
   # Calibration
   manual_calibration_output: "Yes", # calibration override: No or Yes
   # pixel size of output: take downsampling into account!
-  output_pixel_distance_x: 0.285901069641113, 
-  output_pixel_distance_y: 0.285901069641113,
-  output_pixel_distance_z: 0.285901069641113,
+  output_pixel_distance_x: 0.57, 
+  output_pixel_distance_y: 0.57,
+  output_pixel_distance_z: 0.57,
   output_pixel_unit: 'um'
   }
   # ============================================================================
@@ -276,17 +294,14 @@ fusion: {
 
 external_transform: {
   # Downsamples for deconvolution
-  # BUG: external transformation breaks .xml file
   # channel setting: '"all_channels"'
-  channel_setting: '"green"',
+  # channel_setting: '"green"',
   transform_timepoint: '"All Timepoints"',
   transform_angle: '"All angles"',
   transform_channel: '"All channels"',
   transform_illumination: '"All illuminations"',
   apply_transformation: '"Current view transformations (appends to current transforms)"',
   define_mode_transform: '"Matrix"',
-  # Matrix for downsampling
-  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',
   transformation: '"Rigid"',
   bsh_file: "transform.bsh"
   }
@@ -323,7 +338,7 @@ hdf5_output: {
   # subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
   # chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
   # Standard settings for hdf5_output
-  output_type_of_dataset: '"Image Stacks (LOCI Bioformats)"', # '"Image Stacks (ImageJ Opener)"' or '"Image Stacks (LOCI Bioformats)"'
+  output_type_of_dataset: '"Image Stacks (ImageJ Opener)"', # '"Image Stacks (ImageJ Opener)"' or '"Image Stacks (LOCI Bioformats)"'
   output_multiple_timepoints: '"YES (one file per time-point)"',
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
