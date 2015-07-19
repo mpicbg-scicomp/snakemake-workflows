@@ -50,7 +50,7 @@ common: {
   #          illuminations
   #          Settings for .czi or .tif files
   # ============================================================================
-  ntimepoints: 2,        # number of timepoints of dataset
+  ntimepoints: 90,        # number of timepoints of dataset
   angles: "0,72,144,216,288",   # format e.g.: "0,72,144,216,288",
   channels: "green",     # format e.g.: "green,red", IMPORTANT: for tif numeric!
   illumination: "0",     # format e.g.: "0,1",
@@ -236,7 +236,7 @@ registration: {
   model_to_regularize_with: "Rigid",
   lambda: '0.10',
   imglib_container: '"ArrayImg (faster)"',
-  num_cores_reg: 2,
+  num_cores_reg: 3,
   bsh_file: "registration.bsh"  # .bsh script for registration
   }
 

@@ -168,7 +168,7 @@ rule resave_hdf5:
        	       	
 rule registration:
     input: rules.resave_hdf5.output, [ item+"_hdf5" for item in datasets ], expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]) 
-    output: temp("{xml_base}.job_{file_id,\d+}.xml") #, "{xml_base}-{file_id,\d+}-00.h5_registered", 
+    output: temp("{xml_base}.job_{file_id,\d+}.xml")
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
@@ -218,7 +218,6 @@ rule registration:
         cmd_string += " > {log} 2>&1 && touch {output}"
        
         shell(cmd_string)
-        #shell("touch {output}")
 
 rule xml_merge:
     input: [ str(config["common"]["hdf5_xml_filename"].strip('\"')+".job_"+(padding_format.format(item))+".xml") for item in range(int(config["common"]["ntimepoints"])) ] #[ item+"_registered" for item in datasets ] 
@@ -339,7 +338,7 @@ rule fusion:
         shell(cmd_string)
 
 rule external_transform:
-    input: rules.timelapse.output[0], merged_xml="{xml_base}_merge.xml" #rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
+    input: rules.timelapse.output[0], merged_xml="{xml_base}_merge.xml" 
     output: temp(rules.timelapse.output[0] + "_transform")
     log: "logs/e2_external_transform.log"
     run:
