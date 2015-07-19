@@ -117,6 +117,7 @@ In the first part (common) of the yaml file the key parameters for the processin
 These parameters are usually dataset and user dependent.
 
 1. Software directories
+
 2. Processing switches
 
     2.1. Switch between all channels contain beads and one channel of two contains beads
@@ -124,9 +125,19 @@ These parameters are usually dataset and user dependent.
     2.2. Switch between fusion and deconvolution 
     
 4. Define dataset
+    
+    4.1. General Settings
+
+    4.2. Settings for .czi files
+    
+    4.3 Settings for .tif datasets
+    
 5. Detection and registration
+
 6. Timelapse registration
+
 7. Weighted-average fusion
+
 8. Multiview deconvolution
 
     8.1. External transformation
