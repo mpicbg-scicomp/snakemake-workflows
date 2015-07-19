@@ -2,22 +2,30 @@ Datasets
 ========================
 The scripts are now supporting multiple angles, multiple channels and multiple illumination direction without adjusting the Snakefile or .bsh scripts.
 
-Based on SPIM registration version 3.3.9
+Using spimdata version: 0.9-revision
+Using SPIM registration version 3.3.9
 
 Supported datasets are in the following format:
 
-ImageJ Opener (resave to .tif):
+Using Zeiss Lightsheet Z.1 Dataset (LOCI)
+
+    Multiple timepoints:  YES (one file per timepoint) or (all time-points in one file)
+    Multiple channels:  YES (one file per timepoint) or (all time-points in one file)
+    Multiple illumination directions: YES (one file per illumination direction)
+    Multiple angles: YES (one file per angle)
+    
+Using LOCI Bioformats opener (.tif)
+
+    Multiple timepoints: YES (one file per timepoint) or (all time-points in one file)
+    Multiple channels: YES (one file per timepoint) or (all time-points in one file)
+    Multiple illumination directions: YES (one file per illumination direction) => not tested yet
+    Multiple angles: YES (one file per angle)
+    
+Using ImageJ Opener (resave to .tif):
 
     Multiple timepoints: YES (one file per timepoint)
     Multiple channels: YES (one file per channel)
     Multiple illumination directions: YES (one file per illumination direction) => not tested yet
-    Multiple angles: YES one file per angle
-
-Zeiss Lightsheet Z.1 Dataset (LOCI)
-
-    Multiple timepoints: Supports multiple time points per file
-    Multiple channels: Supports multiple channels per file
-    Multiple illumination directions: YES (one file per illumination direction)
     Multiple angles: YES (one file per angle)
 
 Timelapse based workflow
@@ -46,7 +54,7 @@ The repository contains the example configuration scripts for single and dual ch
 
 A data directory e.g. looks like this:
 
-It contains the .yaml file for the specific dataset. You can either copy it if you want to keep it together with the dataset or make a symlink from the processing repository. 
+It contains the .yaml file for the specific dataset. You can either copy it, if you want to keep it together with the dataset, or make a symlink from the processing repository. 
 
 ```bash
 /path/to/data
@@ -72,25 +80,38 @@ Some datasets are currently only usable when resaving them into .tif:
 * discontinous .czi datasets
 * .czi dataset with multiple groups
 
-The master_preprocesing.sh file is the configuration script that contains the information about the dataset that needs to be resaved or split. rename-zeiss-file.sh is renaming the .czi files into the .tif naming convention for SPIM processing: SPIM_TL{t}_Angle{a}.tif. The different resaving steps are then carried out by creating the jobs and submitting them to the cluster.
+The master_preprocesing.sh file is the configuration script that contains the information about the dataset that needs to be resaved. In the czi_resave directory you will find the the create-resaving-jobs.sh script that creates a job for each TP. The submit-jobs script sends these jobs to the cluster were they call the resaving.bsh script. The beanshell then uses executes the Fiji macro and resaves the files. The resaving of czi files is using LOCI bioformats and preserves the metadata. 
 
 ```bash
 /path/to/repo/tools
 ├── master_preprocessing.sh
-├── rename-zeiss-file.sh
-├── compress
-    ├── create-compress-jobs.sh
-    ├── for_czi.bsh
-    └── submit-jobs
 ├── czi_resave
     ├── create-resaving-jobs.sh
     ├── resaving.bsh
     └── submit-jobs
-└──  split_channels
-    ├── create-split-jobs.sh
-    ├── split.bsh
-    └── submit.jobs
 ```
+
+Processing
+--------------
+
+The current workflow consists of the following steps. It covers the prinicipal processing for timelapse multiview SPIM processing:
+
+* define czi or tif dataset
+* resave into hdf5
+* detect and register interespoints
+* merge xml
+* timelapse registration
+* optional for dual channel dataset: dublicate transformations
+* optional for deconvolution: external transformation
+* average-weight fusion/deconvolution
+* define output
+* resave output into hdf5
+
+The entire processing is controlled via the yaml file. 
+
+Preparations for processing
+--------------
+
 
 Submitting Jobs
 ---------------
@@ -98,28 +119,28 @@ Submitting Jobs
 If DRMAA is supported on your cluster:
 
 ```bash
-snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra}"
+/path/to/snakemake/snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra}"
 ```
 
 If not:
 
 ```bash
-snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra}"
+/path/to/snakemake/snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra}"
 ```
 
 For error and output of the cluser add -o test.out -e test.err e.g.:
 
 DRMAA
 ```bash
-snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
+/path/to/snakemake/snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --drmaa " -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
 ```
 
 LSF
 ```bash
-snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
+/path/to/snakemake/snakemake -j2 -d /path/to/data/ --cluster-config ./cluster.json --cluster "bsub -q {cluster.lsf_q} {cluster.lsf_extra} -o test.out -e test.err"
 ```
 
-Note: with this all the error and output files of one job would be written into these files. 
+Note:  the error and output of the cluster of all jobs are written into these files. 
 
 Log files and supervision of the pipeline
 ---------------
