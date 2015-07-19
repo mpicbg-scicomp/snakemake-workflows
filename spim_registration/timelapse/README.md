@@ -91,7 +91,7 @@ The master_preprocesing.sh file is the configuration script that contains the in
     └── submit-jobs
 ```
 
-Processing
+workflow
 --------------
 
 The current workflow consists of the following steps. It covers the prinicipal processing for timelapse multiview SPIM processing:
@@ -107,11 +107,11 @@ The current workflow consists of the following steps. It covers the prinicipal p
 * define output
 * resave output into hdf5
 
-The entire processing is controlled via the yaml file. 
+
 
 Preparations for processing
 --------------
-
+The entire processing is controlled via the yaml file.
 
 Submitting Jobs
 ---------------
