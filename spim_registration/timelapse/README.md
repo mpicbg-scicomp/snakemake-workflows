@@ -173,26 +173,43 @@ The second part contains the advanced and manual overrides for each processing s
 ```bash
 common: {
   # ============================================================================
-  #
-  # yaml example file for single channel processing
-  #
-  # General settings for processing
-  #
   # ============================================================================
-  # directory that contains the bean shell scripts and Snakefile
+  # yaml example file 
+  #
+  # DESCRIPTION: source file for cluster processing scripts
+  #
+  #      AUTHOR: Christopher Schmied, schmied@mpi-cbg.de
+  #   INSTITUTE: Max Planck Institute for Molecular Cell Biology and Genetics
+  #        BUGS:
+  #       NOTES:
+  #     Version: 3.3
+  #     CREATED: 2015-06-01
+  #    REVISION: 2015-07-19
+  # ============================================================================
+  # ============================================================================
+  # 1. Software directories
+  # 
+  # Description: paths to software dependencies of processing
+  # Options: Fiji location
+  #          beanshell and snakefile diretory
+  #          directory for cuda libraries
+  #          xvfb setting
+  #          sysconfcpus setting
+  # ============================================================================
+  # current working Fiji
+  fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",
+  # bean shell scripts and Snakefile
   bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
   # Directory that contains the cuda libraries
   directory_cuda: "/sw/users/schmied/cuda/",
-  # Directory that contains the current working Fiji
-  fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",
+  # xvfb 
   fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
   sysconfcpus: "sysconfcpus -n",
   # ============================================================================
-  # Processing switches
-  # Description: Use switches to decide which processing steps you need:
+  # 2. Processing switches
   #
-  # Options:
-  #           transformation_switch: "timelapse",
+  # Description: Use switches to decide which processing steps you need:
+  # Options:  transformation_switch: "timelapse",
   #           goes directly into fusion after timelapse registration
   #
   #           transformation_switch: "timelapse_duplicate",
@@ -209,38 +226,47 @@ common: {
   # Fusion switch:
   fusion_switch: "deconvolution",
   # ============================================================================
-  # xml file name
-  # 
-  # Description: xml file name without .xml suffix
-  # ============================================================================
-  hdf5_xml_filename: '"single"', 
-  # ============================================================================
-  # Describe the dataset
+  # 3. Define dataset
   #
-  # Options: number of timepoints
+  # Description: key parameters for processing
+  # Options: General Settings
+  #          Settings for .czi files
+  #          Settings for .tif datasets
+  # ============================================================================
+  # 3.1. General Settings -------------------------------------------------------
+  #
+  # Description: applies to both .czi and tif datasets
+  # Options: xml file name
+  #          number of timepoints
   #          angles
   #          channels
   #          illuminations
-  #          Settings for .czi or .tif files
-  # ============================================================================
+  # ----------------------------------------------------------------------------
+  hdf5_xml_filename: '"dataset_one"', 
   ntimepoints: 90,        # number of timepoints of dataset
   angles: "0,72,144,216,288",   # format e.g.: "0,72,144,216,288",
   channels: "green",     # format e.g.: "green,red", IMPORTANT: for tif numeric!
   illumination: "0",     # format e.g.: "0,1",
+  #
+  # 3.2. Settings for .czi files -----------------------------------------------
+  #
+  # Description: applies only to .czi dataset
+  # Options: name of first czi file
   # ----------------------------------------------------------------------------
-  # Settings for .czi files
-  first_czi: "2015-02-21_LZ1_Stock68_3.czi", 
-  # ----------------------------------------------------------------------------
-  # Settings for .tif datasets
-  # Options: 
-  #          file pattern of .tif files:
+  first_czi: "2015-04-21_LZ2_Stock32.czi", 
+  #
+  # 3.3. Settings for .tif datasets --------------------------------------------
+  #
+  # Description: applies only to .tif dataset
+  # Options: file pattern of .tif files:
   #          multi channel with one file per channel: 
   #          spim_TL{tt}_Angle{a}_Channel{c}.tif
   #          for padded zeros use tt 
+  # ----------------------------------------------------------------------------
   image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif',
   multiple_channels: '"NO (one channel)"',         # '"YES (all channels in one file)"' or '"YES (one file per channel)"' or '"NO (one channel)"'
   # ============================================================================
-  # Detection and registration
+  # 4. Detection and registration
   #
   # Description: settings for interest point detection and registration
   # Options: Single channel and dual channel processing
@@ -276,60 +302,65 @@ common: {
   sigma: '1.3',
   threshold_gaussian: '0.025',
   # ============================================================================
-  # Timelapse registration
+  # 5. Timelapse registration
   #
   # Description: settings for timelapse registration
   # Options: reference timepoint
   # ============================================================================
-  reference_timepoint: '1',   # Reference timepoint
+  reference_timepoint: '45',   # Reference timepoint
   # ============================================================================
-  # Content-based multiview fusion
+  # 6. Weighted-average fusion
   #
   # Description: settings for content-based multiview fusion
   # Options: downsampling
   #          Cropping parameters based on full resolution
   # ============================================================================
-  downsample: '2',    # set downsampling
-  minimal_x: '190',   # Cropping parameters of full resolution
-  minimal_y: '-16',
-  minimal_z: '-348',
-  maximal_x: '1019',
-  maximal_y: '1941',
-  maximal_z: '486',
+  downsample: '1',    # set downsampling
+  minimal_x: '274',   # Cropping parameters of full resolution
+  minimal_y: '17',
+  minimal_z: '-423',
+  maximal_x: '1055',
+  maximal_y: '1928',
+  maximal_z: '480',
   # ============================================================================
-  # External transformation switch
+  # 7. Multiview deconvolution
+  #
+  # Description: settings for multiview deconvolution
+  # Options: External transformation
+  #          Deconvolution settings
+  #
+  # ============================================================================
+  # 7.1. External transformation -----------------------------------------------
   #
   # Description: Allows downsampling prior deconvolution
-  # Options: no downsampling 
+  # Options: no downsampling: 
   #          external_trafo_switch: "_transform",
   #
-  #          downsampling
+  #          downsampling:
   #          external_trafo_switch: "external_trafo",
   #          IMPORTANT: boundingbox needs to reflect this downsampling. 
   #
   #          Matrix for downsampling
-  # ============================================================================
-  # External transformation switch:
+  # ----------------------------------------------------------------------------
   external_trafo_switch: "_transform",
   #
   # Matrix for downsampling
   matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',
-  # ============================================================================
-  # Multiview deconvolution
   #
-  # Description: settings for multiview deconvolution
-  # Options: 
-  #          number of iterations
+  # 7.2. Deconvolution settings ------------------------------------------------
+  # 
+  # Description: core settings for multiview deconvolution
+  # Options: number of iterations
   #          Cropping parameters taking downsampling into account!
   #          Channel settings for deconvolution
-  # ============================================================================
-  iterations: '20',        # number of iterations
-  minimal_x_deco: '95',  # Cropping parameters: take downsampling into account
+  # ----------------------------------------------------------------------------
+  iterations: '15',        # number of iterations
+  minimal_x_deco: '137',  # Cropping parameters: take downsampling into account
   minimal_y_deco: '-8',
-  minimal_z_deco: '-174',
-  maximal_x_deco: '509',
-  maximal_y_deco: '970',
-  maximal_z_deco: '243',
+  minimal_z_deco: '-211',
+  maximal_x_deco: '527',
+  maximal_y_deco: '964',
+  maximal_z_deco: '240',
   # Channel settings for deconvolution
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
