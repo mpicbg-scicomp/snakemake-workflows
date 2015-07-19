@@ -84,6 +84,22 @@ catch ( e ) {
 // Executes Fiji plugin
 System.out.println("=========================================================");
 System.out.println("Start plugin:");
+System.out.println("As HDF5, select_xml=" + image_file_directory + first_xml_filename + ".xml " +
+	"resave_angle=[" + resave_angle + "] " +
+	"resave_channel=[" + resave_channel + "] " +
+	"resave_illumination=[" + resave_illumination + "] " +
+	"resave_timepoint=[" + resave_timepoint + "] " +
+	"manual_mipmap_setup " +
+	"subsampling_factors=[" + subsampling_factors + "] " +
+	"hdf5_chunk_sizes=[" + hdf5_chunk_sizes + "] " +
+	"split_hdf5 " +
+	"timepoints_per_partition=" + timepoints_per_partition + " " +
+	"setups_per_partition=" + setups_per_partition + " " +
+	"run_only_job_number=" + run_only_job_number + " " +
+	"use_deflate_compression " +
+	"export_path=" + image_file_directory + hdf5_xml_filename + " " +
+	data_string + "");
+
 try{
 IJ.run("As HDF5",
 	"select_xml=" + image_file_directory + first_xml_filename + ".xml " +
