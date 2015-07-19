@@ -22,7 +22,7 @@ Using LOCI Bioformats opener (.tif)
     Multiple illumination directions: YES (one file per illumination direction) => not tested yet
     Multiple angles: YES (one file per angle)
     
-Using ImageJ Opener (resave to .tif):
+Using ImageJ Opener (.tif):
 
     Multiple timepoints: YES (one file per timepoint)
     Multiple channels: YES (one file per channel)
