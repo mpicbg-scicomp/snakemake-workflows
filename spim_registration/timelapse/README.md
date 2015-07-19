@@ -124,25 +124,25 @@ These parameters are usually dataset and user dependent.
     
     2.2. Switch between fusion and deconvolution 
     
-4. Define dataset
+3. Define dataset
     
-    4.1. General Settings
+    3.1. General Settings
 
-    4.2. Settings for .czi files
+    3.2. Settings for .czi files
     
-    4.3 Settings for .tif datasets
+    3.3 Settings for .tif datasets
     
-5. Detection and registration
+4. Detection and registration
 
-6. Timelapse registration
+5. Timelapse registration
 
-7. Weighted-average fusion
+6. Weighted-average fusion
 
-8. Multiview deconvolution
+7. Multiview deconvolution
 
-    8.1. External transformation
+    7.1. External transformation
     
-    8.2. Deconvolution settings 
+    7.2. Deconvolution settings 
 
 ```bash
 common: {
