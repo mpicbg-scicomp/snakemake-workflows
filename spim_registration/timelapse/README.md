@@ -146,17 +146,29 @@ The second part contains the advanced and manual overrides for each processing s
     7.2. Deconvolution settings 
 
 8. Advanced settings 
-            * define_xml_czi
-            * define_xml_tif
-            * resave_hdf5
-            * registration
-            * xml_merge
-            * timelapse
-            * dublicate_transformations
-            * fusion
-            * external_transform
-            * deconvolution
-            * hdf5_output
+
+    8.1. define_xml_czi
+    
+    8.2. define_xml_tif
+    
+    8.3. resave_hdf5
+    
+    8.4. registration
+    
+    8.5. xml_merge
+    
+    8.6. timelapse
+    
+    8.7. dublicate_transformations
+    
+    8.8. fusion
+    
+    8.9. external_transform
+    
+    8.10. deconvolution
+    
+    8.11. hdf5_output
+    
 
 ```bash
 common: {
