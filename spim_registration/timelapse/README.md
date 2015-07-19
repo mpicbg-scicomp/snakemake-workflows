@@ -115,6 +115,7 @@ The entire processing is controlled via the yaml file.
 
 In the first part (common) of the yaml file the key parameters for the processing are found.
 These parameters are usually dataset and user dependent.
+The second part contains the advanced and manual overrides for each processing step. These steps correspond to the rules in the snakefile.
 
 1. Software directories
 
@@ -143,6 +144,19 @@ These parameters are usually dataset and user dependent.
     7.1. External transformation
     
     7.2. Deconvolution settings 
+
+8. Advanced settings 
+            * define_xml_czi
+            * define_xml_tif
+            * resave_hdf5
+            * registration
+            * xml_merge
+            * timelapse
+            * dublicate_transformations
+            * fusion
+            * external_transform
+            * deconvolution
+            * hdf5_output
 
 ```bash
 common: {
