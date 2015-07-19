@@ -3,6 +3,7 @@ Datasets
 The scripts are now supporting multiple angles, multiple channels and multiple illumination direction without adjusting the Snakefile or .bsh scripts.
 
 Using spimdata version: 0.9-revision
+
 Using SPIM registration version 3.3.9
 
 Supported datasets are in the following format:
