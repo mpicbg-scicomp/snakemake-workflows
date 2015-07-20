@@ -365,7 +365,7 @@ external_transform: {
 deconvolution: {
   # Settings for GPU or CPU processing 
   # '"CPU (Java)"' or '"GPU (Nvidia CUDA via JNA)"'
-  compute_on: '"GPU (Nvidia CUDA via JNA)"',
+  compute_on: '"CPU (Java)"',
   cudafourierconvolution: "libFourierConvolutionCUDALib.so", # GPU processing name of cuda library
   # Standard settings for deconvolution
   process_timepoint: '"Single Timepoint (Select from List)"',
