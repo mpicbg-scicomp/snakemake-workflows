@@ -387,7 +387,7 @@ rule deconvolution:
         -Dmaximal_y_deco={maximal_y_deco} \
         -Dmaximal_z_deco={maximal_z_deco} \
         -Dimglib2_container_deco={imglib2_container} \
-        -Dfused_image={fused_image} \ 
+        -Dfused_image={fused_image} \
         -Dtype_of_iteration={type_of_iteration} \
         -Dosem_acceleration={osem_acceleration} \
         -DTikhonov_parameter={Tikhonov_parameter} \
@@ -407,8 +407,7 @@ rule deconvolution:
                                     file_id_w="{wildcards.file_id}",
                                     path_bsh=config["common"]["bsh_directory"] + config["deconvolution"]["bsh_file"],
                                     jdir=JOBDIR,
-                                    merged_xml_file="{input.merged_xml}"
-        )
+                                    merged_xml_file="{input.merged_xml}")
         cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
 
