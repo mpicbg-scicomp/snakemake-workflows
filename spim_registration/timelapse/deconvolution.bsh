@@ -231,7 +231,8 @@ IJ.run("Fuse/Deconvolve Dataset",
 	compute_string +
 	"psf_estimation=[" + psf_estimation + "] " +
 	"psf_display=[Do not show PSFs] " +
-	"select=" + image_file_directory + output_xml + " " +
+	"output_file_directory=" + image_file_directory + " " +
+	//"select=" + image_file_directory + output_xml + " " +
 	cuda_settings +
 	channel_string +
 	"psf_size_x=" + psf_size_x + " " +
