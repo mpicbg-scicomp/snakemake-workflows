@@ -192,7 +192,24 @@ common: {
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
   # Dual Channel one channel contains beads: '"[Same PSF as channel red],beads"'
-  detections_to_extract_psf_for_channel: '"beads"'
+  detections_to_extract_psf_for_channel: '"beads"',
+  # ============================================================================
+  # Resave output
+  #
+  # Description: writes new hdf5 dataset for fusion output
+  # Options: Naming pattern of output based on channel number
+  #          Channel settings
+  #          File name for resaving output into hdf5
+  #          Pixel size > isotropic resolution
+  #          Image type (16Bit from content-based fusion, 32Bit from deconvolution)
+  # ============================================================================
+  # Calibration
+  manual_calibration_output: "Yes", # calibration override: No or Yes
+  # pixel size of output: take downsampling into account!
+  output_pixel_distance_x: 0.57, 
+  output_pixel_distance_y: 0.57,
+  output_pixel_distance_z: 0.57,
+  output_pixel_unit: 'um'
   }
   
   # ============================================================================
@@ -338,7 +355,7 @@ fusion: {
   pixel_type: '"16-bit unsigned integer"',
   imglib2_data_container: '"ArrayImg (faster)"',
   process_views_in_paralell: '"All"',
-  fused_image: '"Save as new XML Project (TIFF)"', 
+  fused_image: '"Save as TIFF stack"', 
   num_cores_fusion: 6,
   bsh_file: "fusion.bsh"
   }
@@ -381,7 +398,7 @@ deconvolution: {
   psf_size_y: '19',
   psf_size_z: '25',
   imglib2_container: '"ArrayImg"',
-  fused_image: '"Save as new XML Project (TIFF)"',
+  fused_image: '"Save as TIFF stack"',
   num_cores_deco: 7,
   bsh_file: "deconvolution.bsh"
   }
