@@ -37,8 +37,8 @@
 
     "deconvolution" :
     {
-        "lsf_extra" : "-n 7 -R \"span[hosts=1] rusage[mem=50000]\"",
-	"lsf_q" : "gpu"
+        "lsf_extra" : "-n 12 -R \"span[hosts=1] rusage[mem=100000]\"",
+	"lsf_q" : "medium"
     },
     
     "resave_hdf5_output" :
