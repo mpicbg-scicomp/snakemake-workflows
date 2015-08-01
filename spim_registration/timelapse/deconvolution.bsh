@@ -1,6 +1,6 @@
 // Load Fiji dependencies
 import ij.IJ; 		// calls imagej
-import ij.Prefs; 	// calls imagej settings
+//import ij.Prefs; 	// calls imagej settings
 import java.lang.Runtime;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -8,8 +8,8 @@ import java.io.FilenameFilter;
 runtime = Runtime.getRuntime();
 System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
 
-Prefs.setThreads(7); 	// defines the number of threads allowed
-print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+//Prefs.setThreads(7); 	// defines the number of threads allowed
+//print("Threads: "+Prefs.getThreads()); // prints thread setting in output
 
 System.out.println( "Start to load Parameters:" );
 // Select xml

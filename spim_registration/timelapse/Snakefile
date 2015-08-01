@@ -111,7 +111,8 @@ rule hdf5_xml:
     log: "logs/b1_hdf5_xml.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {sysconfcpus} {num_cores_hdf5_xml} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_hdf5} \
+        	{fiji-app} {memory-prefix}{mem_hdf5} \
                 -Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={first_xml_filename} \
                 -Dhdf5_xml_filename={hdf5_xml_filename} \
@@ -126,6 +127,7 @@ rule hdf5_xml:
                 -Drun_only_job_number=0 \
                 -- --no-splash {path_bsh}""", 
            config["common"],
+           config["Fiji_resources"],
            config["resave_hdf5"],
            jdir=JOBDIR,
            first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
@@ -142,7 +144,8 @@ rule resave_hdf5:
     log: "logs/b2_resave_hdf5-{file_id}.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {sysconfcpus} {num_cores_resave_hdf5} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_hdf5} \
+        	{fiji-app} {memory-prefix}{mem_hdf5} \
         	-Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={first_xml_filename} \
                 -Dhdf5_xml_filename={input_xml_base} \
@@ -157,6 +160,7 @@ rule resave_hdf5:
         -Drun_only_job_number={job_number} \
         -- --no-splash {path_bsh}""", # the & submits everyting at once
            config["common"],
+           config["Fiji_resources"],
            config["resave_hdf5"],
            jdir=JOBDIR,
            first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
@@ -172,7 +176,8 @@ rule registration:
     log: "logs/c_{xml_base}-{file_id}-registration.log"
     run:
         cmd_string = produce_string(
-           """{fiji-prefix} {sysconfcpus} {num_cores_reg} {fiji-app} \
+           """{fiji-prefix} {sysconfcpus} {num_cores_reg} \
+        	{fiji-app} {memory-prefix}{mem_reg} \
         -Dparallel_timepoints={file_id_w} \
         -Dimage_file_directory={jdir} \
         -Dxml_filename={input_xml} \
@@ -209,7 +214,8 @@ rule registration:
         -Ddetection_min_max={detection_min_max} \
         -Dsignificance={significance} \
         -- --no-splash {path_bsh}""",
-           config["common"], 
+           config["common"],
+           config["Fiji_resources"],
            config["registration"],
            file_id_w=wildcards.file_id,
            path_bsh=config["common"]["bsh_directory"] + config["registration"]["bsh_file"],
@@ -243,7 +249,8 @@ rule timelapse:
     log: "logs/d2_{xml_base}_timelapse.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_time} \
+        	{fiji-app} {memory-prefix}{mem_time} \
         -Dimage_file_directory={jdir} \
         -Dmerged_xml={input} \
         -Dtimelapse_process_timepoints={timelapse_process_timepoints} \
@@ -262,6 +269,7 @@ rule timelapse:
         -Dsignificance={significance} \
         -- --no-splash {path_bsh}""",
                                     config["common"],
+                                    config["Fiji_resources"],
                                     config["registration"],
                                     config["timelapse"],
                                     input="{input}",
@@ -303,7 +311,8 @@ rule fusion:
     log: "logs/e1_{xml_base}-{file_id,\d+}-00-fusion.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {sysconfcpus} {num_cores_fusion} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_fusion} \
+        	{fiji-app} {memory-prefix}{mem_fusion} \
         -Dimage_file_directory={jdir} \
     	-Dparallel_timepoints={file_id_w} \
     	-Dmerged_xml={merged_xml_file} \
@@ -326,6 +335,7 @@ rule fusion:
     	-Dfused_image={fused_image} \
         -- --no-splash {path_bsh}""",
                                     config["common"],
+                                    config["Fiji_resources"],
                                     config["fusion"],
                                     path_bsh=config["common"]["bsh_directory"] + config["fusion"]["bsh_file"],
                                     jdir=JOBDIR,
@@ -370,7 +380,8 @@ rule deconvolution:
     log: "logs/e2_{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(
-        	"""{fiji-prefix} {sysconfcpus} {num_cores_deco} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_deco} \
+        	{fiji-app} {memory-prefix}{mem_deco} \
         -Dimage_file_directory={jdir} \
         -Ddeco_output_file_directory={jdir} \
         -Dmerged_xml={merged_xml_file} \
@@ -402,7 +413,8 @@ rule deconvolution:
         -Dpsf_size_z={psf_size_z} \
         -Diterations={iterations} \
         -- --no-splash {path_bsh}""",
-                                    config["common"], 
+                                    config["common"],
+                                    config["Fiji_resources"],
                                     config["deconvolution"],
                                     file_id_w="{wildcards.file_id}",
                                     path_bsh=config["common"]["bsh_directory"] + config["deconvolution"]["bsh_file"],
@@ -453,7 +465,8 @@ rule hdf5_xml_output:
     log: "logs/f2_output_hdf5_xml.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {sysconfcpus} {num_cores_hdf5_xml_output} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_output} \
+        	{fiji-app} {memory-prefix}{mem_output} \
                 -Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={output_xml} \
                 -Dhdf5_xml_filename={output_hdf5_xml} \
@@ -470,6 +483,7 @@ rule hdf5_xml_output:
                 -Dconvert_32bit={convert_32bit}\
                 -- --no-splash {path_bsh}""", 
            config["common"],
+           config["Fiji_resources"],
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
@@ -486,7 +500,8 @@ rule resave_hdf5_output:
     log: "logs/f3_resave_output-{file_id}.log"
     run:
         part_string = produce_string(
-        	"""{fiji-prefix} {sysconfcpus} {num_cores_resave_hdf5_output} {fiji-app} \
+        	"""{fiji-prefix} {sysconfcpus} {num_cores_output} \
+        	{fiji-app} {memory-prefix}{mem_output} \
                 -Dimage_file_directory={jdir} \
                 -Dfirst_xml_filename={output_xml} \
                 -Dhdf5_xml_filename={output_hdf5_xml} \
@@ -503,6 +518,7 @@ rule resave_hdf5_output:
         -Dconvert_32bit={convert_32bit}\
         -- --no-splash {path_bsh}""", 
            config["common"],
+           config["Fiji_resources"],
            config["hdf5_output"],
            config["resave_hdf5"],
            jdir=JOBDIR,
