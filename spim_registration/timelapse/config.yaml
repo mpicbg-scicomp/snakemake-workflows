@@ -6,7 +6,7 @@ common: {
   # DESCRIPTION: source file for cluster processing scripts
   #
   #      AUTHOR: Christopher Schmied, schmied@mpi-cbg.de
-  #   INSTITUTE: Max Planck Institute for Molecular Cell Biology and Genetics
+  #   INSTITUTE: Max Planck Institute of Molecular Cell Biology and Genetics
   #        BUGS:
   #       NOTES:
   #     Version: 3.3
@@ -22,7 +22,7 @@ common: {
   #
   #           transformation_switch: "timelapse_duplicate",
   #           for dual channel processing one channel contains the beads
-  #           dublicates the transformation from the source channel to the 
+  #           duplicates the transformation from the source channel to the 
   #           target channel
   #
   #           Switches between content based fusion and deconvoltion
