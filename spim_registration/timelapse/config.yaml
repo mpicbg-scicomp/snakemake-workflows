@@ -51,7 +51,7 @@ common: {
   #          illuminations
   # ----------------------------------------------------------------------------
   hdf5_xml_filename: '"dataset_one"', 
-  ntimepoints: 1,        # number of timepoints of dataset
+  ntimepoints: 2,        # number of timepoints of dataset
   angles: "0,72,144,216,288",   # format e.g.: "0,72,144,216,288",
   channels: "green",     # format e.g.: "green,red", IMPORTANT: for tif 0,1 etc!
   illumination: "0",     # format e.g.: "0,1",
@@ -61,7 +61,7 @@ common: {
   # Description: applies only to .czi dataset
   # Options: name of first czi file
   # ----------------------------------------------------------------------------
-  first_czi: "2015-04-21_LZ2_Stock32.czi", 
+  first_czi: "2015-02-21_LZ1_Stock68_3.czi", # use .czi suffix
   #
   # 2.3. Settings for .tif datasets --------------------------------------------
   #
@@ -115,7 +115,7 @@ common: {
   # Description: settings for timelapse registration
   # Options: reference timepoint
   # ============================================================================
-  reference_timepoint: '45',   # Reference timepoint
+  reference_timepoint: '1',   # Reference timepoint
   # ============================================================================
   # 5. Weighted-average fusion
   #
@@ -187,9 +187,9 @@ common: {
   # Calibration
   manual_calibration_output: "Yes", # calibration override: No or Yes
   # pixel size of output: take downsampling into account!
-  output_pixel_distance_x: 0.57, 
-  output_pixel_distance_y: 0.57,
-  output_pixel_distance_z: 0.57,
+  output_pixel_distance_x: 0.2859, 
+  output_pixel_distance_y: 0.2859,
+  output_pixel_distance_z: 0.2859,
   output_pixel_unit: 'um',
   # ============================================================================
   # 7. Software directories
