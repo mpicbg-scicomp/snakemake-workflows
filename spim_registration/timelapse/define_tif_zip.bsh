@@ -113,10 +113,10 @@ System.out.println( "Illuminations = " + illum_string );
 System.out.println("=========================================================");
 System.out.println("Calibration:");
 manual_calibration_tif = System.getProperty( "manual_calibration_tif" );
-float czi_pixel_distance_x = Float.parseFloat( System.getProperty( "pixel_distance_x" ) );
-float czi_pixel_distance_y = Float.parseFloat( System.getProperty( "pixel_distance_y" ) );
-float czi_pixel_distance_z = Float.parseFloat( System.getProperty( "pixel_distance_z" ) );
-czi_pixel_unit = System.getProperty( "pixel_unit" );
+float pixel_distance_x = Float.parseFloat( System.getProperty( "pixel_distance_x" ) );
+float pixel_distance_y = Float.parseFloat( System.getProperty( "pixel_distance_y" ) );
+float pixel_distance_z = Float.parseFloat( System.getProperty( "pixel_distance_z" ) );
+pixel_unit = System.getProperty( "pixel_unit" );
 
 // builds string for calibration override
 if (manual_calibration_tif.equalsIgnoreCase( "No" ) )

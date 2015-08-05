@@ -1,6 +1,6 @@
 // Load Fiji dependencies
 import ij.IJ; 		// calls imagej
-import ij.Prefs; 	// calls imagej settings
+//import ij.Prefs; 	// calls imagej settings
 import java.lang.Runtime;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -8,8 +8,8 @@ import java.io.FilenameFilter;
 runtime = Runtime.getRuntime();
 System.out.println(runtime.availableProcessors() + " cores available for multi-threading");
 
-Prefs.setThreads(7); 	// defines the number of threads allowed
-print("Threads: "+Prefs.getThreads()); // prints thread setting in output
+//Prefs.setThreads(7); 	// defines the number of threads allowed
+//print("Threads: "+Prefs.getThreads()); // prints thread setting in output
 
 System.out.println( "Start to load Parameters:" );
 // Select xml
@@ -157,6 +157,16 @@ else
 					
 System.out.println( "compute_string=" + compute_string );
 
+// Saving settings
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Saving settings: " );
+fused_image = System.getProperty( "fused_image" );
+System.out.println( "fused_image=" + fused_image );
+
+output_xml = System.getProperty( "output_xml" );
+System.out.println( "output_xml" );
+
+
 // Execute Fiji Plugin
 System.out.println( "=======================================================" );
 System.out.println( "Starting Deconvolution" );
@@ -168,7 +178,7 @@ System.out.println("Fuse/Deconvolve Dataset select_xml=" + image_file_directory 
 	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " +
 	"type_of_image_fusion=[Multi-view deconvolution] " +
 	"bounding_box=[Define manually] " +
-	"fused_image=[Save as TIFF stack] " +
+	"fused_image=[" + fused_image + "] " +
 	"minimal_x=" + minimal_x_deco + " " +
 	"minimal_y=" + minimal_y_deco + " " +
 	"minimal_z=" + minimal_z_deco + " " +
@@ -186,7 +196,7 @@ System.out.println("Fuse/Deconvolve Dataset select_xml=" + image_file_directory 
 	compute_string +
 	"psf_estimation=[" + psf_estimation + "] " +
 	"psf_display=[Do not show PSFs] " +
-	"output_file_directory=" + deco_output_file_directory + " " +
+	"select=" + image_file_directory + output_xml + " " +
 	cuda_settings +
 	channel_string +
 	"psf_size_x=" + psf_size_x + " " +
@@ -203,7 +213,7 @@ IJ.run("Fuse/Deconvolve Dataset",
 	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " +
 	"type_of_image_fusion=[Multi-view deconvolution] " +
 	"bounding_box=[Define manually] " +
-	"fused_image=[Save as TIFF stack] " +
+	"fused_image=[" + fused_image + "] " +
 	"minimal_x=" + minimal_x_deco + " " +
 	"minimal_y=" + minimal_y_deco + " " +
 	"minimal_z=" + minimal_z_deco + " " +
@@ -221,7 +231,8 @@ IJ.run("Fuse/Deconvolve Dataset",
 	compute_string +
 	"psf_estimation=[" + psf_estimation + "] " +
 	"psf_display=[Do not show PSFs] " +
-	"output_file_directory=" + deco_output_file_directory + " " +
+	"output_file_directory=" + image_file_directory + " " +
+	//"select=" + image_file_directory + output_xml + " " +
 	cuda_settings +
 	channel_string +
 	"psf_size_x=" + psf_size_x + " " +

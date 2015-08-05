@@ -17,7 +17,6 @@ transform_angle = System.getProperty( "transform_angle" );
 transform_channel = System.getProperty( "transform_channel" );
 transform_illumination = System.getProperty( "transform_illumination" );
 transform_timepoint = System.getProperty( "transform_timepoint" );
-channel_setting = System.getProperty( "channel_setting" );
 transformation = System.getProperty( "transformation" );
 apply_transformation  = System.getProperty( "apply_transformation" );
 define_mode_transform = System.getProperty( "define_mode_transform" );
@@ -31,11 +30,63 @@ System.out.println( "apply_to_angle = " + transform_angle );
 System.out.println( "apply_to_channel = " + transform_channel );
 System.out.println( "apply_to_illumination = " + transform_illumination );
 System.out.println( "apply_to_timepoint = " + transform_timepoint );
-System.out.println( "Channel_setting = " + channel_setting );
 System.out.println( "transformation = " + transformation );
 System.out.println( "apply = " + apply_transformation );
 System.out.println( "define = " + define_mode_transform );
-System.out.println( "all_timepoints_channel_" + channel_setting + "_illumination_0_all_angles = " + matrix_transform );
+
+// Prints channel settings:
+channel_setting = System.getProperty( "channel_setting" );
+System.out.println( "Channel_setting = " + channel_setting );
+
+String delims = "[,]";
+String[] channel_token = channel_setting.split(delims);
+
+if ( channel_token.length ==1 )
+
+{ 
+
+	channels_string = "_" + channel_setting;
+	System.out.println("channels = " + channels_string);
+	multiple_channels = "NO (one channel)";
+}
+
+else if ( channel_token.length > 1 )
+
+{
+
+	channels = "";
+	multiple_channels = "YES (one file per channel)";
+	
+}
+
+System.out.println( "channels = " + multiple_channels );
+
+
+// Prints illumination settings:
+illumination = System.getProperty( "illumination" );
+
+String[] illumination_token = illumination.split(delims);
+
+if ( illumination_token.length ==1 )
+
+{ 
+
+	illumination_string = "_" + illumination;
+	System.out.println("illumination = " + illumination_string);
+	multiple_illumination = "NO (one illumination side)";
+}
+
+else if ( channel_token.length > 1 )
+
+{
+
+	illumination = "";
+	multiple_illumination = "YES (one file per illumination)";
+	
+}
+
+System.out.println( "illumination = " + multiple_illumination );
+
 
 // Execute Fiji Plugin
 try {
@@ -51,7 +102,7 @@ IJ.run("Apply Transformations",
 	"define=" + define_mode_transform + " " + 
 	"same_transformation_for_all_timepoints " + 
 	"same_transformation_for_all_angles " +
-	"all_timepoints_channel_" + channel_setting + "_illumination_0_all_angles=[" + matrix_transform + "]");
+	"all_timepoints_channel" + channels_string + "_illumination" + illumination_string + "_all_angles=[" + matrix_transform + "]");
 }
 catch ( e ) { 
 

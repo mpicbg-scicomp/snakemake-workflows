@@ -72,6 +72,15 @@ System.out.println( "imglib2_container_fusion=" + imglib2_container_fusion );
 System.out.println( "interpolation=" + interpolation );
 System.out.println( "imglib2_data_container=" + imglib2_data_container );
 
+// Saving settings
+System.out.println( "-------------------------------------------------------" );
+System.out.println( "Saving settings: " );
+fused_image = System.getProperty( "fused_image" );
+System.out.println( "fused_image=" + fused_image );
+
+output_xml = System.getProperty( "output_xml" );
+System.out.println( "output_xml" );
+
 // Execute Fiji Plugin
 System.out.println( "=======================================================" );
 System.out.println( "Starting Fusion" );
@@ -82,11 +91,11 @@ IJ.run("Fuse/Deconvolve Dataset",
         "process_illumination=[" + process_illumination + "] " +
         "process_timepoint=[" + process_timepoint + "] " +
 	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " + 
-//	"xml_output=[Do not process on cluster] " +
 	"processing_timepoint=[Timepoint "+ parallel_timepoints +"] " +
 	"type_of_image_fusion=[Weighted-average fusion] " +
 	"bounding_box=[Define manually] " +
-	"fused_image=[Save as TIFF stack] " + // works but does not create xml file
+	//"fused_image=[Save as TIFF stack] " + // works but does not create xml file
+	"fused_image=[" + fused_image + "] " +
 	"minimal_x=" + minimal_x + " " +
 	"minimal_y=" + minimal_y + " " +
 	"minimal_z=" + minimal_z + " " +
@@ -102,6 +111,7 @@ IJ.run("Fuse/Deconvolve Dataset",
 	//"content-based " +
 	"output_file_directory=" + image_file_directory + " " +
 	"lossless " +
+	//"select=" + image_file_directory + output_xml + " " +
 	"imglib2_data_container=[" + imglib2_data_container + "]");
 }
 catch ( e ) {

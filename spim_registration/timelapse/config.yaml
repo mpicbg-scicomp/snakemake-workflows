@@ -1,80 +1,85 @@
 common: {
   # ============================================================================
-  #
-  # yaml example file for single channel processing
-  #
-  # General settings for processing
-  # 2015-04-01_LZ2_Stock46
-  # Dpse_Dip3_VK33
-  #
   # ============================================================================
-  # directory that contains the bean shell scripts and Snakefile
-  bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
-  # Directory that contains the cuda libraries
-  directory_cuda: "/sw/users/schmied/cuda/",
-  # Directory that contains the current working Fiji
-  fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",
-  fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
-  sysconfcpus: "sysconfcpus -n",
+  # yaml example file 
+  #
+  # DESCRIPTION: source file for cluster processing scripts
+  #
+  #      AUTHOR: Christopher Schmied, schmied@mpi-cbg.de
+  #   INSTITUTE: Max Planck Institute for Molecular Cell Biology and Genetics
+  #        BUGS:
+  #       NOTES:
+  #     Version: 3.3
+  #     CREATED: 2015-06-01
+  #    REVISION: 2015-07-28
   # ============================================================================
-  #   Processing switches
+  # ============================================================================
+  # 1. Processing switches
+  #
   # Description: Use switches to decide which processing steps you need:
+  # Options:  transformation_switch: "timelapse",
+  #           goes directly into fusion after timelapse registration
   #
-  # Options:
-  # transformation_switch: "timelapse" standard processing
-  # after timelapse registration directly goes into fusion, timelapse_duplicate
-  # "timelapse_duplicate" for dual channel processing one channel contains the beads
+  #           transformation_switch: "timelapse_duplicate",
+  #           for dual channel processing one channel contains the beads
+  #           dublicates the transformation from the source channel to the 
+  #           target channel
   #
-  # Switches between content based fusion and deconvoltion
-  # "deconvolution" > for deconvolution
-  # "fusion" > for content based fusion
+  #           Switches between content based fusion and deconvoltion
+  #           fusion_switch: "deconvolution", > for deconvolution
+  #           fusion_switch: "fusion", > for content based fusion
   # ============================================================================
-  #
   # Transformation switch:
-  transformation_switch: "timelapse", 
+  transformation_switch: "timelapse",
   # Fusion switch:
   fusion_switch: "fusion",
   # ============================================================================
-  # xml file names
-  # 
-  # xml file names without .xml suffix
+  # 2. Define dataset
+  #
+  # Description: key parameters for processing
+  # Options: General Settings
+  #          Settings for .czi files
+  #          Settings for .tif datasets
   # ============================================================================
+  # 2.1. General Settings -------------------------------------------------------
   #
-  first_xml_filename: 'Dpse_Dip3_VK33',              # Name of the xml file for the .czi or .tif files
-  hdf5_xml_filename: '"hdf5_Dpse_Dip3_VK33"', # Name of .xml file for the hdf5 data after resave_hdf5
-  # .xml file names for output
-  output_xml: '"fused_Dpse_Dip3_VK33"',
-  output_hdf5_xml: '"hdf5_fused_Dpse_Dip3_VK33"',
-  #
-  # ============================================================================
-  # Describe the dataset
-  #
-  # Options: number of timepoints
+  # Description: applies to both .czi and tif datasets
+  # Options: xml file name
+  #          number of timepoints
   #          angles
   #          channels
   #          illuminations
-  #          pixel size
-  # ============================================================================
-  ntimepoints: 2,               # number of timepoints of dataset
-  angles: "1,2,3,4,5",   # angles "0,72,144,216,288"
-  channels: "green",        # channels, for tif numeric!
-  illumination: "0",            # illuminations
   # ----------------------------------------------------------------------------
-  # For .czi datasets
-  # master .czi file
-  first_czi: "2015-04-01_LZ2_Stock46.czi", 
+  hdf5_xml_filename: '"dataset_one"', 
+  ntimepoints: 1,        # number of timepoints of dataset
+  angles: "0,72,144,216,288",   # format e.g.: "0,72,144,216,288",
+  channels: "green",     # format e.g.: "green,red", IMPORTANT: for tif numeric!
+  illumination: "0",     # format e.g.: "0,1",
+  #
+  # 2.2. Settings for .czi files -----------------------------------------------
+  #
+  # Description: applies only to .czi dataset
+  # Options: name of first czi file
   # ----------------------------------------------------------------------------
-  # For .tif datasets
-  # file pattern of .tif files:
-  # for multi channel with one file per channel give spim_TL{tt}_Angle{a}_Channel{c}.tif
-  # for padded zeros use tt 
+  first_czi: "2015-04-21_LZ2_Stock32.czi", 
+  #
+  # 2.3. Settings for .tif datasets --------------------------------------------
+  #
+  # Description: applies only to .tif dataset
+  # Options: file pattern of .tif files:
+  #          multi channel with one file per channel: 
+  #          spim_TL{tt}_Angle{a}_Channel{c}.tif
+  #          for padded zeros use tt 
+  # ----------------------------------------------------------------------------
   image_file_pattern: 'img_TL{{t}}_Angle{{a}}.tif',
   multiple_channels: '"NO (one channel)"',         # '"YES (all channels in one file)"' or '"YES (one file per channel)"' or '"NO (one channel)"'
   # ============================================================================
-  # Detection and registration
+  # 3. Detection and registration
   #
   # Description: settings for interest point detection and registration
   # Options: Single channel and dual channel processing
+  #          Source and traget for dual channel one channel contains the beads
+  #          Interestpoints label
   #          Difference-of-mean or difference-of-gaussian detection
   # ============================================================================
   # reg_process_channel:
@@ -84,8 +89,9 @@ common: {
   reg_process_channel: '"All channels"',
   #
   # Dual channel 1 Channel contains the beads: which channel contains the beads?
-  reg_processing_channel: '"green"',
-  #
+  # Ignore if Single Channel or Dual Channel both channels contain beads
+  source_channel: "red", # channel that contains the beads
+  target_channel: "green", # channel without beads
   # reg_interest_points_channel:
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
@@ -104,48 +110,70 @@ common: {
   sigma: '1.3',
   threshold_gaussian: '0.025',
   # ============================================================================
-  # Timelapse registration
+  # 4. Timelapse registration
   #
   # Description: settings for timelapse registration
   # Options: reference timepoint
   # ============================================================================
-  reference_timepoint: '40',   # Reference timepoint
+  reference_timepoint: '45',   # Reference timepoint
   # ============================================================================
-  # Content-based multiview fusion
+  # 5. Weighted-average fusion
   #
   # Description: settings for content-based multiview fusion
   # Options: downsampling
   #          Cropping parameters based on full resolution
   # ============================================================================
   downsample: '1',    # set downsampling
-  minimal_x: '237',   # Cropping parameters of full resolution
-  minimal_y: '-16',
-  minimal_z: '-292',
-  maximal_x: '1041',
-  maximal_y: '1853',
-  maximal_z: '509',
+  minimal_x: '274',   # Cropping parameters of full resolution
+  minimal_y: '17',
+  minimal_z: '-423',
+  maximal_x: '1055',
+  maximal_y: '1928',
+  maximal_z: '480',
   # ============================================================================
-  # Multiview deconvolution
+  # 6. Multiview deconvolution
   #
   # Description: settings for multiview deconvolution
-  # Options: number of iterations
-  #          Cropping parameters taking downsampling into account
-  #          Channel settings for deconvolution
-  # ============================================================================
-  iterations: '1',        # number of iterations
-  minimal_x_deco: '237',  # Cropping parameters: take downsampling into account
-  minimal_y_deco: '-16',
-  minimal_z_deco: '-292',
-  maximal_x_deco: '1041',
-  maximal_y_deco: '1853',
-  maximal_z_deco: '509',
+  # Options: External transformation
+  #          Deconvolution settings
   #
+  # ============================================================================
+  # 6.1. External transformation -----------------------------------------------
+  #
+  # Description: Allows downsampling prior deconvolution
+  # Options: no downsampling: 
+  #          external_trafo_switch: "_transform",
+  #
+  #          downsampling:
+  #          external_trafo_switch: "external_trafo",
+  #          IMPORTANT: boundingbox needs to reflect this downsampling. 
+  #
+  #          Matrix for downsampling
+  # ----------------------------------------------------------------------------
+  external_trafo_switch: "_transform",
+  #
+  # Matrix for downsampling
+  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',
+  #
+  # 6.2. Deconvolution settings ------------------------------------------------
+  # 
+  # Description: core settings for multiview deconvolution
+  # Options: number of iterations
+  #          Cropping parameters taking downsampling into account!
+  #          Channel settings for deconvolution
+  # ----------------------------------------------------------------------------
+  iterations: '15',        # number of iterations
+  minimal_x_deco: '137',  # Cropping parameters: take downsampling into account
+  minimal_y_deco: '-8',
+  minimal_z_deco: '-211',
+  maximal_x_deco: '527',
+  maximal_y_deco: '964',
+  maximal_z_deco: '240',
   # Channel settings for deconvolution
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
   # Dual Channel one channel contains beads: '"[Same PSF as channel red],beads"'
   detections_to_extract_psf_for_channel: '"beads"',
-  #
   # ============================================================================
   # Resave output
   #
@@ -156,31 +184,82 @@ common: {
   #          Pixel size > isotropic resolution
   #          Image type (16Bit from content-based fusion, 32Bit from deconvolution)
   # ============================================================================
-  # Number of timepoints
-  output_timepoints: '0-1',   # Timepoints format: '1-2'
-  #
-  # Naming pattern:
-  # Single Channel: TP{{t}}_Chgreen_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  # Dual Channel: TP{{t}}_Ch{{0}}_Ill0_Ang0,72,144,216,288.tif > Ch{name} is added here
-  output_image_file_pattern: '"TP{{t}}_Ch0_Ill0_Ang1,2,3,4,5.tif"',
-  #
-  # channel setting:
-  # Single channel: '"NO (one channel)"'
-  # Dual channel: '"YES (one file per channel)"'
-  output_multiple_channels: '"NO (one channel)"',
-  output_channels: "green",
   # Calibration
   manual_calibration_output: "Yes", # calibration override: No or Yes
   # pixel size of output: take downsampling into account!
-  output_pixel_distance_x: 0.285901069641113, 
-  output_pixel_distance_y: 0.285901069641113,
-  output_pixel_distance_z: 0.285901069641113,
-  output_pixel_unit: 'um'
+  output_pixel_distance_x: 0.57, 
+  output_pixel_distance_y: 0.57,
+  output_pixel_distance_z: 0.57,
+  output_pixel_unit: 'um',
+  # ============================================================================
+  # 7. Software directories
+  # 
+  # Description: paths to software dependencies of processing
+  # Options: Fiji location
+  #          beanshell and snakefile diretory
+  #          directory for cuda libraries
+  #          xvfb setting
+  #          sysconfcpus setting
+  # ============================================================================
+  # current working Fiji
+  fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",
+  # bean shell scripts and Snakefile
+  bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
+  # Directory that contains the cuda libraries
+  directory_cuda: "/sw/users/schmied/cuda/",
+  # xvfb 
+  fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
+  sysconfcpus: "sysconfcpus -n",
+  memory-prefix: "-Xmx"
+  }
+  
+  # ============================================================================
+  # 8. Fiji Resource settings
+  # 
+  # Description: number of cores and memory for Fiji
+  # Options: number of cores
+  #          memory in GB
+  # ============================================================================
+Fiji_resources: {
+  # setting for hdf5 resave:
+  num_cores_hdf5: 2,
+  mem_hdf5: "20g",
+  # setting for registration:
+  num_cores_reg: 3,
+  mem_reg: "40g",
+  # setting for timelapse registration:
+  num_cores_time: 3,
+  mem_time: "50g",
+  # settings for average fusion:
+  num_cores_fusion: 6,
+  mem_fusion: "50g", 
+  # settings for deconvolution:
+  num_cores_deco: 12,
+  mem_deco: "110g",
+  # settings for resaving of output:
+  num_cores_output: 2,
+  mem_output: "20g"
   }
   # ============================================================================
-  # Advanced settings
+  # 9. Advanced settings
+  # 
+  # Description: advanced and manual settings for each processing step
+  #              corresponds to each rule in the snakefile
+  #     Options: define_xml_czi
+  #              define_xml_tif
+  #              resave_hdf5
+  #              registration
+  #              xml_merge
+  #              timelapse
+  #              dublicate_transformations
+  #              fusion
+  #              external_transform
+  #              deconvolution
+  #              hdf5_output
   # ============================================================================
-  
+  # ----------------------------------------------------------------------------
+  # 9.1. define_xml_czi
+  # ----------------------------------------------------------------------------
 define_xml_czi: {
   manual_calibration_czi: "No", # calibration override: No or Yes
   czi_pixel_distance_x: '0.285901069641113',  # Manual calibration x
@@ -191,6 +270,9 @@ define_xml_czi: {
   bsh_file: "define_czi.bsh"       # .bsh script for defining .czi file
   }
   
+  # ----------------------------------------------------------------------------
+  # 9.2. define_xml_tif
+  # ----------------------------------------------------------------------------
 define_xml_tif: {
   # Settings for ImageJ Opener
   manual_calibration_tif: "No", # calibration override: No or Yes
@@ -206,6 +288,9 @@ define_xml_tif: {
   bsh_file: "define_tif_zip.bsh"
   }
   
+  # ----------------------------------------------------------------------------
+  # 9.3. resave_hdf5
+  # ----------------------------------------------------------------------------
 resave_hdf5: {
   # Resaves .tif or .czi data into hdf5
   # Subsampling and resolution settings for hdf5: data dependent
@@ -218,11 +303,12 @@ resave_hdf5: {
   resave_angle: '"All angles"',
   resave_channel: '"All channels"',
   resave_illumination: '"All illuminations"',
-  num_cores_hdf5_xml: 2,
-  num_cores_resave_hdf5: 2,
   bsh_file: "export.bsh"
   }
-
+  
+  # ----------------------------------------------------------------------------
+  # 9.4. registration
+  # ----------------------------------------------------------------------------
 registration: {
   # Processing setting for Difference-of-Gaussian detection
   # compute_on:'"GPU accurate (Nvidia CUDA via JNA)"'
@@ -249,14 +335,19 @@ registration: {
   model_to_regularize_with: "Rigid",
   lambda: '0.10',
   imglib_container: '"ArrayImg (faster)"',
-  num_cores_reg: 2,
   bsh_file: "registration.bsh"  # .bsh script for registration
   }
 
+  # ----------------------------------------------------------------------------
+  # 9.5. xml_merge
+  # ----------------------------------------------------------------------------
 xml_merge: {
   bsh_file: "xml_merge.bsh"
   }
   
+  # ----------------------------------------------------------------------------
+  # 9.6. timelapse
+  # ---------------------------------------------------------------------------- 
 timelapse: {
   # Standard settings for timelapse registration
   type_of_registration_timelapse: '"Match against one reference timepoint (no global optimization)"',
@@ -264,16 +355,20 @@ timelapse: {
   bsh_file: "timelapse_registration.bsh"
   }
   
+  # ----------------------------------------------------------------------------
+  # 9.7. dublicate_transformations
+  # ----------------------------------------------------------------------------
 dublicate_transformations: {
   # If dual channel processing and only one channel contains beads
   # this allows you to dublicate the transformation for the 
   # channel that does not contain beas
-  source_dublication: "red",  # source channel
-  target_dublication: "green", # target channel
   duplicate_which_transformations: '"Replace all transformations"', # mode of dublication
   bsh_file: "dublicate_transformations.bsh" # .bsh script for dublication
   }
   
+  # ----------------------------------------------------------------------------
+  # 9.8. fusion
+  # ----------------------------------------------------------------------------
 fusion: {
   # fused_image: '"Append to current XML Project"', does not work yet
   process_timepoint: '"Single Timepoint (Select from List)"',
@@ -285,32 +380,33 @@ fusion: {
   pixel_type: '"16-bit unsigned integer"',
   imglib2_data_container: '"ArrayImg (faster)"',
   process_views_in_paralell: '"All"',
-  xml_output: '"Save every XML with user-provided unique id"',
-  num_cores_fusion: 6,
+  fused_image: '"Save as TIFF stack"', 
   bsh_file: "fusion.bsh"
   }
-
+  # ----------------------------------------------------------------------------
+  # 9.9. external_transform
+  # ----------------------------------------------------------------------------
 external_transform: {
   # Downsamples for deconvolution
-  # BUG: external transformation breaks .xml file
   # channel setting: '"all_channels"'
-  channel_setting: '"green"',
+  # channel_setting: '"green"',
   transform_timepoint: '"All Timepoints"',
   transform_angle: '"All angles"',
   transform_channel: '"All channels"',
   transform_illumination: '"All illuminations"',
   apply_transformation: '"Current view transformations (appends to current transforms)"',
   define_mode_transform: '"Matrix"',
-  # Matrix for downsampling
-  matrix_transform: '"0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0"',
   transformation: '"Rigid"',
   bsh_file: "transform.bsh"
   }
-
+  
+  # ----------------------------------------------------------------------------
+  # 9.10. external_transform
+  # ----------------------------------------------------------------------------
 deconvolution: {
   # Settings for GPU or CPU processing 
   # '"CPU (Java)"' or '"GPU (Nvidia CUDA via JNA)"'
-  compute_on: '"GPU (Nvidia CUDA via JNA)"',
+  compute_on: '"CPU (Java)"',
   cudafourierconvolution: "libFourierConvolutionCUDALib.so", # GPU processing name of cuda library
   # Standard settings for deconvolution
   process_timepoint: '"Single Timepoint (Select from List)"',
@@ -326,10 +422,13 @@ deconvolution: {
   psf_size_y: '19',
   psf_size_z: '25',
   imglib2_container: '"ArrayImg"',
-  num_cores_deco: 7,
+  fused_image: '"Save as TIFF stack"',
   bsh_file: "deconvolution.bsh"
   }
   
+  # ----------------------------------------------------------------------------
+  # 9.11. hdf5_output
+  # ----------------------------------------------------------------------------
 hdf5_output: {
   # if data is 32Bit then the data is converted into 16Bit data
   convert_32bit: '"[Use min/max of first image (might saturate intenities over time)]"',
@@ -339,13 +438,11 @@ hdf5_output: {
   # subsampling_output: '"{{ {{1,1,1}}, {{2,2,2}} }}"',
   # chunk_sizes_output: '"{{ {{16,16,16}}, {{16,16,16}} }}"',
   # Standard settings for hdf5_output
-  output_type_of_dataset: '"Image Stacks (LOCI Bioformats)"', # '"Image Stacks (ImageJ Opener)"' or '"Image Stacks (LOCI Bioformats)"'
+  output_type_of_dataset: '"Image Stacks (ImageJ Opener)"', # '"Image Stacks (ImageJ Opener)"' or '"Image Stacks (LOCI Bioformats)"'
   output_multiple_timepoints: '"YES (one file per time-point)"',
   output_multiple_angles: '"NO (one angle)"',
   output_illumination_directions: '"NO (one illumination direction)"',
   output_imglib_container: '"ArrayImg (faster)"',
-  num_cores_hdf5_xml_output: 2,
-  num_cores_resave_hdf5_output: 2,
   bsh_file_define: "define_output.bsh", # .bsh script for defining the dataset
   bsh_file_hdf5: "export_output.bsh"    # .bsh script for resaving into hdf5
   }

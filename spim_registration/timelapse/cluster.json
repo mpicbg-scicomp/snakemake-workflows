@@ -7,22 +7,22 @@
     
     "hdf5_xml" :
     {
- 	"lsf_extra" : "-n 2 -R \"span[hosts=1] rusage[mem=5000]\""
+ 	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\""
     },
 
     "resave_hdf5" :	
     {
- 	"lsf_extra" : "-n 2 -R \"span[hosts=1] rusage[mem=50000]\""
+ 	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\""
     },
 
     "registration" :
     {
-        "lsf_extra" : "-n 2 -R \"span[hosts=1] rusage[mem=100000]\""
+        "lsf_extra" : "-n 4 -R \"span[hosts=1] rusage[mem=40000]\""
     },
     
     "timelapse" : 
     {
-    	"lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=100000]\""
+    	"lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=50000]\""
     },
 
     "external_transfrom" :
@@ -32,17 +32,18 @@
 
     "fusion" : 
     {
-        "lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=100000]\""
+        "lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=50000]\"",
+        "lsf_q" : "short"
     },
 
     "deconvolution" :
     {
-        "lsf_extra" : "-n 7 -R \"span[hosts=1] rusage[mem=50000]\"",
+        "lsf_extra" : "-n 12 -R \"span[hosts=1] rusage[mem=110000]\"",
 	"lsf_q" : "gpu"
     },
     
     "resave_hdf5_output" :
     {
-	"lsf_extra" : "-n 2 -R \"span[hosts=1] rusage[mem=50000]\""
+	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\""
     }
 }
