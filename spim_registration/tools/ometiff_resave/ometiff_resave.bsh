@@ -21,7 +21,7 @@ first_file = System.getProperty( "first_file" );
 	
 int timepoint = Integer.parseInt( System.getProperty( "timepoint" ) );
 angle = System.getProperty( "angle" );
-stack_size = System.getProperty( "stack_size" );
+//stack_size = System.getProperty( "stack_size" );
 int pad = Integer.parseInt( System.getProperty( "pad" ) );
 int tif_timepoint = Integer.parseInt( System.getProperty( "tif_timepoint" ) );
 
@@ -30,7 +30,7 @@ System.out.println( "directory = " + dir );
 System.out.println( "first_file = " + first_file );
 System.out.println( "timepoint = " + timepoint );
 System.out.println( "angle = " + angle );
-System.out.println( "stack_size = " + stack_size );
+//System.out.println( "stack_size = " + stack_size );
 System.out.println( "pad = " + pad );
 System.out.println( "timepoint = " + tif_timepoint );
 
@@ -38,15 +38,15 @@ System.out.println( "timepoint = " + tif_timepoint );
 System.out.println( "=======================================================" );
 System.out.println( "Opening Image" ) ;
 IJ.run("Bio-Formats Importer", 
-	"open=" + dir + first_file + " " + 
-	"color_mode=Default " +
-	"specify_range " +
-	"view=[Standard ImageJ] " +
-	"stack_order=XYCZT " +
-	"series_" + angle + " " +
-	"t_begin_" + angle + "=" + timepoint + " " +
-	"t_end_" + angle + "=" + timepoint + " " +
-	"t_step_" + angle + "=1");
+		"open=" + dir + first_file + " " +
+		"color_mode=Default " +
+		"open_files " + 
+		"specify_range " +
+		"view=[Standard ImageJ] " +
+		"series_" + angle + " " +
+		"t_begin_" + angle + "=" + timepoint + " " +
+		"t_end_" + angle + "=" + timepoint + " " +
+		"t_step_" + angle + "=1");
 
 // Resaves .czi files as .tif file
 System.out.println( "Save as  .tif" ) ;
