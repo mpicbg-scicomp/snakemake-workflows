@@ -358,7 +358,7 @@ timelapse: {
   # ----------------------------------------------------------------------------
   # 9.7. dublicate_transformations
   # ----------------------------------------------------------------------------
-dublicate_transformations: {
+duplicate_transformations: {
   # If dual channel processing and only one channel contains beads
   # this allows you to dublicate the transformation for the 
   # channel that does not contain beas
