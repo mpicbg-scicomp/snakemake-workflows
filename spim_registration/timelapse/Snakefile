@@ -298,7 +298,7 @@ rule duplicate_transformations:
                                     config["registration"],
                                     config["timelapse"],
                                     config["duplicate_transformations"],
-                                    path_bsh=config["common"]["bsh_directory"] + config["dublicate_transformations"]["bsh_file"],
+                                    path_bsh=config["common"]["bsh_directory"] + config["duplicate_transformations"]["bsh_file"],
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
