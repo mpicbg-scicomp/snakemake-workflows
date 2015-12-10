@@ -51,9 +51,9 @@ common: {
   #          illuminations
   # ----------------------------------------------------------------------------
   hdf5_xml_filename: '"dataset_one"', 
-  ntimepoints: 2,        # number of timepoints of dataset
-  angles: "0,72,144,216,288",   # format e.g.: "0,72,144,216,288",
-  channels: "green",     # format e.g.: "green,red", IMPORTANT: for tif 0,1 etc!
+  ntimepoints: 4,        # number of timepoints of dataset
+  angles: "0",   # format e.g.: "0,72,144,216,288",
+  channels: "488,561",     # format e.g.: "green,red", IMPORTANT: for tif 0,1 etc!
   illumination: "0",     # format e.g.: "0,1",
   #
   # 2.2. Settings for .czi files -----------------------------------------------
@@ -61,7 +61,7 @@ common: {
   # Description: applies only to .czi dataset
   # Options: name of first czi file
   # ----------------------------------------------------------------------------
-  first_czi: "2015-02-21_LZ1_Stock68_3.czi", # use .czi suffix
+  first_czi: "007-H2B-GFP-LA-mKate2-220min-E03_E04.czi", # use .czi suffix
   #
   # 2.3. Settings for .tif datasets --------------------------------------------
   #

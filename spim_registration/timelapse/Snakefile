@@ -24,7 +24,7 @@ datasets = [ str(config["common"]["hdf5_xml_filename"].strip('\"')+(ds_format.fo
 xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
-    input: [ ds + "_output_hdf5" for ds in datasets ]
+    input: [ ds + "_hdf5" for ds in datasets ]
 
 # local rules are running the specified rules on the head node
 #localrules: define_xml_tif, xml_merge, timelapse, 
