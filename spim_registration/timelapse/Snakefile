@@ -52,7 +52,9 @@ rule define_xml_czi:
         -Dczi_pixel_distance_z={czi_pixel_distance_z} \
         -Dczi_pixel_unit={czi_pixel_unit} \
         -Dfirst_xml_filename={first_xml_filename} \
+        -Dmanual_rotation={manual_rotation} \
         -Drotation_around={rotation_around} \
+        -Dapply_rotation_to_dataset={apply_rotation_to_dataset} \
         -- --no-splash {path_bsh}""",
 	   config["common"],
 	   config["define_xml_czi"],
