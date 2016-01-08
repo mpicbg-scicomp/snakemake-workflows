@@ -145,7 +145,7 @@ common: {
   #          external_trafo_switch: "_transform",
   #
   #          downsampling:
-  #          external_trafo_switch: "external_trafo",
+  #          external_trafo_switch: "_external_trafo",
   #          IMPORTANT: boundingbox needs to reflect this downsampling. 
   #
   #          Matrix for downsampling
