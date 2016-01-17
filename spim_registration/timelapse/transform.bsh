@@ -33,6 +33,7 @@ System.out.println( "apply_to_timepoint = " + transform_timepoint );
 System.out.println( "transformation = " + transformation );
 System.out.println( "apply = " + apply_transformation );
 System.out.println( "define = " + define_mode_transform );
+System.out.println( "matrix_transform = " + matrix_transform );
 
 // Prints channel settings:
 channel_setting = System.getProperty( "channel_setting" );
@@ -45,8 +46,8 @@ if ( channel_token.length ==1 )
 
 { 
 
-	channels_string = "_" + channel_setting;
-	System.out.println("channels = " + channels_string);
+	channels_string = "_channel_" + channel_setting;
+	channel_transformation = "";
 	multiple_channels = "NO (one channel)";
 }
 
@@ -54,11 +55,13 @@ else if ( channel_token.length > 1 )
 
 {
 
-	channels = "";
+	channels_string = "_all_channels";
+	channel_transformation = "same_transformation_for_all_channels ";
 	multiple_channels = "YES (one file per channel)";
 	
 }
 
+System.out.println("channels_string = " + channels_string);
 System.out.println( "channels = " + multiple_channels );
 
 
@@ -87,6 +90,19 @@ else if ( channel_token.length > 1 )
 
 System.out.println( "illumination = " + multiple_illumination );
 
+System.out.println( "Apply Transformations browse=" + image_file_directory + " " +
+        "select_xml=" + image_file_directory + merged_xml + " " +
+        "apply_to_angle=[" + transform_angle + "] " +
+        "apply_to_channel=[" + transform_channel + "] " +
+        "apply_to_illumination=[" + transform_illumination + "] " +
+        "apply_to_timepoint=[" + transform_timepoint + "] " +
+        "transformation=" + transformation + " " +
+        "apply=[" + apply_transformation + "] " +
+        "define=" + define_mode_transform + " " +
+        "same_transformation_for_all_timepoints " +
+        channel_transformation + 
+	"same_transformation_for_all_angles " +
+        "all_timepoints" + channels_string + "_illumination" + illumination_string + "_all_angles=[" + matrix_transform + "]" );
 
 // Execute Fiji Plugin
 try {
@@ -101,8 +117,9 @@ IJ.run("Apply Transformations",
 	"apply=[" + apply_transformation + "] " +
 	"define=" + define_mode_transform + " " + 
 	"same_transformation_for_all_timepoints " + 
+	channel_transformation +
 	"same_transformation_for_all_angles " +
-	"all_timepoints_channel" + channels_string + "_illumination" + illumination_string + "_all_angles=[" + matrix_transform + "]");
+	"all_timepoints" + channels_string + "_illumination" + illumination_string + "_all_angles=[" + matrix_transform + "]");
 }
 catch ( e ) { 
 
@@ -113,6 +130,3 @@ catch ( e ) {
 }
 /* shutdown */
 runtime.exit(0);
-	
-
-
