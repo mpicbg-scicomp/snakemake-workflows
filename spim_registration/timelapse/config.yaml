@@ -51,9 +51,9 @@ common: {
   #          illuminations
   # ----------------------------------------------------------------------------
   hdf5_xml_filename: '"dataset_one"', 
-  ntimepoints: 2,        # number of timepoints of dataset
-  angles: "0,72,144,216,288",   # format e.g.: "0,72,144,216,288",
-  channels: "green",     # format e.g.: "green,red", IMPORTANT: for tif 0,1 etc!
+  ntimepoints: 4,        # number of timepoints of dataset
+  angles: "0",   # format e.g.: "0,72,144,216,288",
+  channels: "488,561",     # format e.g.: "green,red", IMPORTANT: for tif 0,1 etc!
   illumination: "0",     # format e.g.: "0,1",
   #
   # 2.2. Settings for .czi files -----------------------------------------------
@@ -202,7 +202,7 @@ common: {
   #          sysconfcpus setting
   # ============================================================================
   # current working Fiji
-  fiji-app: "/sw/users/schmied/packages/2015-06-30_Fiji.app.cuda/ImageJ-linux64",
+  fiji-app: "/sw/users/schmied/packages/2015-12-09_Fiji.app.cuda/ImageJ-linux64",
   # bean shell scripts and Snakefile
   bsh_directory: "/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/timelapse/",
   # Directory that contains the cuda libraries
@@ -266,7 +266,9 @@ define_xml_czi: {
   czi_pixel_distance_y: '0.285901069641113',  # Manual calibration y
   czi_pixel_distance_z: '1.500000000000000',  # Manual calibration z
   czi_pixel_unit: "um",             # unit of manual calibration
-  rotation_around: "X-Axis",       # axis of acquistion
+  manual_rotation: "No", # manual override for rotation "Yes" if metadata is wrong
+  rotation_around: "X-Axis",       # axis of acquistion for manual rotation
+  apply_rotation_to_dataset: "Yes", # applies the approximate orientation as defined in the metadata as an affine transformation, on top of the correction for the anisotropy
   bsh_file: "define_czi.bsh"       # .bsh script for defining .czi file
   }
   

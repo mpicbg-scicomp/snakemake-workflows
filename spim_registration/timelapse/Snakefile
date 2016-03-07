@@ -24,7 +24,7 @@ datasets = [ str(config["common"]["hdf5_xml_filename"].strip('\"')+(ds_format.fo
 xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
-    input: [ ds + "_output_hdf5" for ds in datasets ]
+    input: [ ds + "_hdf5" for ds in datasets ]
 
 # local rules are running the specified rules on the head node
 #localrules: define_xml_tif, xml_merge, timelapse, 
@@ -52,7 +52,9 @@ rule define_xml_czi:
         -Dczi_pixel_distance_z={czi_pixel_distance_z} \
         -Dczi_pixel_unit={czi_pixel_unit} \
         -Dfirst_xml_filename={first_xml_filename} \
+        -Dmanual_rotation={manual_rotation} \
         -Drotation_around={rotation_around} \
+        -Dapply_rotation_to_dataset={apply_rotation_to_dataset} \
         -- --no-splash {path_bsh}""",
 	   config["common"],
 	   config["define_xml_czi"],
