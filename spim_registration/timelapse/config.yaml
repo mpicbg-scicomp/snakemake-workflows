@@ -61,7 +61,7 @@ common: {
   # Description: applies only to .czi dataset
   # Options: name of first czi file
   # ----------------------------------------------------------------------------
-  first_czi: "007-H2B-GFP-LA-mKate2-220min-E03_E04.czi", # use .czi suffix
+  first_czi: "exampleSingleChannel.czi", # use .czi suffix
   #
   # 2.3. Settings for .tif datasets --------------------------------------------
   #
@@ -145,7 +145,7 @@ common: {
   #          external_trafo_switch: "_transform",
   #
   #          downsampling:
-  #          external_trafo_switch: "external_trafo",
+  #          external_trafo_switch: "_external_trafo",
   #          IMPORTANT: boundingbox needs to reflect this downsampling. 
   #
   #          Matrix for downsampling
@@ -377,7 +377,7 @@ fusion: {
   process_angle: '"All angles"',
   process_channel: '"All channels"',
   process_illumination: '"All illuminations"',
-  imglib2_container_fusion: '"ArrayImg"',
+  imglib2_container_fusion: '"ArrayImg"', # For larger datasets use: '"[CellImg (large images)]"'
   interpolation: '"Linear Interpolation"',
   pixel_type: '"16-bit unsigned integer"',
   imglib2_data_container: '"ArrayImg (faster)"',
