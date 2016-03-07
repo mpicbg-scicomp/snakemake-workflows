@@ -125,7 +125,7 @@ common: {
   # ============================================================================
   downsample: '1',    # set downsampling
   minimal_x: '274',   # Cropping parameters of full resolution
-  minimal_y: '17',
+  minimal_y: '-17',
   minimal_z: '-423',
   maximal_x: '1055',
   maximal_y: '1928',
