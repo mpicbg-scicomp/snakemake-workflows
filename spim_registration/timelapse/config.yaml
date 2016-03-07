@@ -61,7 +61,7 @@ common: {
   # Description: applies only to .czi dataset
   # Options: name of first czi file
   # ----------------------------------------------------------------------------
-  first_czi: "2015-02-21_LZ1_Stock68_3.czi", # use .czi suffix
+  first_czi: "exampleSingleChannel.czi", # use .czi suffix
   #
   # 2.3. Settings for .tif datasets --------------------------------------------
   #
