@@ -24,7 +24,7 @@ datasets = [ str(config["common"]["hdf5_xml_filename"].strip('\"')+(ds_format.fo
 xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
-    input: [ ds + "_output_hdf5" for ds in datasets ]
+    input: [ ds + "_hdf5" for ds in datasets ]
 
 # local rules are running the specified rules on the head node
 #localrules: define_xml_tif, xml_merge, timelapse, 
@@ -52,7 +52,9 @@ rule define_xml_czi:
         -Dczi_pixel_distance_z={czi_pixel_distance_z} \
         -Dczi_pixel_unit={czi_pixel_unit} \
         -Dfirst_xml_filename={first_xml_filename} \
+        -Dmanual_rotation={manual_rotation} \
         -Drotation_around={rotation_around} \
+        -Dapply_rotation_to_dataset={apply_rotation_to_dataset} \
         -- --no-splash {path_bsh}""",
 	   config["common"],
 	   config["define_xml_czi"],
@@ -297,8 +299,8 @@ rule duplicate_transformations:
                                     config["common"],
                                     config["registration"],
                                     config["timelapse"],
-                                    config["dublicate_transformations"],
-                                    path_bsh=config["common"]["bsh_directory"] + config["dublicate_transformations"]["bsh_file"],
+                                    config["duplicate_transformations"],
+                                    path_bsh=config["common"]["bsh_directory"] + config["duplicate_transformations"]["bsh_file"],
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
@@ -347,7 +349,7 @@ rule fusion:
 
 rule external_transform:
     input: rules.timelapse.output[0], merged_xml="{xml_base}_merge.xml" 
-    output: temp(rules.timelapse.output[0] + "_transform")
+    output: temp(rules.timelapse.output[0] + "_external_trafo")
     log: "logs/e2_external_transform.log"
     run:
         cmd_string = produce_string(
