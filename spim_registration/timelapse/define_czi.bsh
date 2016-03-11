@@ -107,53 +107,9 @@ System.out.println( illum_string );
 
 System.out.println("---------------------------------------------------------");
 System.out.println("Rotation setting:");
-manual_rotation = System.getProperty( "manual_rotation");
+
 rotation_around = System.getProperty( "rotation_around" );
-
-if (manual_rotation.equalsIgnoreCase( "No" ) )
-{
-	manual_rotation_string1 = "";
-	manual_rotation_string2 = "";
-	System.out.println( "Rotation set to automatic" );
-}
-
-else if (manual_rotation.equalsIgnoreCase( "Yes" ) ) 
-{ 
-	
-	manual_rotation_string1 = "modify_rotation_axis ";
-	manual_rotation_string2 = "rotation_around=" + rotation_around + "";
-	System.out.println( "Rotation set to automatic" );
-}
-
-else
-{
-	System.out.println( "Manual calibration setting bad" );
-}
-
-System.out.println( "manual_rotation_string= " + manual_rotation_string );
-
-
-apply_rotation_to_dataset = System.getProperty( "apply_rotation_to_dataset" );
-
-if (apply_rotation_to_dataset.equalsIgnoreCase( "No" ) )
-{
-	apply_rotation_to_dataset_string = "";
-	System.out.println( "Apply no rotation to dataset" );
-}
-
-else if (apply_rotation_to_dataset.equalsIgnoreCase( "Yes" ) ) 
-{ 
-	apply_rotation_to_dataset = "apply_rotation_to_dataset";
-	System.out.println( "Apply rotation to dataset" );
-}
-
-else
-{
-	System.out.println( "Apply rotation to dataset setting bad" );
-}
-
-System.out.println( "apply_rotation_string= " + apply_rotation_to_dataset );
-
+System.out.println( "rotation_around = " + rotation_around );
 
 // Calibaration
 System.out.println("=========================================================");
@@ -201,11 +157,9 @@ System.out.println("Define Multi-View Dataset type_of_dataset=[Zeiss Lightsheet 
 	channel_string + 
  	illum_string +
 	modify_calibration +
-	manual_rotation_string1 +
-	modify_calibration + 
-	manual_calibration_string + 
-	manual_rotation_string2 +
-	apply_rotation_to_dataset +
+	"modify_rotation_axis " +
+	manual_calibration_string +
+	"rotation_around=" + rotation_around + 
 	"");
 
 try {
@@ -217,12 +171,10 @@ IJ.run("Define Multi-View Dataset",
 	angle_string +
 	channel_string + 
 	illum_string +
-	manual_rotation_string1 +
 	modify_calibration + 
+	"modify_rotation_axis " +
 	manual_calibration_string + 
-	manual_rotation_string2 +
-	apply_rotation_to_dataset +
-	"");
+	"rotation_around=" + rotation_around + "");
 }
 catch ( e ) { 
 
