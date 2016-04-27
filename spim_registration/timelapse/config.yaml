@@ -360,10 +360,10 @@ timelapse: {
   # ----------------------------------------------------------------------------
 duplicate_transformations: {
   # If dual channel processing and only one channel contains beads
-  # this allows you to dublicate the transformation for the 
+  # this allows you to duplicate the transformation for the 
   # channel that does not contain beas
-  duplicate_which_transformations: '"Replace all transformations"', # mode of dublication
-  bsh_file: "duplicate_transformations.bsh" # .bsh script for dublication
+  duplicate_which_transformations: '"Replace all transformations"', # mode of duplication
+  bsh_file: "duplicate_transformations.bsh" # .bsh script for duplication
   }
   
   # ----------------------------------------------------------------------------
