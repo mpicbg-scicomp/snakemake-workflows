@@ -95,7 +95,7 @@ common: {
   # reg_interest_points_channel:
   # Single Channel: '"beads"'
   # Dual Channel: '"beads,beads"'
-  # Dual Channel: Channel does not contain the beads '"[DO NOT register this channel],beads"'
+  # Dual Channel: Channel does not contain the beads '"[(DO NOT register this channel)],beads"'
   reg_interest_points_channel: '"beads"',
   #
   # type of detection: '"Difference-of-Mean (Integral image based)"' or '"Difference-of-Gaussian"'
