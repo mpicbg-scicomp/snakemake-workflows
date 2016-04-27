@@ -25,7 +25,7 @@ common: {
   #           duplicates the transformation from the source channel to the 
   #           target channel
   #
-  #           Switches between content based fusion and deconvoltion
+  #           Switches between content based fusion and deconvolution
   #           fusion_switch: "deconvolution", > for deconvolution
   #           fusion_switch: "fusion", > for content based fusion
   # ============================================================================
