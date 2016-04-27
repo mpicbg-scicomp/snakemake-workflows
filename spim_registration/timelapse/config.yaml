@@ -363,7 +363,7 @@ duplicate_transformations: {
   # this allows you to dublicate the transformation for the 
   # channel that does not contain beas
   duplicate_which_transformations: '"Replace all transformations"', # mode of dublication
-  bsh_file: "dublicate_transformations.bsh" # .bsh script for dublication
+  bsh_file: "duplicate_transformations.bsh" # .bsh script for dublication
   }
   
   # ----------------------------------------------------------------------------
