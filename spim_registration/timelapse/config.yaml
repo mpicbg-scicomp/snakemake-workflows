@@ -9,9 +9,9 @@ common: {
   #   INSTITUTE: Max Planck Institute of Molecular Cell Biology and Genetics
   #        BUGS:
   #       NOTES:
-  #     Version: 3.3
+  #     Version: 3.4
   #     CREATED: 2015-06-01
-  #    REVISION: 2015-07-28
+  #    REVISION: 2015-04-27
   # ============================================================================
   # ============================================================================
   # 1. Processing switches
@@ -25,7 +25,7 @@ common: {
   #           duplicates the transformation from the source channel to the 
   #           target channel
   #
-  #           Switches between content based fusion and deconvoltion
+  #           Switches between content based fusion and deconvolution
   #           fusion_switch: "deconvolution", > for deconvolution
   #           fusion_switch: "fusion", > for content based fusion
   # ============================================================================
@@ -356,7 +356,7 @@ timelapse: {
   }
   
   # ----------------------------------------------------------------------------
-  # 9.7. dublicate_transformations
+  # 9.7. duplicate_transformations
   # ----------------------------------------------------------------------------
 duplicate_transformations: {
   # If dual channel processing and only one channel contains beads
