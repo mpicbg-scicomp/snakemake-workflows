@@ -20,7 +20,7 @@ ds_format = "-"+padding_format+"-00.h5"
 
 # problematic needs padding of file_id
 datasets = [ str(config["common"]["hdf5_xml_filename"].strip('\"')+(ds_format.format(item))) for item in range(int(config["common"]["ntimepoints"])) ]
-
+      
 xml_merge_in = produce_xml_merge_job_files(datasets)
 
 rule done:
@@ -36,7 +36,7 @@ rule resave_prepared:
 # defining xml for czi dataset
 rule define_xml_czi:
     input: config["common"]["first_czi"]
-    output: temp(config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml")
+    output: config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml"
     log: "logs/a1_define_xml_czi.log"
     run: 
         cmd_string = produce_string(
@@ -67,7 +67,7 @@ rule define_xml_czi:
 # defining xml for tif dataset
 rule define_xml_tif:
     input: glob.glob(re.sub("{{.}}","*", config["common"]['image_file_pattern'])) #replaces all occurrences of {{a}} (a can be any character) by * to use the string for globbing
-    output: temp(config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml")
+    output: config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml"
     log: "logs/a2_define_xml_tif.log"
     run:
         cmd_string = produce_string(
@@ -107,7 +107,7 @@ ruleorder: define_xml_czi > define_xml_tif
 # create mother .xml/.h5
 rule hdf5_xml:
     input: config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml" 
-    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), temp([ item+"_xml" for item in datasets ])
+    output: expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]), [ item+"_xml" for item in datasets ]
     log: "logs/b1_hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -140,7 +140,7 @@ rule hdf5_xml:
 # resave  .czi/.tif dataset as hdf5	
 rule resave_hdf5:
     input: "{xml_base}-{file_id,\d+}-00.h5_xml", config["common"]["hdf5_xml_filename"].strip('\"') + "_first.xml"
-    output: "{xml_base}-{file_id,\d+}-00.h5", temp("{xml_base}-{file_id,\d+}-00.h5_hdf5")
+    output: "{xml_base}-{file_id,\d+}-00.h5", "{xml_base}-{file_id,\d+}-00.h5_hdf5"
     log: "logs/b2_resave_hdf5-{file_id}.log"
     run:
         part_string = produce_string(
@@ -171,9 +171,9 @@ rule resave_hdf5:
         shell(part_string) 
        	       	
 rule registration:
-    input: rules.resave_hdf5.output, [ item+"_hdf5" for item in datasets ], expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]) 
-    output: temp("{xml_base}.job_{file_id,\d+}.xml")
-    log: "logs/c_{xml_base}-{file_id}-registration.log"
+    input: rules.resave_hdf5.output, expand("{dataset}_hdf5",dataset=datasets) , expand("{dataset}.{suffix}",dataset=[ config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]) 
+    output: "{xml_base}.job_{file_id,\d+}.xml"
+    log: "logs/c_{xml_base}-{file_id,\d+}-registration.log"
     run:
         cmd_string = produce_string(
            """{fiji-prefix} {sysconfcpus} {num_cores_reg} \
@@ -245,7 +245,7 @@ rule xml_merge:
 
 rule timelapse:
     input: rules.xml_merge.output
-    output: temp(rules.xml_merge.output[0] + "_timelapse")
+    output: rules.xml_merge.output[0] + "_timelapse"
     log: "logs/d2_{xml_base}_timelapse.log"
     run:
         cmd_string = produce_string(
@@ -280,7 +280,7 @@ rule timelapse:
 
 rule duplicate_transformations:
     input: rules.timelapse.output, merged_xml="{xml_base}_merge.xml"
-    output: temp(rules.timelapse.output[0] + "_duplicate")
+    output: rules.timelapse.output[0] + "_duplicate"
     log: "logs/d3_{xml_base}_duplicate_transformations.log"
     run:
         cmd_string = produce_string(
@@ -307,7 +307,7 @@ rule duplicate_transformations:
 
 rule fusion:
     input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: temp("{xml_base}-{file_id,\d+}-00.h5_fusion")
+    output: "{xml_base}-{file_id,\d+}-00.h5_fusion"
     log: "logs/e1_{xml_base}-{file_id,\d+}-00-fusion.log"
     run:
         cmd_string = produce_string(
@@ -347,7 +347,7 @@ rule fusion:
 
 rule external_transform:
     input: rules.timelapse.output[0], merged_xml="{xml_base}_merge.xml" 
-    output: temp(rules.timelapse.output[0] + "_external_trafo")
+    output: rules.timelapse.output[0] + "_external_trafo"
     log: "logs/e2_external_transform.log"
     run:
         cmd_string = produce_string(
@@ -376,7 +376,7 @@ rule external_transform:
 
 rule deconvolution:
     input: [ str("{xml_base}_merge.xml_" + config["common"]["transformation_switch"] + config["common"]["external_trafo_switch"] ) ], "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.timelapse.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml" # rules.external_transform.output, "{xml_base}-{file_id,\d+}-00.h5", merged_xml="{xml_base}_merge.xml"
-    output: temp("{xml_base}-{file_id,\d+}-00.h5_deconvolution")
+    output: "{xml_base}-{file_id,\d+}-00.h5_deconvolution"
     log: "logs/e2_{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(
@@ -425,7 +425,7 @@ rule deconvolution:
 
 rule define_output:
     input: glob.glob('TP*'), [ item + "_" + config["common"]["fusion_switch"] for item in datasets ]
-    output: temp(config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml")
+    output: config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml"
     log: "logs/f1_define_output.log"
     run:
         cmd_string = produce_string(
@@ -461,7 +461,7 @@ rule define_output:
 rule hdf5_xml_output:
     input: glob.glob('TP*'), [ item + "_" + config["common"]["fusion_switch"] for item in datasets ], config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml"
     output: expand("{dataset}.{suffix}",dataset=[ config["common"]["fusion_switch"].strip('\"') + "_" + config["common"]["hdf5_xml_filename"].strip('\"')], suffix=["xml","h5"]),
-    	    temp([ item+"_output" for item in datasets ])
+    	    [ item+"_output" for item in datasets ]
     log: "logs/f2_output_hdf5_xml.log"
     run:
         part_string = produce_string(
@@ -496,7 +496,7 @@ rule hdf5_xml_output:
 
 rule resave_hdf5_output:
     input: "{xml_base}-{file_id,\d+}-00.h5_output", config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define.xml"
-    output: temp("{xml_base}-{file_id,\d+}-00.h5_output_hdf5")
+    output: "{xml_base}-{file_id,\d+}-00.h5_output_hdf5"
     log: "logs/f3_resave_output-{file_id}.log"
     run:
         part_string = produce_string(
