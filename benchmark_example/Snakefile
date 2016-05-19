@@ -1,6 +1,9 @@
 import glob
 import os
 import time
+import subprocess
+import sys
+import snakemake
 
 app_to_bench = "/home/steinbac/development/pippel_numa_tests/dev/bin/daligner"
 data_to_use  = "/home/steinbac/development/pippel_numa_tests/dev-data"
@@ -16,40 +19,55 @@ temps_discovered = [ item for item in glob.glob("default-[0-9]*[0-9]") ]
 temps_discovered.extend(glob.glob("numa_*-[0-9]*[0-9]"))
 
 global_timestamp = int(time.time())
+common_csv_header = "app,elapsed_s,sys_cpu_s,user_cpu_s,n_threads,execution_mode,comment\n"
 
+nthreads = 4
+if len(config) and "nthreads" in config:
+    nthreads = int(config["nthreads"])
+
+def create_csv_with_header(_name, _header=common_csv_header):
+    if not os.path.exists(_name):
+        with open(_name,'a') as csvout:
+            csvout.write(_header)
+
+def symlink_all_in(_dest_dir, _files):
+    for f in _files:
+        fhead, ftail = os.path.split(f)
+        sym_dest = "{:s}/{:s}".format(_dest_dir,ftail)
+        if not os.path.exists(sym_dest):
+            os.symlink(f,sym_dest)
+            
+            
 rule all:
     input: expand("{dataset}-{ts}/d002_00001/TEST.1.TEST.1.las",dataset=["default","numa_preferred_same","numa_fixed_same","numa_fixed_other"],ts=global_timestamp)
-        
+
+
+
 rule default:
     input: "TEST.db", "test.fasta"
     params: local_workdir=os.path.abspath("{:s}/{:s}-{:d}".format(data_to_use,"default",global_timestamp))
-    
-    output: "default-{tid}/d002_00001/TEST.1.TEST.1.las".format(tid=global_timestamp)
-    benchmark: "results/default.tsv"
-    threads: 4
+    output: csvfile="results/default.csv", daligner_result="default-{tid}/d002_00001/TEST.1.TEST.1.las".format(tid=global_timestamp)
+    threads: nthreads
     log: "logs/default.log"
     run:
-        
-        if not os.path.exists(params.local_workdir):
-            os.mkdir(params.local_workdir)
-        
-        os.chdir(params.local_workdir)
-        for f in files:
-            fhead, ftail = os.path.split(f)
-            sym_dest = "{:s}/{:s}".format(params.local_workdir,ftail)
-            if not os.path.exists(sym_dest):
-                os.symlink(f,sym_dest)
+        create_csv_with_header(output.csvfile)
 
-        #print("{app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1".format(app_to_bench=app_to_bench, threads=threads))
-        shell("{app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1")
-        os.chdir(data_to_use)
+        os.chdir(params.local_workdir)
+        symlink_all_in(params.local_workdir,files)
         
+        cmd = "\\time -f \"%e,%S,%U\" {app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1".format(app_to_bench=app_to_bench, threads=threads)
+        print(">>",cmd)
+        process_output = subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        os.chdir(data_to_use)
+        with open(output.csvfile,'a') as csvout:
+            times = str(process_output.stderr,sys.stdout.encoding)
+            csvout.write("daligner,{:s},{:d},default,\n".format(times.rstrip("\n"),threads))
         
 
 # rule anywhereio:
 #     input: os.path.abspath("test.fasta")
-#     params: anywhere="/tmp"
-#     output: "{dir}/test".format(dir="/tmp")
+#     params: anywhere="/lustre/steinbac"
+#     output: "{dir}/test".format(dir="/lustre/steinbac/")
 #     benchmark: "results/testio.tsv"
 #     run:
 #         orig_pwd = os.path.abspath(os.curdir)
@@ -59,34 +77,69 @@ rule default:
         
 rule numa_preferred_same:
     input: "TEST.db", "test.fasta"
-    output: "d002_00001/TEST.1.TEST.1.las.numa_preferred_same"
-    benchmark: "results/numa_preferred_same.tsv"
+    params: local_workdir=os.path.abspath("{:s}/{:s}-{:d}".format(data_to_use,"numa_preferred_same",global_timestamp))
+    output: csvfile="results/numa_preferred_same.csv", daligner_result="numa_preferred_same-{tid}/d002_00001/TEST.1.TEST.1.las".format(tid=global_timestamp)
+    threads: nthreads
     log: "logs/numa_preferred_same.log"
-    shell: """
-    numactl -N0 --preferred=0 {app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1;
-    cp d002_00001/TEST.1.TEST.1.las {output}
-    """
+    run:
+        create_csv_with_header(output.csvfile)
 
+        os.chdir(params.local_workdir)
+        symlink_all_in(params.local_workdir,files)
+        
+        cmd = "\\time -f \"%e,%S,%U\" numactl -N0 --preferred=0 {app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1".format(app_to_bench=app_to_bench, threads=threads)
+        print(">>",cmd)
+        process_output = subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        os.chdir(data_to_use)
+        with open(output.csvfile,'a') as csvout:
+            times = str(process_output.stderr,sys.stdout.encoding)
+            csvout.write("daligner,{:s},{:d},numa_preferred_same,\n".format(times.rstrip("\n"),threads))
+            
 rule numa_fixed_same:
     input: "TEST.db", "test.fasta"
-    output: "d002_00001/TEST.1.TEST.1.las.numa_fixed_same"
-    benchmark: "results/numa_fixed_same.tsv"
+    params: local_workdir=os.path.abspath("{:s}/{:s}-{:d}".format(data_to_use,"numa_fixed_same",global_timestamp))
+    output: csvfile="results/numa_fixed_same.csv", daligner_result="numa_fixed_same-{tid}/d002_00001/TEST.1.TEST.1.las".format(tid=global_timestamp)
+    threads: nthreads
     log: "logs/numa_fixed_same.log"
-    shell: """
-    numactl -N0 -m0 {app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1;
-    cp d002_00001/TEST.1.TEST.1.las {output}
-    """
+    run:
+        create_csv_with_header(output.csvfile)
+
+        os.chdir(params.local_workdir)
+        symlink_all_in(params.local_workdir,files)
+        
+        cmd = "\\time -f \"%e,%S,%U\" numactl -N0 -m0 {app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1".format(app_to_bench=app_to_bench, threads=threads)
+        print(">>",cmd)
+        process_output = subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        os.chdir(data_to_use)
+        with open(output.csvfile,'a') as csvout:
+            times = str(process_output.stderr,sys.stdout.encoding)
+            csvout.write("daligner,{:s},{:d},numa_fixed_same,\n".format(times.rstrip("\n"),threads))
 
 rule numa_fixed_other:
     input: "TEST.db", "test.fasta"
-    output: "d002_00001/TEST.1.TEST.1.las.numa_fixed_other"
-    benchmark: "results/numa_fixed_other.tsv"
+    params: local_workdir=os.path.abspath("{:s}/{:s}-{:d}".format(data_to_use,"numa_fixed_other",global_timestamp))
+    output: csvfile="results/numa_fixed_other.csv", daligner_result="numa_fixed_other-{tid}/d002_00001/TEST.1.TEST.1.las".format(tid=global_timestamp)
+    threads: nthreads
     log: "logs/numa_fixed_other.log"
-    shell: """
-    numactl -N0 -m1 {app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1;
-    cp d002_00001/TEST.1.TEST.1.las {output}
-    """
+    run:
+        create_csv_with_header(output.csvfile)
+
+        os.chdir(params.local_workdir)
+        symlink_all_in(params.local_workdir,files)
+        
+        cmd = "\\time -f \"%e,%S,%U\" numactl -N0 -m1 {app_to_bench} -t 40 -r 2 -I -j{threads} TEST.1 TEST.1".format(app_to_bench=app_to_bench, threads=threads)
+        print(">>",cmd)
+        process_output = subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        os.chdir(data_to_use)
+        with open(output.csvfile,'a') as csvout:
+            times = str(process_output.stderr,sys.stdout.encoding)
+            csvout.write("daligner,{:s},{:d},numa_fixed_other,\n".format(times.rstrip("\n"),threads))
+
 
 rule clean:
-    message: "removing {temps_discovered}"
-    shell: "rm -rfv {temps_discovered}"
+    message: "removing {temps_discovered} results/ logs/"
+    shell: "rm -rfv {temps_discovered} results/ logs"
+
+rule debug:
+    threads: nthreads
+    shell: "echo threads {threads} nthreads {nthreads}" 
