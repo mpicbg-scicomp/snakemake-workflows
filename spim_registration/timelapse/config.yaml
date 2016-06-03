@@ -208,7 +208,7 @@ common: {
   # Directory that contains the cuda libraries
   directory_cuda: "/sw/users/schmied/cuda/",
   # xvfb 
-  fiji-prefix: "/sw/users/schmied/packages/xvfb-run -a",       # calls xvfb for Fiji headless mode
+  fiji-prefix: "xvfb-run -a",       # calls xvfb for Fiji headless mode
   sysconfcpus: "sysconfcpus -n",
   memory-prefix: "-Xmx"
   }
