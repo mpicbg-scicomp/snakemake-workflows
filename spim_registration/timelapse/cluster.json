@@ -10,25 +10,25 @@
     "hdf5_xml" :
     {
  	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\"",
-	"slurm_extra" : "--ntasks-per-node=3 -n 3 --mem-per-cpu=7000"
+	"slurm_extra" : "-n 1 -c 3 --mem-per-cpu=7000"
     },
 
     "resave_hdf5" :	
     {
  	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\"",
-	"slurm_extra" : "-n 3 --ntasks-per-node=3 --mem-per-cpu=7000"
+	"slurm_extra" : "-n 1 -c 3 --mem-per-cpu=7000"
     },
 
     "registration" :
     {
         "lsf_extra" : "-n 4 -R \"span[hosts=1] rusage[mem=40000]\"",
-	"slurm_extra" : "-n 4 --ntasks-per-node=4 --mem-per-cpu=10000"
+	"slurm_extra" : "-n 1 -c 4 --mem-per-cpu=10000"
     },
     
     "timelapse" : 
     {
     	"lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=50000]\"",
-	"slurm_extra" : "-n 6 --ntasks-per-node=6 --mem-per-cpu=10000"
+	"slurm_extra" : "-n 1 -c 6 --mem-per-cpu=10000"
     },
 
     "external_transfrom" :
@@ -40,7 +40,7 @@
     "fusion" : 
     {
         "lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=50000]\"",
-	"slurm_extra" : "-n 6 --ntasks-per-node=6 --mem-per-cpu=10000"
+	"slurm_extra" : "-n 1 -c 6 --mem-per-cpu=10000"
     },
 
     "deconvolution" :
@@ -54,7 +54,7 @@
     "resave_hdf5_output" :
     {
 	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\"",
-	"slurm_extra" : "-n 3 --ntasks-per-node=3 --mem-per-cpu=7000"
+	"slurm_extra" : "-n 1 -c 3 --mem-per-cpu=7000"
     }
 }
 
