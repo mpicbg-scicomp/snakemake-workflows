@@ -1,0 +1,17 @@
+import os
+import glob
+
+input_files = glob.glob("*y4m")
+
+configfile: "scan.yaml"
+
+param_set = {}
+for k,v in confg.items():
+    if "global" not in k:
+        param_set[k] = v
+
+
+rule print:
+    run:
+        for k,v in param_set:
+            print("{:10s} \t {s}".format(k,v))

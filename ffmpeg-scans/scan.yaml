@@ -1,0 +1,21 @@
+global: {
+  
+
+  }
+
+
+x264: {
+  preset: ["ultrafast","superfast","slower","veryslow"],
+  tune: ["", "psnr","ssim","zerolatency"]
+  #TODO: qp=0 lossless?
+  #TODO: crf
+  
+  }
+  
+
+x265: {
+  preset: ["ultrafast","superfast","slower","veryslow"],
+  tune: ["", "psnr","ssim","zerolatency"]
+  #TODO: lossless
+
+  }
