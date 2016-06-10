@@ -52,12 +52,12 @@ for f in input_files:
         (head,tail) = os.path.splitext(f)
         
         if "output_path" in config["global"]:
+            (old_path,filename) = os.path.split(f)
             if len(config["global"]["output_path"])>0:
                 mkdir_if_not_present(config["global"]["output_path"])
-            (old_path,filename) = os.path.split(f)
-            head = config["global"]["output_path"]
-            head += "/"
-            head += os.path.splitext(filename)[0]
+                head = config["global"]["output_path"]
+                head += "/"
+                head += os.path.splitext(os.path.split(f)[-1])[0]
         else:
             print(">> no output_path !")
             print(config["global"])
@@ -110,7 +110,7 @@ rule x264:
         except Exception as exc:
             print("ERROR!")
             print(process_output)
-            print(exc.what())
+            print(exc)
 
         with open(config["global"]["csv_output"],'a') as csvout:
             cleaned_output = str(process_output,sys.stdout.encoding)
@@ -132,9 +132,60 @@ rule x264:
     
 rule x265:
     input : "{basename}.y4m"
-    output : "{basename}_x265_{mode}_{tune}_{preset}.hevc"
+    output : "{outputpath}/{basename}_x265_lossless_{tune}_{preset}.hevc", "{outputpath}/{basename}_x265_lossy_{tune}_{preset}.hevc"
+    threads : config["x265"]["nthreads"]
     run :
-        shell("touch "+output[0])
+        create_csv_with_header(config["global"]["csv_output"],
+                               config["global"]["csv_header"])
+
+        cmd = "\\time -f \"%e\" ffmpeg -y -i {inputfile} -vcodec libx265 ".format(inputfile=input[0])
+
+        cmd += " -x265-params pool=-,+:"
+        if "mode" in wildcards.keys():
+            cmd += param_set["x264"]["mode_flag"][wildcards["mode"]]
+        
+
+        if "tune" in wildcards.keys():
+            if "default" not in wildcards["tune"]:
+                cmd += " -tune "+wildcards["tune"]
+            
+        if "preset" in wildcards.keys():
+            if "default" not in wildcards["preset"]:
+                cmd += " -preset "+wildcards["preset"]
+
+        
+        for o in output:
+            
+            ocmd = cmd + " "+o
+            if output.index(o) % 2 != 0:
+                ocmd = ocmd.replace("-,+","+,-")
+                
+            print(">\t>>",ocmd)
+            process_output = None
+            try:
+                process_output = subprocess.check_output(ocmd,stderr=subprocess.STDOUT,shell=True)
+            except Exception as exc:
+                print("ERROR!")
+                print(process_output)
+                print(exc.what())
+
+            with open(config["global"]["csv_output"],'a') as csvout:
+                cleaned_output = str(process_output,sys.stdout.encoding)
+                times = cleaned_output.rstrip("\n").split("\n")[-1]
+                    
+                csvout.write("{:s},{:f},{:s},{:s},{:f},{:s},{:d}\n".format(
+                    input[0],
+                    os.stat(input[0]).st_size/float(1<<20),
+                    "x264",
+                    times,
+                    os.stat(output[0]).st_size/float(1<<20),
+                    "{mode}_{tune}_{preset}".format(mode=wildcards["mode"],
+                                                    tune=wildcards["tune"],
+                                                    preset=wildcards["preset"]
+                    ),
+                    4
+                )
+                )
              
 rule print:
     run:

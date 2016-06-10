@@ -17,7 +17,8 @@ x264: {
 x265: {
   preset: ["default","ultrafast","superfast","slower","veryslow"],
   tune: ["default", "psnr","ssim","zerolatency"],
-  mode_flag: { "lossy" : "", "lossless": "--lossless"},
-  extension: ".hevc"
+  mode_flag: { "lossy" : "", "lossless": "lossless=1"},
+  extension: ".hevc",
+  nthreads: 16
   #TODO: crf or similar?
 }
