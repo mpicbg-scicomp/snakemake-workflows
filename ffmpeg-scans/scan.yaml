@@ -1,21 +1,23 @@
 global: {
-  
-
-  }
+  csv_output : "ffmpeg_scan.csv",
+  csv_header : ["filename","inputsize_MB","encoder","realtime_s","encodedsize_MB","commandtag","nthreads"],
+  output_path : "/scratch/steinbac"
+}
 
 
 x264: {
-  preset: ["ultrafast","superfast","slower","veryslow"],
-  tune: ["", "psnr","ssim","zerolatency"]
-  #TODO: qp=0 lossless?
+  preset: ["default", "ultrafast","superfast","slower","veryslow"],
+  tune: ["default", "psnr","ssim","zerolatency"],
+  mode_flag: { "lossy" : "", "lossless": "-qp 0"},
+  extension: ".h264"
   #TODO: crf
-  
-  }
+}
   
 
 x265: {
-  preset: ["ultrafast","superfast","slower","veryslow"],
-  tune: ["", "psnr","ssim","zerolatency"]
-  #TODO: lossless
-
-  }
+  preset: ["default","ultrafast","superfast","slower","veryslow"],
+  tune: ["default", "psnr","ssim","zerolatency"],
+  mode_flag: { "lossy" : "", "lossless": "--lossless"},
+  extension: ".hevc"
+  #TODO: crf or similar?
+}

@@ -1,17 +1,147 @@
 import os
 import glob
+import subprocess
 
+
+def create_csv_with_header(_name, _header):
+    if not os.path.exists(_name):
+        with open(_name,'a') as csvout:
+            header_str = ""
+            if type(_header) == type(list()):
+                header_str = ",".join(_header)
+            else:
+                header_str = _header
+            if not header_str.endswith("\n"):
+                header_str += "\n"
+                
+            csvout.write(header_str)
+
+
+def mkdir_if_not_present(_path):
+    if not os.path.exists(_path):
+        os.mkdir(_path)
+        
 input_files = glob.glob("*y4m")
 
 configfile: "scan.yaml"
 
+csv_file = config["global"]["csv_output"]
 param_set = {}
-for k,v in confg.items():
+for k,v in config.items():
     if "global" not in k:
         param_set[k] = v
 
 
+commands = {}
+for enc in param_set.keys():
+    commands[enc] = []
+    for mf in param_set[enc]["mode_flag"]:
+        for t in param_set[enc]["tune"]:
+            for p in param_set[enc]["preset"]:
+                cmd = "_".join([enc,mf,p,t])
+                if cmd.endswith("_"):
+                    cmd = cmd.rstrip("_")
+                commands[enc].append(cmd)
+
+all_outputs = []
+expected_output = {}
+for f in input_files:
+    for enc,fid in commands.items():
+        if enc not in expected_output.keys():
+            expected_output[enc] = []
+        (head,tail) = os.path.splitext(f)
+        
+        if "output_path" in config["global"]:
+            if len(config["global"]["output_path"])>0:
+                mkdir_if_not_present(config["global"]["output_path"])
+            (old_path,filename) = os.path.split(f)
+            head = config["global"]["output_path"]
+            head += "/"
+            head += os.path.splitext(filename)[0]
+        else:
+            print(">> no output_path !")
+            print(config["global"])
+            
+                
+        if enc in param_set:
+            tail = param_set[enc]["extension"]
+        for i in fid:
+            newfilename = head+"_"+i+tail
+            expected_output[enc].append(newfilename)
+            all_outputs.append(newfilename)
+
+rule all:
+    input : all_outputs
+
+rule h264:
+    input : expected_output["x264"]
+
+rule h265:
+    input : expected_output["x265"]
+
+                            
+rule x264:
+    input : "{basename}.y4m"
+    output : "{outputpath}/{basename}_x264_{mode}_{preset}_{tune}.h264"
+    threads : 4
+    run : 
+        create_csv_with_header(config["global"]["csv_output"],
+                               config["global"]["csv_header"])
+
+        cmd = "\\time -f \"%e\" ffmpeg -y -i {inputfile} -vcodec libx264 -threads 4 ".format(inputfile=input[0])
+
+        if "mode" in wildcards.keys():
+            cmd += " "+param_set["x264"]["mode_flag"][wildcards["mode"]]
+
+        if "tune" in wildcards.keys():
+            if "default" not in wildcards["tune"]:
+                cmd += " -tune "+wildcards["tune"]
+            
+        if "preset" in wildcards.keys():
+            if "default" not in wildcards["preset"]:
+                cmd += " -preset "+wildcards["preset"]
+                
+        cmd += " "+output[0]
+        
+        print(">\t>>",cmd)
+        process_output = None
+        try:
+            process_output = subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+        except Exception as exc:
+            print("ERROR!")
+            print(process_output)
+            print(exc.what())
+
+        with open(config["global"]["csv_output"],'a') as csvout:
+            cleaned_output = str(process_output,sys.stdout.encoding)
+            times = cleaned_output.rstrip("\n").split("\n")[-1]
+            
+            csvout.write("{:s},{:f},{:s},{:s},{:f},{:s},{:d}\n".format(
+                input[0],
+                os.stat(input[0]).st_size/float(1<<20),
+                "x264",
+                times,
+                os.stat(output[0]).st_size/float(1<<20),
+                "x264_{mode}_{tune}_{preset}".format(mode=wildcards["mode"],
+                                                     tune=wildcards["tune"],
+                                                     preset=wildcards["preset"]
+                ),
+                4
+            )
+            )
+    
+rule x265:
+    input : "{basename}.y4m"
+    output : "{basename}_x265_{mode}_{tune}_{preset}.hevc"
+    run :
+        shell("touch "+output[0])
+             
 rule print:
     run:
-        for k,v in param_set:
-            print("{:10s} \t {s}".format(k,v))
+        for k,v in param_set.items():
+            print("{:10s} \t {:s}".format(k,str(v)))
+            for o in expected_output[k]:
+                print("\t",o)
+
+rule clean:
+    shell: "rm -rf {all_outputs} {csv_file}"
