@@ -122,9 +122,9 @@ rule x264:
                 "x264",
                 times,
                 os.stat(output[0]).st_size/float(1<<20),
-                "x264_{mode}_{tune}_{preset}".format(mode=wildcards["mode"],
-                                                     tune=wildcards["tune"],
-                                                     preset=wildcards["preset"]
+                "{mode}_{tune}_{preset}".format(mode=wildcards["mode"],
+                                                tune=wildcards["tune"],
+                                                preset=wildcards["preset"]
                 ),
                 4
             )
