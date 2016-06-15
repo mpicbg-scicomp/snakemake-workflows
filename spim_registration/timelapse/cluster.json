@@ -2,48 +2,59 @@
     "__default__" :
     {
 	"lsf_extra" : "-R \"span[hosts=1]\"",
-	"lsf_q" : "short"	
+	"slurm_extra" : "",
+	"lsf_q" : "short",
+	"slurm_q" : "--time=00:45:00"
     },
     
     "hdf5_xml" :
     {
- 	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\""
+ 	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\"",
+	"slurm_extra" : "-n 1 -c 3 --mem-per-cpu=7000"
     },
 
     "resave_hdf5" :	
     {
- 	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\""
+ 	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\"",
+	"slurm_extra" : "-n 1 -c 3 --mem-per-cpu=7000"
     },
 
     "registration" :
     {
-        "lsf_extra" : "-n 4 -R \"span[hosts=1] rusage[mem=40000]\""
+        "lsf_extra" : "-n 4 -R \"span[hosts=1] rusage[mem=40000]\"",
+	"slurm_extra" : "-n 1 -c 4 --mem-per-cpu=10000"
     },
     
     "timelapse" : 
     {
-    	"lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=50000]\""
+    	"lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=50000]\"",
+	"slurm_extra" : "-n 1 -c 6 --mem-per-cpu=10000"
     },
 
     "external_transfrom" :
     {
-        "lsf_extra" : "-R \"span[hosts=1] rusage[mem=10000]\""
+        "lsf_extra" : "-R \"span[hosts=1] rusage[mem=10000]\"",
+	"slurm_extra" : "-n 1 --mem-per-cpu=10000"
     },
 
     "fusion" : 
     {
         "lsf_extra" : "-n 6 -R \"span[hosts=1] rusage[mem=50000]\"",
-        "lsf_q" : "short"
+	"slurm_extra" : "-n 1 -c 6 --mem-per-cpu=10000"
     },
 
     "deconvolution" :
     {
         "lsf_extra" : "-n 12 -R \"span[hosts=1] rusage[mem=110000]\"",
-	"lsf_q" : "gpu"
+	"lsf_q" : "gpu",
+	"slurm_extra" : "-N 1 --exclusive",
+	"slurm_q" : "--time=08:00:00"
     },
     
     "resave_hdf5_output" :
     {
-	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\""
+	"lsf_extra" : "-n 3 -R \"span[hosts=1] rusage[mem=20000]\"",
+	"slurm_extra" : "-n 1 -c 3 --mem-per-cpu=7000"
     }
 }
+
