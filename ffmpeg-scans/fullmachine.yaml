@@ -1,26 +1,26 @@
 global: {
-  csv_output : "ffmpeg_scan.csv",
+  csv_output : "ffmpeg_full_machine.csv",
   csv_header : ["filename","inputsize_MB","encoder","realtime_s","encodedsize_MB","commandtag","nthreads","mse","psnr"],
-  output_path : "/tmp",
+  output_path : "/scratch/steinbac/",
   sqy_app : "/home/steinbac/development/sqeazy/build/cpp/src/sqy"
 }
 
 
 x264: {
-  preset: ["default", "ultrafast","superfast","slower","veryslow"],
-  tune: ["default", "psnr","ssim","zerolatency"],
+  preset: ["default", "ultrafast","superfast"],
+  tune: ["default", "psnr"],
   mode_flag: { "lossy" : "", "lossless": "-qp 0"},
   extension: ".h264",
-  nthreads: 8  
+  nthreads: 16 
   #TODO: crf
 }
   
 
 x265: {
-  preset: ["default","ultrafast","superfast","slower","veryslow"],
+  preset: ["default","ultrafast","superfast"],
   tune: ["default", "psnr","ssim"],
   mode_flag: { "lossy" : "", "lossless": "lossless=1"},
   extension: ".hevc",
-  nthreads: 8
+  nthreads: 16
   #TODO: crf or similar?
 }

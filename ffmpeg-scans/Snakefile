@@ -1,29 +1,11 @@
 import os
 import glob
 import subprocess
-
-
-def create_csv_with_header(_name, _header):
-    if not os.path.exists(_name):
-        with open(_name,'a') as csvout:
-            header_str = ""
-            if type(_header) == type(list()):
-                header_str = ",".join(_header)
-            else:
-                header_str = _header
-            if not header_str.endswith("\n"):
-                header_str += "\n"
-                
-            csvout.write(header_str)
-
-
-def mkdir_if_not_present(_path):
-    if not os.path.exists(_path):
-        os.mkdir(_path)
-        
-input_files = glob.glob("*y4m")
+from ffmpegutils import *
 
 configfile: "scan.yaml"
+        
+input_files = glob.glob("*y4m")
 
 csv_file = config["global"]["csv_output"]
 param_set = {}
@@ -43,7 +25,7 @@ for enc in param_set.keys():
                     cmd = cmd.rstrip("_")
                 commands[enc].append(cmd)
 
-all_outputs = []
+wanted_outputs = []
 expected_output = {}
 for f in input_files:
     for enc,fid in commands.items():
@@ -68,10 +50,13 @@ for f in input_files:
         for i in fid:
             newfilename = head+"_"+i+tail
             expected_output[enc].append(newfilename)
-            all_outputs.append(newfilename)
+            wanted_outputs.append(newfilename)
+            wanted_outputs.append(head+"_"+i+"_rt.y4m")
 
+
+            
 rule all:
-    input : all_outputs
+    input : wanted_outputs
 
 rule h264:
     input : expected_output["x264"]
@@ -82,13 +67,14 @@ rule h265:
                             
 rule x264:
     input : "{basename}.y4m"
-    output : "{outputpath}/{basename}_x264_{mode}_{preset}_{tune}.h264"
-    threads : 4
+    output : "{outputpath}/{basename}_x264_{mode}_{preset}_{tune}.h264", "{outputpath}/{basename}_x264_{mode}_{preset}_{tune}_rt.y4m" 
+    threads : config["x264"]["nthreads"]
     run : 
         create_csv_with_header(config["global"]["csv_output"],
                                config["global"]["csv_header"])
 
-        cmd = "\\time -f \"%e\" ffmpeg -y -i {inputfile} -vcodec libx264 -threads 4 ".format(inputfile=input[0])
+        cmd = "\\time -f \"%e\" ffmpeg -y -i {inputfile} -vcodec libx264 -threads {nthreads} ".format(inputfile=input[0],
+                                                                                                      nthreads=threads)
 
         if "mode" in wildcards.keys():
             cmd += " "+param_set["x264"]["mode_flag"][wildcards["mode"]]
@@ -102,21 +88,62 @@ rule x264:
                 cmd += " -preset "+wildcards["preset"]
                 
         cmd += " "+output[0]
-        
-        print(">\t>>",cmd)
+
+        #forward
+        print("\t",cmd)
         process_output = None
         try:
             process_output = subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
         except Exception as exc:
-            print("ERROR!")
+            print("ERROR during x264 video encoding")
             print(process_output)
             print(exc)
-
-        with open(config["global"]["csv_output"],'a') as csvout:
+            raise
+        else:
             cleaned_output = str(process_output,sys.stdout.encoding)
             times = cleaned_output.rstrip("\n").split("\n")[-1]
+
+        if not os.path.isfile(output[0]) and os.stat(output[0]).st_size > 0:
+            print("YIKES, ",output[0],"does not exist")
+            raise Exception("[x264 video encoding]\t{fname} was not created!".format(fname=output[0]))
             
-            csvout.write("{:s},{:f},{:s},{:s},{:f},{:s},{:d}\n".format(
+        #backward
+        roundtrip = output[-1]
+        cmd = "ffmpeg -y -i {encoded} {roundtrip}".format(encoded=output[0],roundtrip=roundtrip)
+        print("\t",cmd)
+        process_output = None
+        try:
+            process_output = subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+        except Exception as exc:
+            print("ERROR during x264 video decoding")
+            print(process_output)
+            print(exc)
+            raise
+
+        if not os.path.isfile(roundtrip) and os.stat(roundtrip).st_size > 0:
+            print("YIKES, ",roundtrip,"does not exist")
+            raise Exception("[x264 video decoding]\t{fname} was not created!".format(fname=roundtrip))
+        
+        #comparison
+        cmd = "{sqy_app} compare -m \"mse,psnr\" {inputfile} {roundtrip}".format(sqy_app=config["global"]["sqy_app"],
+                                                                                 inputfile=input[0],
+                                                                                 roundtrip=roundtrip)
+        print("\t",cmd)
+        process_output = None
+        try:
+            process_output = subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+        except Exception as exc:
+            print("ERROR during x264 file comparison")
+            print(process_output)
+            print(exc)
+            raise
+        else:
+            cleaned_output = str(process_output,sys.stdout.encoding)
+            quality = cleaned_output.rstrip("\n").split("\n")[-1]
+            
+        with open(config["global"]["csv_output"],'a') as csvout:
+            
+            csvout.write("{:s},{:f},{:s},{:s},{:f},{:s},{:d},{:s}\n".format(
                 input[0],
                 os.stat(input[0]).st_size/float(1<<20),
                 "x264",
@@ -126,13 +153,15 @@ rule x264:
                                                 tune=wildcards["tune"],
                                                 preset=wildcards["preset"]
                 ),
-                4
+                4,
+                quality
             )
             )
     
 rule x265:
     input : "{basename}.y4m"
-    output : "{outputpath}/{basename}_x265_lossless_{tune}_{preset}.hevc", "{outputpath}/{basename}_x265_lossy_{tune}_{preset}.hevc"
+    output : "{outputpath}/{basename}_x265_{mode}_{preset}_{tune}.hevc", "{outputpath}/{basename}_x265_{mode}_{preset}_{tune}_rt.y4m"
+    
     threads : config["x265"]["nthreads"]
     run :
         create_csv_with_header(config["global"]["csv_output"],
@@ -140,11 +169,7 @@ rule x265:
 
         cmd = "\\time -f \"%e\" ffmpeg -y -i {inputfile} -vcodec libx265 ".format(inputfile=input[0])
 
-        cmd += " -x265-params pool=-,+:"
-        if "mode" in wildcards.keys():
-            cmd += param_set["x264"]["mode_flag"][wildcards["mode"]]
         
-
         if "tune" in wildcards.keys():
             if "default" not in wildcards["tune"]:
                 cmd += " -tune "+wildcards["tune"]
@@ -153,39 +178,72 @@ rule x265:
             if "default" not in wildcards["preset"]:
                 cmd += " -preset "+wildcards["preset"]
 
-        
-        for o in output:
-            
-            ocmd = cmd + " "+o
-            if output.index(o) % 2 != 0:
-                ocmd = ocmd.replace("-,+","+,-")
-                
-            print(">\t>>",ocmd)
-            process_output = None
-            try:
-                process_output = subprocess.check_output(ocmd,stderr=subprocess.STDOUT,shell=True)
-            except Exception as exc:
-                print("ERROR!")
-                print(process_output)
-                print(exc.what())
 
-            with open(config["global"]["csv_output"],'a') as csvout:
-                cleaned_output = str(process_output,sys.stdout.encoding)
-                times = cleaned_output.rstrip("\n").split("\n")[-1]
-                    
-                csvout.write("{:s},{:f},{:s},{:s},{:f},{:s},{:d}\n".format(
-                    input[0],
-                    os.stat(input[0]).st_size/float(1<<20),
-                    "x264",
-                    times,
-                    os.stat(output[0]).st_size/float(1<<20),
-                    "{mode}_{tune}_{preset}".format(mode=wildcards["mode"],
-                                                    tune=wildcards["tune"],
-                                                    preset=wildcards["preset"]
-                    ),
-                    4
-                )
-                )
+        cmd += " -x265-params \"frame-threads={nthreads}".format(nthreads=threads)
+        if "lossless" in wildcards["mode"]:
+            cmd += ":"+param_set["x265"]["mode_flag"]["lossless"]
+            omode="lossless"
+        else:
+            omode="lossy"
+        cmd += "\" "+output[0]
+
+        print("\t",cmd)
+        process_output = None
+        try:
+            process_output = subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+        except Exception as exc:
+            print("ERROR during x265 encoding!")
+            print(process_output)
+            print(exc)
+            raise
+        else:
+            cleaned_output = str(process_output,sys.stdout.encoding)
+            times = cleaned_output.rstrip("\n").split("\n")[-1]
+
+        roundtrip = output[-1]
+        cmd = "ffmpeg -y -i "+output[0]+" "+roundtrip
+        print("\t",cmd)
+        process_output = None
+        try:
+            process_output = subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+        except Exception as exc:
+            print("ERROR during x265 decoding!")
+            print(process_output)
+            print(exc)
+            raise
+
+        cmd = "{sqy_app} compare -m \"mse,psnr\" {inputfile} {roundtrip}".format(sqy_app=config["global"]["sqy_app"],
+                                                                                   inputfile=input[0],
+                                                                                   roundtrip=roundtrip)
+        print("\t",cmd)
+        process_output = None
+        try:
+            process_output = subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+        except Exception as exc:
+            print("ERROR during x265 file comparison!")
+            print(process_output)
+            print(exc)
+            raise
+        else:
+            cleaned_output = str(process_output,sys.stdout.encoding)
+            quality = cleaned_output.rstrip("\n").split("\n")[-1]
+
+        with open(config["global"]["csv_output"],'a') as csvout:
+
+            csvout.write("{:s},{:f},{:s},{:s},{:f},{:s},{:d},{:s}\n".format(
+                input[0],
+                os.stat(input[0]).st_size/float(1<<20),
+                "x265",
+                times,
+                os.stat(output[0]).st_size/float(1<<20),
+                "{mode}_{tune}_{preset}".format(mode=omode,
+                                                tune=wildcards["tune"],
+                                                preset=wildcards["preset"]
+                ),
+                config["x265"]["nthreads"],
+                quality
+            )
+            )
              
 rule print:
     run:
@@ -193,6 +251,14 @@ rule print:
             print("{:10s} \t {:s}".format(k,str(v)))
             for o in expected_output[k]:
                 print("\t",o)
-
+        print(config)
+        #print(wanted_outputs)
+        
 rule clean:
-    shell: "rm -rf {all_outputs} {csv_file}"
+    run:
+        for f in wanted_outputs:
+            if os.path.exists(f):
+                os.remove(f)
+
+        if os.path.exists(csv_file):
+            os.remove(csv_file)
