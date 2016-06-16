@@ -3,9 +3,11 @@ import glob
 import subprocess
 from ffmpegutils import *
 
-configfile: "scan.yaml"
-        
+# configfile:
+#     "config.yaml"
+    
 input_files = glob.glob("*y4m")
+
 
 csv_file = config["global"]["csv_output"]
 param_set = {}
@@ -153,7 +155,7 @@ rule x264:
                                                 tune=wildcards["tune"],
                                                 preset=wildcards["preset"]
                 ),
-                4,
+                config["x264"]["nthreads"],
                 quality
             )
             )
