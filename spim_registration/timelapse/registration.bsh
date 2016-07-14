@@ -97,6 +97,7 @@ System.out.println( "downsample_z = " + downsample_z );
 if (downsample_detection.equalsIgnoreCase("Yes") )
 {
 	System.out.println( "Downsampling is turned on" );
+	downsample_images = "downsample_images ";
 	downsample_string = "downsample_xy=[" + downsample_xy + "] " +
 				"downsample_z=" + downsample_z + " ";
 }
@@ -104,6 +105,7 @@ if (downsample_detection.equalsIgnoreCase("Yes") )
 else if (downsample_detection.equalsIgnoreCase("No") )
 {
 	System.out.println( "Downsampling is turned off" );
+	downsample_images = "";
 	downsample_string = "";
 }
 
@@ -331,6 +333,7 @@ else
 	System.out.println( "Settings for [Difference of Gaussian:compute on] is bad" );
 }
 
+System.out.println( "downsample_images = " + downsample_images );
 System.out.println( "downsample = " + downsample_string );
 System.out.println( "Processing Channel = " + processing_channel_string );
 System.out.println( "Channel String: " + channel_string );
@@ -437,6 +440,7 @@ System.out.println("(Detect Interest Points for Registration , select_xml=" + xm
 	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " +
 	"type_of_interest_point_detection=[" + type_of_detection + "] " +
 	"label_interest_points=" + label_interest_points + " " +
+	downsample_images +
 	"subpixel_localization=[" + subpixel_localization + "] " +
 	downsample_string +
 	channel_string + "" +
@@ -457,6 +461,7 @@ IJ.run("Detect Interest Points for Registration",
 	"processing_timepoint=[Timepoint " + parallel_timepoints + "] " +
 	"type_of_interest_point_detection=[" + type_of_detection + "] " +
 	"label_interest_points=" + label_interest_points + " " +
+        downsample_images +
 	"subpixel_localization=[" + subpixel_localization + "] " +
 	downsample_string +
 	channel_string + "" +
