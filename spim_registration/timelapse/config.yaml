@@ -375,7 +375,7 @@ fusion: {
   process_angle: '"All angles"',
   process_channel: '"All channels"',
   process_illumination: '"All illuminations"',
-  imglib2_container_fusion: '"ArrayImg"', # For larger datasets use: '"[CellImg (large images)]"'
+  imglib2_container_fusion: '"ArrayImg"', # '"ArrayImg"' for larger datasets use: '"[CellImg (large images)]"'
   interpolation: '"Linear Interpolation"',
   pixel_type: '"16-bit unsigned integer"',
   imglib2_data_container: '"ArrayImg (faster)"',
