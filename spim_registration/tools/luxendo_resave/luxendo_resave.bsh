@@ -36,7 +36,7 @@ IJ.run("Scriptable load HDF5...",
 
 // Resaves to .tif
 System.out.println( "Save as .tif" ) ;
-IJ.saveAs("Tiff", dir + "lux_TP" + IJ.pad( timepoint, pad) + "_Angle" + angle + "_Cam1.tif");
+IJ.saveAs("Tiff", dir + "lux_TP" + IJ.pad( timepoint, pad) + "_Angle" + angle + "_Cam0.tif");
 imp1 = IJ.getImage();
 imp1.close();
 
@@ -51,7 +51,7 @@ IJ.run("TransformJ Mirror", "x-mirror");
 
 // saves to .tif
 System.out.println( "Save as .tif" ) ;
-IJ.saveAs("Tiff", dir + "lux_TP" + IJ.pad( timepoint, pad) + "_Angle" + angle + "_Cam2.tif");
+IJ.saveAs("Tiff", dir + "lux_TP" + IJ.pad( timepoint, pad) + "_Angle" + angle + "_Cam1.tif");
 
 /* shutdown */
 runtime.exit(0);
