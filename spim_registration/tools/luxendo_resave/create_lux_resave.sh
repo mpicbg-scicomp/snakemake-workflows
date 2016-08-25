@@ -15,16 +15,20 @@ for timepoint in ${timepoints}
 do
 	for angle in ${angles}
 	do
-		job="$jobs_luxendo/resave-${timepoint}-${angle}.job"
-		echo $job
-		echo "${XVFB_RUN} ${sysconfcpus} ${Fiji_lux} \
-			-Ddir=${image_file_directory} \
-			-Dangledir=${view_directory} \
-			-Dtimepoint=${timepoint} \
-			-Dangle=${angle} \
-			-Dpad=${pad} \
-			-- --no-splash ${luxendo_resave}" >> "${job}"
-		chmod a+x "${job}"
+	
+		for channel in ${channels}
+		do
+			job="$jobs_luxendo/resave-${timepoint}-${angle}.job"
+			echo $job
+			echo "${XVFB_RUN} ${sysconfcpus} ${Fiji_lux} \
+				-Ddir=${image_file_directory} \
+				-Dtimepoint=${timepoint} \
+				-Dangle=${angle} \
+				-Dchannel=${channel} \
+				-Dpad=${pad} \
+				-- --no-splash ${luxendo_resave}" >> "${job}"
+			chmod a+x "${job}"
+		done
 	done
 timepoint=$((${timepoint} + 1))
 

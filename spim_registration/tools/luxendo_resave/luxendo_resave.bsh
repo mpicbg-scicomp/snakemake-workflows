@@ -12,27 +12,27 @@ System.out.println( "=======================================================" );
 System.out.println( "Load Parameters" ) ;
 
 dir = System.getProperty( "dir" );
-angledir = System.getProperty( "angledir" );
 
 int timepoint = Integer.parseInt( System.getProperty( "timepoint" ) );
 
 int pad = Integer.parseInt( System.getProperty( "pad" ) );
 
 angle = System.getProperty( "angle" );
+channel = System.getProperty( "channel" );
 
 // Prints Parameters into output file
 System.out.println( "directory = " + dir );
-System.out.println( "directory of angles = " + angledir );
 
 System.out.println( "timepoint = " + timepoint );
 System.out.println( "pad = " + pad );
 System.out.println( "angle = " + angle );
+System.out.println( "Channel = " + channel );
 
 // Executes Fiji Plugin HDF5 to open .h5 from left camera
 System.out.println( "=======================================================" );
 System.out.println( "Opening Image from left Cam" ) ;
 IJ.run("Scriptable load HDF5...", 
-	   "load=" + dir + angledir + angle + "/" + "Cam_Left_" + IJ.pad( timepoint, pad) + ".h5 datasetnames=Data nframes=1 nchannels=1");
+	   "load=" + dir + "stack_" + angle + "_channel_" + channel + "/" + "Cam_Left_" + IJ.pad( timepoint, pad) + ".h5 datasetnames=Data nframes=1 nchannels=1");
 
 // Resaves to .tif
 System.out.println( "Save as .tif" ) ;
@@ -43,7 +43,7 @@ imp1.close();
 // Opens stack from right camera
 System.out.println( "Opening Image from right Cam" ) ;
 IJ.run("Scriptable load HDF5...", 
-	   "load=" + dir + angledir + angle + "/" + "Cam_Right_" + IJ.pad( timepoint, pad) + ".h5 datasetnames=Data nframes=1 nchannels=1");
+	   "load=" + dir + "stack_" + angle + "_channel_" + channel + "/" + "Cam_Right_" + IJ.pad( timepoint, pad) + ".h5 datasetnames=Data nframes=1 nchannels=1");
 
 // Mirrors stack from right camera around x-axis
 System.out.println( "Mirroring Image from right Cam" ) ;

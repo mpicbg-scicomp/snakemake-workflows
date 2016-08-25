@@ -20,7 +20,7 @@
 # 
 #===============================================================================
 # directory of data, don't forget / at the end!
-image_file_directory="/projects/pilot_spim/EMBO/Pavel/"
+image_file_directory="/projects/pilot_spim/EMBO/Pavel/timelapse/"
 
 # --- jobs directory -----------------------------------------------------------
 job_directory="/projects/pilot_spim/Christopher/snakemake-workflows/spim_registration/tools/"
@@ -31,14 +31,11 @@ job_directory="/projects/pilot_spim/Christopher/snakemake-workflows/spim_registr
 # carry the index (0)
 #-------------------------------------------------------------------------------
 first_file="2015-02-21_LZ1_Stock68_3.czi" # name of the first czi or ometiff file
-timepoints="0" # number of time points format: "`seq 0 1`"
+timepoints="`seq 0 100`" # number of time points format: "`seq 0 1`"
 angles="0 1 2 3 4" # angles format: "1 2 3"
+channels="0" # channels format: "0 1 2"
 pad="5"		# for padded zeros
 first_timepoint="0"	# First .tif needs to start with 0 for workflow
-# ------------------------------------------------------------------------------
-# Settings specific for luxendo .h5
-# ------------------------------------------------------------------------------
-view_directory="view"
 #-------------------------------------------------------------------------------
 # Fiji settings
 #-------------------------------------------------------------------------------
