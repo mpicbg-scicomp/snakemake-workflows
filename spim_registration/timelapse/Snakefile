@@ -348,7 +348,7 @@ rule fusion:
 
 rule external_transform:
     input: rules.timelapse.output[0], merged_xml="{xml_base}_merge.xml"
-    output: rules.timelapse.output[0] + "_external_trafo"
+    output: rules.timelapse.output[0] + config["common"]["external_trafo_switch"]
     log: "logs/e2_external_transform.log"
     run:
         cmd_string = produce_string(
