@@ -58,7 +58,8 @@ rule define_xml_czi:
            config["define_xml_czi"],
            jdir=JOBDIR,
            first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
-           path_bsh=config["common"]["bsh_directory"] + config["define_xml_czi"]["bsh_file"])
+           path_bsh=os.path.join(config["common"]["bsh_directory"],config["define_xml_czi"]["bsh_file"])
+        )
         cmd_string += " > {log} 2>&1"
         shell(cmd_string)
 
@@ -95,7 +96,7 @@ rule define_xml_tif:
            config["define_xml_tif"],
            jdir=JOBDIR,
            first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
-           path_bsh=config["common"]["bsh_directory"] + config["define_xml_tif"]["bsh_file"],
+           path_bsh=os.path.join(config["common"]["bsh_directory"],config["define_xml_tif"]["bsh_file"]),
            timepoints="0-"+str(int(config["common"]["ntimepoints"])-1)
         )
 
@@ -131,7 +132,7 @@ rule hdf5_xml:
            config["resave_hdf5"],
            jdir=JOBDIR,
            first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"])
+           path_bsh=os.path.join(config["common"]["bsh_directory"],config["resave_hdf5"]["bsh_file"]))
 
         part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
@@ -164,7 +165,7 @@ rule resave_hdf5:
            config["resave_hdf5"],
            jdir=JOBDIR,
            first_xml_filename=config["common"]["hdf5_xml_filename"].strip('\"') + "_first",
-           path_bsh=config["common"]["bsh_directory"] + config["resave_hdf5"]["bsh_file"],
+           path_bsh=os.path.join(config["common"]["bsh_directory"],config["resave_hdf5"]["bsh_file"]),
            input_xml_base="{wildcards.xml_base}",
            job_number=int(wildcards.file_id)+1)
         part_string += " > {log} 2>&1 && touch {output}"
@@ -218,7 +219,7 @@ rule registration:
            config["Fiji_resources"],
            config["registration"],
            file_id_w=wildcards.file_id,
-           path_bsh=config["common"]["bsh_directory"] + config["registration"]["bsh_file"],
+           path_bsh=os.path.join(config["common"]["bsh_directory"],config["registration"]["bsh_file"]),
            jdir=JOBDIR,
            input_xml=wildcards.xml_base)
         cmd_string += " > {log} 2>&1 && touch {output}"
@@ -237,7 +238,7 @@ rule xml_merge:
         -- --no-splash {path_bsh}""",
                                     config["common"],
                                     config["xml_merge"],
-                                    path_bsh=config["common"]["bsh_directory"] + config["xml_merge"]["bsh_file"],
+                                    path_bsh=os.path.join(config["common"]["bsh_directory"],config["xml_merge"]["bsh_file"]),
                                     jdir=JOBDIR,
                                     output="{output}")
         cmd_string += " > {log} 2>&1 && touch {output}"
@@ -273,7 +274,7 @@ rule timelapse:
                                     config["registration"],
                                     config["timelapse"],
                                     input="{input}",
-                                    path_bsh=config["common"]["bsh_directory"] + config["timelapse"]["bsh_file"],
+                                    path_bsh=os.path.join(config["common"]["bsh_directory"],config["timelapse"]["bsh_file"]),
                                     jdir=JOBDIR)
         cmd_string += " > {log} 2>&1 && touch {output}"
         shell(cmd_string)
@@ -298,7 +299,7 @@ rule duplicate_transformations:
                                     config["registration"],
                                     config["timelapse"],
                                     config["duplicate_transformations"],
-                                    path_bsh=config["common"]["bsh_directory"] + config["duplicate_transformations"]["bsh_file"],
+                                    path_bsh=os.path.join(config["common"]["bsh_directory"],config["duplicate_transformations"]["bsh_file"]),
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
@@ -337,7 +338,7 @@ rule fusion:
                                     config["common"],
                                     config["Fiji_resources"],
                                     config["fusion"],
-                                    path_bsh=config["common"]["bsh_directory"] + config["fusion"]["bsh_file"],
+                                    path_bsh=os.path.join(config["common"]["bsh_directory"],config["fusion"]["bsh_file"]),
                                     jdir=JOBDIR,
                                     file_id_w="{wildcards.file_id}",
                                     merged_xml_file="{input.merged_xml}"
@@ -367,7 +368,7 @@ rule external_transform:
         -- --no-splash {path_bsh}""",
                                     config["common"],
                                     config["external_transform"],
-                                    path_bsh=config["common"]["bsh_directory"] + config["external_transform"]["bsh_file"],
+                                    path_bsh=os.path.join(config["common"]["bsh_directory"],config["external_transform"]["bsh_file"]),
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}"
         )
@@ -417,7 +418,7 @@ rule deconvolution:
                                     config["Fiji_resources"],
                                     config["deconvolution"],
                                     file_id_w="{wildcards.file_id}",
-                                    path_bsh=config["common"]["bsh_directory"] + config["deconvolution"]["bsh_file"],
+                                    path_bsh=os.path.join(config["common"]["bsh_directory"],config["deconvolution"]["bsh_file"]),
                                     jdir=JOBDIR,
                                     merged_xml_file="{input.merged_xml}")
         cmd_string += " > {log} 2>&1 && touch {output}"
@@ -451,7 +452,7 @@ rule define_output:
         config["hdf5_output"],
         jdir=JOBDIR,
         output_xml=config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define",
-        path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_define"])
+        path_bsh=os.path.join(config["common"]["bsh_directory"],config["hdf5_output"]["bsh_file_define"]))
 
         cmd_string +=" > {log} 2>&1"
         shell(cmd_string)
@@ -489,7 +490,7 @@ rule hdf5_xml_output:
            jdir=JOBDIR,
            output_xml=config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define",
            output_hdf5_xml=config["common"]["fusion_switch"].strip('\"') + "_" + config["common"]["hdf5_xml_filename"].strip('\"'),
-           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"])
+           path_bsh=os.path.join(config["common"]["bsh_directory"],config["hdf5_output"]["bsh_file_hdf5"]))
 
         part_string += " > {log} 2>&1 && touch {output}"
         shell(part_string)
@@ -524,7 +525,7 @@ rule resave_hdf5_output:
            jdir=JOBDIR,
            output_xml=config["common"]["hdf5_xml_filename"].strip('\"') + "_output_define",
            output_hdf5_xml=config["common"]["fusion_switch"].strip('\"') + "_" + config["common"]["hdf5_xml_filename"].strip('\"'),
-           path_bsh=config["common"]["bsh_directory"] + config["hdf5_output"]["bsh_file_hdf5"],
+           path_bsh=os.path.join(config["common"]["bsh_directory"],config["hdf5_output"]["bsh_file_hdf5"]),
            input_xml_base="{wildcards.xml_base}",
            job_number=int(wildcards.file_id)+1)
         part_string += " > {log} 2>&1 && touch {output}"
