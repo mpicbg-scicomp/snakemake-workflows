@@ -13,7 +13,7 @@ if JOBDIR[-1] != "/": # this checks if jobdir ends with slash if not it adds a s
 # configfile: "dual_OneChannel.yaml"
 
 # data specific config file, expected to be inside JOBDIR
-configfile: "config.yaml"
+configfile: os.path.join(JOBDIR,"config.yaml")
 
 padding_format = "{0:0"+str(padding_of_file_id(int(config["common"]["ntimepoints"])))+"d}"
 ds_format = "-"+padding_format+"-00.h5"
@@ -381,7 +381,9 @@ rule deconvolution:
     log: "logs/e2_{xml_base}-{file_id,\d+}-00-deconvolution.log"
     run:
         cmd_string = produce_string(
-                """{fiji-prefix} {sysconfcpus} {num_cores_deco} \
+                """
+                module load cuda &&
+                {fiji-prefix} {sysconfcpus} {num_cores_deco} \
                 {fiji-app} {memory-prefix}{mem_deco} \
         -Dimage_file_directory={jdir} \
         -Ddeco_output_file_directory={jdir} \

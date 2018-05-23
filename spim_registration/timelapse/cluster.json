@@ -50,7 +50,7 @@
         "lsf_extra" : "-n 12 -R \"span[hosts=1] rusage[mem=110000]\"",
         "lsf_q" : "gpu",
         "slurm_extra" : "-n 1 -c 12",
-        "slurm_q" : "--time=08:00:00 --partition=gpu --gres=gpu:1"
+        "slurm_q" : "--time=02:00:00 --partition=gpu --gres=gpu:1"
     },
 
     "resave_hdf5_output" :
