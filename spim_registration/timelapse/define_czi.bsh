@@ -120,6 +120,9 @@ float czi_pixel_distance_y = Float.parseFloat( System.getProperty( "czi_pixel_di
 float czi_pixel_distance_z = Float.parseFloat( System.getProperty( "czi_pixel_distance_z" ) );
 czi_pixel_unit = System.getProperty( "czi_pixel_unit" );
 
+String modify_calibration;
+String manual_calibration_string;
+
 // builds string for calibration override
 if (manual_calibration_czi.equalsIgnoreCase( "No" ) )
 {
