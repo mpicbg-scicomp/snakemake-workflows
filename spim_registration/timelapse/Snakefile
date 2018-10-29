@@ -53,6 +53,7 @@ rule define_xml_czi:
         -Dczi_pixel_unit={czi_pixel_unit} \
         -Dfirst_xml_filename={first_xml_filename} \
         -Drotation_around={rotation_around} \
+        -Dfix_bioformats={fix_bioformats} \
         -- --no-splash {path_bsh}""",
            config["common"],
            config["define_xml_czi"],
