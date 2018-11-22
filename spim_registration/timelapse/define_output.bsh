@@ -54,6 +54,7 @@ System.out.println( "pixel_unit = " + pixel_unit );
 System.out.println("=========================================================");
 System.out.println("Channel Switch:");
 //multiple_channels = System.getProperty( "multiple_channels" );
+String multiple_channels = null;
 channels = System.getProperty( "channels" ); 
 // Parses string
 String delims = "[,]";

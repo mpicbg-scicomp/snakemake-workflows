@@ -120,6 +120,9 @@ float czi_pixel_distance_y = Float.parseFloat( System.getProperty( "czi_pixel_di
 float czi_pixel_distance_z = Float.parseFloat( System.getProperty( "czi_pixel_distance_z" ) );
 czi_pixel_unit = System.getProperty( "czi_pixel_unit" );
 
+String modify_calibration;
+String manual_calibration_string;
+
 // builds string for calibration override
 if (manual_calibration_czi.equalsIgnoreCase( "No" ) )
 {
@@ -146,35 +149,45 @@ else
 	System.out.println( "Manual calibration setting bad" );
 }
 
-// Executes Fiji plugin
+// Fix bioformats
 System.out.println("=========================================================");
-System.out.println("Start plugin:");
-System.out.println("Define Multi-View Dataset type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
+System.out.println("Fix bioformats:");
+fix_bioformats = System.getProperty( "fix_bioformats", "No");
+String fix_bioformats_string = "";
+if (fix_bioformats.equalsIgnoreCase( "No" ))
+{
+	System.out.println( "No fix bioformat" );
+} 
+else if (fix_bioformats.equalsIgnoreCase( "Yes" )) 
+{
+	fix_bioformats_string = "fix_bioformats";
+	System.out.println( "Fix bioformat" );
+} 
+else 
+{
+	System.out.println( "Fix bioformats setting bad" );
+}
+
+parameters_string = "type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
 	"xml_filename=" + first_xml_filename + ".xml " +
 	"browse=" + image_file_directory + first_czi + " " + 
 	"first_czi=" + image_file_directory + first_czi + " " + 
 	angle_string +
-	channel_string + 
- 	illum_string +
+	channel_string +
+	illum_string +
 	modify_calibration +
 	"modify_rotation_axis " +
 	manual_calibration_string +
-	"rotation_around=" + rotation_around + 
-	"");
+	"rotation_around=" + rotation_around + " " +
+	fix_bioformats_string; 
+	
+// Executes Fiji plugin
+System.out.println("=========================================================");
+System.out.println("Start plugin:");
+System.out.println("Define Multi-View Dataset " + parameters_string);
 
 try {
-IJ.run("Define Multi-View Dataset", 
-	"type_of_dataset=[Zeiss Lightsheet Z.1 Dataset (LOCI Bioformats)] " +
-	"xml_filename=" + first_xml_filename + ".xml " +
-	"browse=" + image_file_directory + first_czi + " " + 
-	"first_czi=" + image_file_directory + first_czi + " " + 
-	angle_string +
-	channel_string + 
-	illum_string +
-	modify_calibration + 
-	"modify_rotation_axis " +
-	manual_calibration_string + 
-	"rotation_around=" + rotation_around + "");
+IJ.run("Define Multi-View Dataset", parameters_string);
 }
 catch ( e ) { 
 

@@ -274,7 +274,8 @@ define_xml_czi: {
   czi_pixel_distance_z: '1.500000000000000',  # Manual calibration z
   czi_pixel_unit: "um",             # unit of manual calibration
   rotation_around: "X-Axis",       # axis of acquistion
-  bsh_file: "define_czi.bsh"       # .bsh script for defining .czi file
+  bsh_file: "define_czi.bsh",      # .bsh script for defining .czi file
+  fix_bioformats: "No"
   }
 
   # ----------------------------------------------------------------------------
